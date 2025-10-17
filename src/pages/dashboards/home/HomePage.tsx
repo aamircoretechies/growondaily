@@ -1,0 +1,295 @@
+import { Container } from '@/components/container';
+import { KeenIcon, ProfileSetupModal } from '@/components';
+import { LucideVolume2, LucideBook, LightbulbIcon } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const HomePage = () => {
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const navigate = useNavigate();
+
+  // Get current date in the format "Thu, Aug 07, 2025"
+  const getCurrentDate = () => {
+    const date = new Date();
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const handleAudioPlay = () => {
+    console.log('Audio play clicked');
+  };
+
+  const handleReadMore = () => {
+    console.log('Read more clicked');
+  };
+
+  const handleResume = () => {
+    console.log('Resume reading clicked');
+  };
+
+  const handleStartReflection = (title: string) => {
+    console.log(`Start reflection: ${title}`);
+  };
+
+  const handleReadBible = () => {
+    console.log('Read Bible clicked');
+    navigate('/bible');
+  };
+
+  // Profile setup progress (example: 75%)
+  const profileProgress = 75;
+
+  return (
+    <Container>
+      <div className=" mx-auto min-h-screen p-0">
+      
+
+ 
+        {/* Top Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex-1">
+            <h1 className="font-merriweather text-xl sm:text-2xl text-primary">
+              Good Morning, Thomas
+            </h1>
+            <p className="text-gray-600 text-xs sm:text-sm">
+              {getCurrentDate()}
+            </p>
+          </div>
+          <div className="relative w-full sm:w-auto sm:min-w-[200px]">
+          <button
+            onClick={handleReadBible}
+            className="w-full bg-gray-200 text-primary py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-medium flex items-center justify-center gap-3 sm:gap-4 hover:bg-gray-300 transition-colors text-base sm:text-lg"
+          >
+            <KeenIcon icon="book" className="text-sand text-lg sm:text-xl" />
+            <span>Read Bible</span>
+          </button>
+          </div>
+        </div>
+
+           {/* Profile Setup Progress Section */}
+           <div className="mb-6">
+           <div 
+             className="bg-white/60 hover:bg-white/80 dark:bg-gray-300 hover:cursor-pointer dark:hover:bg-gray-400 rounded-2xl shadow-sm py-2 px-6"
+             onClick={() => setShowProfileSetup(true)}
+           >
+             <div className="flex items-center justify-between">
+               <div className="flex-1">
+                 <h2 className="font-merriweather text-xl text-primary mb-2">
+                   Complete Profile Setup
+                 </h2>
+                 <p className="text-gray-600 dark:text-gray-700 text-sm">
+                   {profileProgress}% completed • {100 - profileProgress}% remaining
+                 </p>
+               </div>
+               <div className="flex-shrink-0 ml-4">
+                 <div className="relative w-20 h-20">
+                   {/* Circular Progress Background */}
+                   <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 80 80">
+                     <circle
+                       cx="40"
+                       cy="40"
+                       r="32"
+                       stroke="currentColor"
+                       strokeWidth="6"
+                       fill="none"
+                       className="text-gray-200 dark:text-gray-300"
+                     />
+                     {/* Progress Circle */}
+                     <circle
+                       cx="40"
+                       cy="40"
+                       r="32"
+                       stroke="currentColor"
+                       strokeWidth="6"
+                       fill="none"
+                       strokeLinecap="round"
+                       className="text-sand transition-all duration-300"
+                       strokeDasharray={`${2 * Math.PI * 32}`}
+                       strokeDashoffset={`${2 * Math.PI * 32 * (1 - profileProgress / 100)}`}
+                     />
+                   </svg>
+                   {/* Progress Text */}
+                   <div className="absolute inset-0 flex items-center justify-center">
+                     <span className="text-lg font-semibold text-primary">
+                       {profileProgress}%
+                     </span>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+
+              {/* Your Daily Word Section */}
+         <div className="mb-6 lg:col-span-2">
+           <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
+             <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-3 sm:mb-4">
+               Your Daily Word
+             </h2>
+             <div className="bg-white/40 dark:bg-gray-200 rounded-xl p-3 sm:p-4 relative">
+               <div className="mb-3 sm:mb-4">
+                 <h3 className="font-merriweather text-base sm:text-lg text-primary leading-relaxed mb-2 sm:mb-3">
+                   "The Lord is my shepherd; I shall not want..."
+                 </h3>
+                 <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
+                   He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake...
+                 </p>
+               </div>
+               <div className="flex gap-2 sm:gap-3 justify-end">
+                 <button
+                   onClick={handleAudioPlay}
+                   className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                 >
+                   <LucideVolume2 className='text-white text-sm sm:text-base'/>
+                 </button>
+                 <button
+                   onClick={handleReadMore}
+                   className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                 >
+                   <LucideBook className='text-white text-sm sm:text-base'/>
+                 </button>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         {/* Continue Reading Section */}
+         <div className="mb-6 lg:col-span-1">
+           <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
+             <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-2">
+               Continue Reading
+             </h2>
+             <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3">
+               Genesis 3:5-10 (KJV)
+             </p>
+             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+               <div className="w-full sm:flex-1 bg-white/70 dark:bg-gray-200 rounded-full h-2">
+                 <div className="bg-sand h-2 rounded-full" style={{ width: '35%' }}></div>
+               </div>
+               <button
+                 onClick={handleResume}
+                 className="w-full sm:w-auto bg-sand dark:bg-gray-200 dark:hover:bg-sand-300 text-primary dark:text-primary px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-transparent dark:border-gray-400"
+               >
+                 Resume
+               </button>
+             </div>
+           </div>
+         </div>
+
+         </div>
+
+       
+
+        {/* Suggested Reflections Section */}
+        <div className="mb-6">
+          <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
+            <h2 className="font-merriweather text-xl text-primary mb-4">
+              Suggested Reflections
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {/* First Reflection Card */}
+              <div className="bg-gray-50 dark:bg-gray-200 rounded-xl p-3 sm:p-4 border border-transparent dark:border-gray-400">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-primary text-sm sm:text-base mb-1 truncate">
+                      Understanding Grace
+                    </h3>
+                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                      A 3-min read on God's unmerited favor
+                    </p>
+                  </div>
+                  <div className="ml-2 sm:ml-3 flex-shrink-0">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                      <LightbulbIcon className="text-yellow-800 text-xs sm:text-sm" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => handleStartReflection('Understanding Grace')}
+                    className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    Start
+                  </button>
+                </div>
+              </div>
+
+              {/* Second Reflection Card */}
+              <div className="bg-gray-50 dark:bg-gray-100 rounded-xl p-3 sm:p-4 border border-transparent dark:border-gray-400">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-primary text-sm sm:text-base mb-1 truncate">
+                      Faith in Difficult Times
+                    </h3>
+                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                      Finding hope during life's trials
+                    </p>
+                  </div>
+                  <div className="ml-2 sm:ml-3 flex-shrink-0">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                      <LightbulbIcon className="text-yellow-800 text-xs sm:text-sm" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => handleStartReflection('Faith in Difficult Times')}
+                    className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    Start
+                  </button>
+                </div>
+              </div>
+
+              {/* Third Reflection Card */}
+              <div className="bg-gray-50 dark:bg-gray-200 rounded-xl p-3 sm:p-4 border border-transparent dark:border-gray-400">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-primary text-sm sm:text-base mb-1 truncate">
+                      Faith in Difficult Times
+                    </h3>
+                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                      Finding hope during life's trials
+                    </p>
+                  </div>
+                  <div className="ml-2 sm:ml-3 flex-shrink-0">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                      <LightbulbIcon className="text-yellow-800 text-xs sm:text-sm" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => handleStartReflection('Faith in Difficult Times')}
+                    className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
+                  >
+                    Start
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Global Action Button */}
+       {/*  <div className="fixed bottom-6 left-4 right-4">
+         
+        </div> */}
+
+        {/* Profile Setup Modal */}
+        <ProfileSetupModal 
+          isOpen={showProfileSetup}
+          onClose={() => setShowProfileSetup(false)}
+        />
+      </div>
+    </Container>
+  );
+};
+
+export { HomePage };

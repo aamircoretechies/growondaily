@@ -1,0 +1,16 @@
+{
+  "USER.MENU.PUBLIC_PROFILE": "Openbaar Profiel",
+  "USER.MENU.MY_PROFILE": "Mijn Profiel",
+  "USER.MENU.MY_ACCOUNT": "Mijn Account",
+  "USER.MENU.GET_STARTED": "Aan de Slag",
+  "USER.MENU.BILLING": "Facturering",
+  "USER.MENU.SECURITY": "Beveiliging",
+  "USER.MENU.MEMBERS_&_ROLES": "Leden & Rollen",
+  "USER.MENU.INTEGRATIONS": "Integraties",
+  "USER.MENU.NOTIFICATIONS": "Meldingen",
+  "USER.MENU.DEV_FORUM": "Ontwikkelaarsforum",
+  "USER.MENU.PAYMENT_&_SUBSCRIPTION_INFO": "Betaling & abonnementsinformatie",
+  "USER.MENU.DARK_MODE": "Donkere Modus",
+  "USER.MENU.LOGOUT": "Uitloggen",
+  "USER.MENU.LANGUAGE": "Taal"
+}
