@@ -1,6 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarClock, Check, ChevronRight, ListChecks, Sun } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useContext } from 'react';
+import { AuthContext } from '@/auth/providers/JWTProvider';
+import { Button } from '@/components/ui/button';
+
 import {
   Dialog,
   DialogBody,
@@ -28,7 +32,7 @@ const Row = ({ title, subtitle, onClick }: RowProps) => (
   </button>
 );
 
-const PersonalizationCard = () => {
+const PersonalizationCard = ({ user }: { user: any }) => {
   const [featuresOpen, setFeaturesOpen] = useState(false);
   const [experienceOpen, setExperienceOpen] = useState(false);
   const [experience, setExperience] = useState<'First Time' | 'Occasional' | 'Regular' | 'Theological'>('First Time');
@@ -124,7 +128,7 @@ const PersonalizationCard = () => {
     '한국어 개역개정 (Korean RVRK)',
     '日本語口語訳 (Japanese Kougo Yaku)',
     'Hindi - आसान बाइबल (ERV-HI)'
-  ] as const;
+  ] as const; 
   const [translations, setTranslations] = useState<string[]>(['KJV - King James Version']);
   const toggleTranslation = (option: string) => {
     setTranslations((prev) =>
@@ -140,6 +144,160 @@ const PersonalizationCard = () => {
     'Deep dive (5+ min read)'
   ] as const;
   const [depth, setDepth] = useState<(typeof depthOptions)[number]>('Short (1-2 min read)');
+
+  // Map backend enums or human-readable phrases -> UI labels
+  const experienceFromEnum = (val?: string): 'First Time' | 'Occasional' | 'Regular' | 'Theological' => {
+    const v = (val || '').toString();
+    const up = v.toUpperCase();
+    if (up === 'FIRST_TIME' || up === 'NEW_TO_BIBLE') return 'First Time';
+    if (up === 'OCCASIONAL' || up === 'SOME_KNOWLEDGE') return 'Occasional';
+    if (up === 'REGULAR' || up === 'REGULAR_STUDY') return 'Regular';
+    if (up === 'THEOLOGICAL' || up === 'ADVANCED_THEOLOGY') return 'Theological';
+    const norm = v.trim().toLowerCase();
+    if (norm.includes('new')) return 'First Time';
+    if (norm.includes('some')) return 'Occasional';
+    if (norm.includes('regular')) return 'Regular';
+    if (norm.includes('advanced') || norm.includes('theolog')) return 'Theological';
+    return 'First Time';
+  };
+
+  const titleForVersionCode = (code?: string) => {
+    const c = (code || '').toUpperCase();
+    const match = translationOptions.find((o) => o.startsWith(`${c} `));
+    return match || 'KJV - King James Version';
+  };
+
+  const toTitleCase = (s: string) => s
+    .toLowerCase()
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+
+  const hydrateFromUser = (u: any) => {
+    if (!u) return;
+
+    // 1) If raw UI-shaped prefs exist (string or object), prefer them
+    const rawPrefs = u.prefs || u.preferences_json || u.preference_json;
+    if (rawPrefs) {
+      try {
+        const prefs = typeof rawPrefs === 'string' ? JSON.parse(rawPrefs) : rawPrefs;
+        setExperience(prefs.experience || 'First Time');
+        setBrings(Array.isArray(prefs.brings) ? prefs.brings : prefs.brings ? [prefs.brings] : []);
+        setEngage(Array.isArray(prefs.engage) ? prefs.engage : prefs.engage ? [prefs.engage] : []);
+        setExplain(prefs.explain || 'Clear and simple language');
+        setTranslations(
+          Array.isArray(prefs.translations)
+            ? prefs.translations
+            : prefs.translations
+            ? [prefs.translations]
+            : ['KJV - King James Version']
+        );
+        setDailyPref(prefs.dailyPref || 'Daily');
+        setDepth(prefs.depth || 'Short (1-2 min read)');
+        return;
+      } catch {}
+    }
+
+    // 2) Otherwise, try backend canonical fields mapping
+    const backend = u.preferences || u.preference || u.user_preferences || u.settings?.preferences;
+    if (backend && typeof backend === 'object') {
+      // depth_level -> UI text
+      const depthLevel = (backend.depth_level || '').toString().toLowerCase();
+      setDepth(
+        depthLevel === 'short'
+          ? 'Short (1-2 min read)'
+          : depthLevel === 'medium'
+          ? 'Medium (3-4 min read)'
+          : 'Deep dive (5+ min read)'
+      );
+
+      // experience_with_bible -> ['FIRST_TIME'] etc.
+      const exp = Array.isArray(backend.experience_with_bible)
+        ? backend.experience_with_bible[0]
+        : backend.experience_with_bible;
+      setExperience(experienceFromEnum(exp));
+
+      // what_brings_you: could be string or array
+      const bringsVal = backend.what_brings_you;
+      setBrings(
+        Array.isArray(bringsVal)
+          ? bringsVal
+          : typeof bringsVal === 'string' && bringsVal.includes(',')
+          ? bringsVal.split(',').map((s: string) => s.trim())
+          : bringsVal
+          ? [bringsVal]
+          : []
+      );
+
+      // engagement_preference: ['READING', 'LISTENING'] -> ['Reading', ...]
+      const engageVal = backend.engagement_preference;
+      setEngage(
+        Array.isArray(engageVal)
+          ? engageVal.map((e: string) => toTitleCase((e || '').toString()))
+          : engageVal
+          ? [toTitleCase((engageVal || '').toString())]
+          : []
+      );
+
+      // explanation_style -> UI option
+      const style = (backend.explanation_style || '').toString().toLowerCase();
+      setExplain(
+        style === 'simple'
+          ? 'Clear and simple language'
+          : style === 'deep'
+          ? 'A bit deeper with context'
+          : 'Mixed depending on topic'
+      );
+
+      // bible_version code -> full title if possible
+      setTranslations([titleForVersionCode(backend.bible_version)]);
+
+      // receive_daily -> UI
+      setDailyPref(backend.receive_daily ? 'Daily' : 'Occasionally');
+    }
+  };
+
+  useEffect(() => {
+    hydrateFromUser(user);
+  }, [user]);
+
+  // Also hydrate when context user changes (page refresh path)
+  const authContext = useContext(AuthContext);
+  useEffect(() => {
+    if (authContext?.currentUser) {
+      hydrateFromUser(authContext.currentUser);
+    }
+  }, [authContext?.currentUser]);
+
+
+
+  
+  const handleSave = async () => {
+    const preferences = {
+      experience,
+      brings,
+      engage,
+      explain,
+      translations,
+      dailyPref,
+      depth,
+    };
+
+    try {
+      if (authContext?.saveOrUpdateUserPreferences) {
+        await authContext.saveOrUpdateUserPreferences(preferences);
+      } else if (authContext?.saveUserPreferences) {
+        await authContext.saveUserPreferences(preferences);
+      }
+      const updatedUser = await authContext?.getUser();
+      authContext?.setCurrentUser(updatedUser);
+      alert("Preferences saved successfully!");
+    } catch (err) {
+      console.error("Save failed:", err);
+      alert("Failed to save preferences. Please try again.");
+    }
+  };
+
   return (
     <Card id="personalization" className='bg-white/40 dark:bg-gray-100 '>
       <CardHeader>
@@ -184,6 +342,7 @@ const PersonalizationCard = () => {
           subtitle={depth}
           onClick={() => setDepthOpen(true)}
         />
+
         <button type="button" onClick={() => setFeaturesOpen(true)} className="w-full text-left bg-sand rounded-xl">
           <div className="flex items-center justify-between px-4 py-4 rounded-xl bg-white/90 hover:bg-white dark:bg-[--tw-page-bg-dark] dark:hover:bg-[--tw-page-bg-dark] transition-colors">
             <div>
@@ -391,9 +550,8 @@ const PersonalizationCard = () => {
                         setDailyPref(key);
                         setDailyOpen(false);
                       }}
-                      className={`rounded-xl border transition-colors text-center py-8 ${
-                        selected ? 'bg-sand border-transparent' : 'border-gray-200 bg-white/90 hover:bg-white'
-                      }`}
+                      className={`rounded-xl border transition-colors text-center py-8 ${selected ? 'bg-sand border-transparent' : 'border-gray-200 bg-white/90 hover:bg-white'
+                        }`}
                     >
                       <div className="flex flex-col items-center gap-3">
                         <Icon className="w-8 h-8 text-primary/80" />
@@ -416,7 +574,7 @@ const PersonalizationCard = () => {
               {depthOptions.map((option) => {
                 const selected = depth === option;
                 return (
-                  <button
+          <button
                     type="button"
                     key={option}
                     onClick={() => {
@@ -429,17 +587,26 @@ const PersonalizationCard = () => {
                       <div className="text-[15px] text-primary">{option}</div>
                       {selected && <Check className="w-4 h-4 text-primary" />}
                     </div>
-                  </button>
+          </button>
                 );
               })}
             </DialogBody>
           </DialogContent>
         </Dialog>
+        <div className="pt-4 text-center">
+          <Button onClick={handleSave} className="bg-primary text-white px-5 py-2 rounded-xl">
+            Save Changes
+          </Button>
+        </div>
+
       </CardContent>
     </Card>
   );
 };
 
 export { PersonalizationCard };
+
+
+
 
 

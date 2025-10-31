@@ -9,8 +9,12 @@ import {
   MenuIcon
 } from '@/components';
 import { useLanguage } from '@/i18n';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { MakeNote } from '@/components';
+import { useBible } from '@/providers/BibleProvider'; // for API data
+import { useNavigate } from 'react-router-dom';
+
+
 
 interface IDashboardDropdownItem {
   title: string;
@@ -18,7 +22,7 @@ interface IDashboardDropdownItem {
   icon: string;
   active?: boolean;
 }
-interface IDashboardDropdownItems extends Array<IDashboardDropdownItem> {}
+interface IDashboardDropdownItems extends Array<IDashboardDropdownItem> { }
 
 interface IMenuItem {
   title: string;
@@ -31,97 +35,76 @@ interface IDashboardMenuItem {
   title: string;
   children: IMenuItem[];
 }
-interface IDashboardMenuItems extends Array<IDashboardMenuItem> {}
+interface IDashboardMenuItems extends Array<IDashboardMenuItem> { }
 
 const SidebarMenuDashboard = () => {
+  const { books, chapters, verses, loading, error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter } = useBible();
   const { isRTL } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [chapterSearchTerm, setChapterSearchTerm] = useState('');
   const [verseSearchTerm, setVerseSearchTerm] = useState('');
   const [deepStudyActive, setDeepStudyActive] = useState(false);
   const [showMakeNote, setShowMakeNote] = useState(false);
-  const dropdownItems: IDashboardDropdownItems = [
-    // Old Testament
-{ title: 'Genesis', path: '', icon: 'calendar', active: true },
-{ title: 'Exodus', path: '', icon: 'calendar', active: true },
-{ title: 'Leviticus', path: '', icon: 'calendar', active: true },
-{ title: 'Numbers', path: '', icon: 'calendar', active: true },
-{ title: 'Deuteronomy', path: '', icon: 'calendar', active: true },
-{ title: 'Joshua', path: '', icon: 'calendar', active: true },
-{ title: 'Judges', path: '', icon: 'calendar', active: true },
-{ title: 'Ruth', path: '', icon: 'calendar', active: true },
-{ title: '1 Samuel', path: '', icon: 'calendar', active: true },
-{ title: '2 Samuel', path: '', icon: 'calendar', active: true },
-{ title: '1 Kings', path: '', icon: 'calendar', active: true },
-{ title: '2 Kings', path: '', icon: 'calendar', active: true },
-{ title: '1 Chronicles', path: '', icon: 'calendar', active: true },
-{ title: '2 Chronicles', path: '', icon: 'calendar', active: true },
-{ title: 'Ezra', path: '', icon: 'calendar', active: true },
-{ title: 'Nehemiah', path: '', icon: 'calendar', active: true },
-{ title: 'Esther', path: '', icon: 'calendar', active: true },
-{ title: 'Job', path: '', icon: 'calendar', active: true },
-{ title: 'Psalms', path: '', icon: 'calendar', active: true },
-{ title: 'Proverbs', path: '', icon: 'calendar', active: true },
-{ title: 'Ecclesiastes', path: '', icon: 'calendar', active: true },
-{ title: 'Song of Solomon', path: '', icon: 'calendar', active: true },
-{ title: 'Isaiah', path: '', icon: 'calendar', active: true },
-{ title: 'Jeremiah', path: '', icon: 'calendar', active: true },
-{ title: 'Lamentations', path: '', icon: 'calendar', active: true },
-{ title: 'Ezekiel', path: '', icon: 'calendar', active: true },
-{ title: 'Daniel', path: '', icon: 'calendar', active: true },
-{ title: 'Hosea', path: '', icon: 'calendar', active: true },
-{ title: 'Joel', path: '', icon: 'calendar', active: true },
-{ title: 'Amos', path: '', icon: 'calendar', active: true },
-{ title: 'Obadiah', path: '', icon: 'calendar', active: true },
-{ title: 'Jonah', path: '', icon: 'calendar', active: true },
-{ title: 'Micah', path: '', icon: 'calendar', active: true },
-{ title: 'Nahum', path: '', icon: 'calendar', active: true },
-{ title: 'Habakkuk', path: '', icon: 'calendar', active: true },
-{ title: 'Zephaniah', path: '', icon: 'calendar', active: true },
-{ title: 'Haggai', path: '', icon: 'calendar', active: true },
-{ title: 'Zechariah', path: '', icon: 'calendar', active: true },
-{ title: 'Malachi', path: '', icon: 'calendar', active: true },
+  // selectedChapter comes from context now
+  const navigate = useNavigate();
+  // const [selectedBook, setSelectedBook] = useState<string>('Select Book');
 
-// New Testament
-{ title: 'Matthew', path: '', icon: 'calendar', active: true },
-{ title: 'Mark', path: '', icon: 'calendar', active: true },
-{ title: 'Luke', path: '', icon: 'calendar', active: true },
-{ title: 'John', path: '', icon: 'calendar', active: true },
-{ title: 'Acts', path: '', icon: 'calendar', active: true },
-{ title: 'Romans', path: '', icon: 'calendar', active: true },
-{ title: '1 Corinthians', path: '', icon: 'calendar', active: true },
-{ title: '2 Corinthians', path: '', icon: 'calendar', active: true },
-{ title: 'Galatians', path: '', icon: 'calendar', active: true },
-{ title: 'Ephesians', path: '', icon: 'calendar', active: true },
-{ title: 'Philippians', path: '', icon: 'calendar', active: true },
-{ title: 'Colossians', path: '', icon: 'calendar', active: true },
-{ title: '1 Thessalonians', path: '', icon: 'calendar', active: true },
-{ title: '2 Thessalonians', path: '', icon: 'calendar', active: true },
-{ title: '1 Timothy', path: '', icon: 'calendar', active: true },
-{ title: '2 Timothy', path: '', icon: 'calendar', active: true },
-{ title: 'Titus', path: '', icon: 'calendar', active: true },
-{ title: 'Philemon', path: '', icon: 'calendar', active: true },
-{ title: 'Hebrews', path: '', icon: 'calendar', active: true },
-{ title: 'James', path: '', icon: 'calendar', active: true },
-{ title: '1 Peter', path: '', icon: 'calendar', active: true },
-{ title: '2 Peter', path: '', icon: 'calendar', active: true },
-{ title: '1 John', path: '', icon: 'calendar', active: true },
-{ title: '2 John', path: '', icon: 'calendar', active: true },
-{ title: '3 John', path: '', icon: 'calendar', active: true },
-{ title: 'Jude', path: '', icon: 'calendar', active: true },
-{ title: 'Revelation', path: '', icon: 'calendar', active: true },
+  
 
-  ];
+  // useEffect(() => {
+  //   const genesis = books.find((b: any) => b.name.toLowerCase() === 'genesis');
+  //   if (genesis) {
+  //     fetchVerses(genesis.book_id, 1, "KJV");
+  //   }
+  // }, [books]);
 
-  // Filter dropdown items based on search term
+  // useEffect(() => {
+    // if (books && books.length > 0) {
+  //     const genesis = books.find(
+  //       (b: any) => b.name.toLowerCase() === "genesis"
+  //     );
+  //     if (genesis) {
+  //       console.log(" Default loading Genesis chapter 1");
+  //       fetchVerses(genesis.book_id, 1, "KJV");
+  //       setSelectedBook("Genesis");
+  //       setSelectedChapter(1);
+  //     }
+  //   }
+  // }, [books]);  
+
+  // console.log(" Bible Context Data:", { books });
+  // useEffect(() => {
+  //   if (books && books.length > 0) {
+  //     const genesis = books.find((b: any) => b.name.toLowerCase() === "genesis");
+  //     console.log(" All Books from API:", books);
+  //     if (genesis) {
+  //       console.log(" Genesis Book Found:", genesis);
+  //       fetchChapters(genesis.book_id, "KJV");
+  //     } else {
+  //       console.log(" Genesis book not found in books array");
+  //     }
+  //   }
+  // }, [books]);
+
   const filteredDropdownItems = useMemo(() => {
-    if (!searchTerm) return dropdownItems;
-    return dropdownItems.filter(item =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [dropdownItems, searchTerm]);
+    if (!Array.isArray(books)) return [];
+    const filtered = books.filter(
+      (book: any) =>
+        book?.name &&
+        book.name.toLowerCase().includes(searchTerm.toLowerCase())
 
-  // Generate chapter items (1-150)
+    );
+    return filtered.map((book: any) => ({
+      id: book.book_id,
+      title: book.name,
+      path: `/bible-content/${book.name?.toLowerCase().replace(/\s+/g, '-')}`,
+      icon: 'book',
+      active: false,
+    }));
+  }, [books, searchTerm]);
+
+
+
   const chapterItems: IDashboardDropdownItems = Array.from({ length: 150 }, (_, index) => ({
     title: `Chapter ${index + 1}`,
     path: `/bible-content/psalm-23/chapter-${index + 1}`,
@@ -138,21 +121,23 @@ const SidebarMenuDashboard = () => {
   }, [chapterItems, chapterSearchTerm]);
 
   // Generate verse items (1-176)
-  const verseItems: IDashboardDropdownItems = Array.from({ length: 176 }, (_, index) => ({
-    title: `Verse ${index + 1}`,
-    path: `/bible-content/psalm-23/verse-${index + 1}`,
-    icon: 'calendar',
-    active: false
-  }));
+  const verseItems: IDashboardDropdownItems = useMemo(() => {
+    if (!Array.isArray(verses)) return [];
+    return verses.map((v, index) => ({
+      title: `Verse ${v.verse}: ${v.text.slice(0, 30)}...`,
+      path: `/bible-content/${v.book_name?.toLowerCase().replace(/\s+/g, '-')}/chapter-${v.chapter}/verse-${v.verse}`,
+      icon: 'book',
+      active: false,
+    }));
+  }, [verses]);
 
-  // Filter verse items based on search term
+  // filter verses by search term
   const filteredVerseItems = useMemo(() => {
     if (!verseSearchTerm) return verseItems;
     return verseItems.filter(item =>
       item.title.toLowerCase().includes(verseSearchTerm.toLowerCase())
     );
   }, [verseItems, verseSearchTerm]);
-
   const menuItems: IDashboardMenuItems = [
     {
       title: 'Options',
@@ -175,15 +160,27 @@ const SidebarMenuDashboard = () => {
           path: '',
           active: false
         },
-       /*  {
-          title: 'Deep Study',
-          icon: 'book-open',
-          path: '',
-          active: deepStudyActive
-        } */
+        /*  {
+           title: 'Deep Study',
+           icon: 'book-open',
+           path: '',
+           active: deepStudyActive
+         } */
       ]
     }
   ];
+
+ const handleBookClick = async (bookId: string, bookTitle: string) => {
+  console.log("User clicked Book:", bookTitle, "=> ID:", bookId);
+  await selectBook(bookId, bookTitle);
+};
+
+
+  const handleChapterClick = (chapterNumber: number, bookId: string) => {
+    console.log("Fetching verses for chapter:", chapterNumber);
+    selectChapter(chapterNumber);
+  };
+
 
   return (
     <div className="flex flex-col gap-1 px-2.5">
@@ -191,66 +188,72 @@ const SidebarMenuDashboard = () => {
       <div className="px-0 py-1">
         <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Bible Books</h3>
       </div>
-      <Menu highlight={true} className="menu-default w-full p-0">
-        <MenuItem
-          className="w-full"
-          toggle="dropdown"
-          trigger="hover"
-          dropdownProps={{
-            placement: isRTL() ? 'bottom-start' : 'bottom-end',
-            modifiers: [
-              {
-                name: 'offset',
-                options: {
-                  offset: [0, 0] // [skid, distance]
-                }
-              }
-            ]
-          }}
-        >
-          <MenuToggle className="w-full btn btn-light btn-sm justify-between flex-nowrap">
-            <span className="flex items-center gap-1.5">
-              Psalm
-            </span>
-            <span className="flex items-center lg:ms-4">
-              <KeenIcon icon="down" className="!text-xs" />
-            </span>
-          </MenuToggle>
 
-          <MenuSub className="menu-default w-[250px] py-2">
-            {/* Search Input */}
-            <div className="px-3 py-2 border-b border-gray-200">
-              <input
-                type="text"
-                placeholder="Search books..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-            
-            {/* Filtered Results */}
-            <div className="max-h-60 overflow-y-auto">
-              {filteredDropdownItems.length > 0 ? (
-                filteredDropdownItems.map((item, index) => (
-                  <MenuItem key={index} className={item.active ? 'active' : ''}>
-                    <MenuLink path={item.path}>
-                      <MenuTitle>{item.title}</MenuTitle>
-                    </MenuLink>
-                  </MenuItem>
-                ))
-              ) : (
-                <div className="px-3 py-2 text-sm text-gray-500">
-                  No books found
-                </div>
-              )}
-            </div>
-          </MenuSub>
-        </MenuItem>
-      </Menu>
+      {loading ? (
+        <div className="px-3 py-2 text-sm text-gray-500">Loading books...</div>
+      ) : error ? (
+        <div className="px-3 py-2 text-sm text-red-500">{error}</div>
+      ) : (
+        <Menu highlight={true} className="menu-default w-full p-0">
+          <MenuItem
+            className="w-full"
+            toggle="dropdown"
+            trigger="hover"
+            dropdownProps={{
+              placement: isRTL() ? 'bottom-start' : 'bottom-end',
+              modifiers: [{ name: 'offset', options: { offset: [0, 0] } }],
+            }}
+          >
+            <MenuToggle className="w-full btn btn-light btn-sm justify-between flex-nowrap">
+              <span className="flex items-center gap-1.5">{selectedBookName || 'Genesis'}</span>
+              <span className="flex items-center lg:ms-4">
+                <KeenIcon icon="down" className="!text-xs" />
+              </span>
+            </MenuToggle>
 
-      {/* Chapters Section */}
+            <MenuSub className="menu-default w-[250px] py-2">
+              {/* Search Input */}
+              <div className="px-3 py-2 border-b border-gray-200">
+                <input
+                  type="text"
+                  placeholder="Search books..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+
+
+              <div
+                onClick={() => console.log("Outer div clicked")}
+                className="max-h-60 overflow-y-auto"
+              >
+                {filteredDropdownItems.length > 0 ? (
+                  filteredDropdownItems.map((item, index) => (
+                    <div
+                      key={index}
+                      className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log(" Book clicked:", item.id);
+                        handleBookClick(item.id, item.title);
+                      }}
+                    >
+                      {item.title}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-sm text-gray-500">No books found</div>
+                )}
+              </div>
+
+
+            </MenuSub>
+          </MenuItem>
+        </Menu>
+      )}
+
       <div className="px-0 py-1">
         <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Chapters</h3>
       </div>
@@ -293,9 +296,9 @@ const SidebarMenuDashboard = () => {
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
-            
+
             {/* Filtered Results */}
-            <div className="max-h-60 overflow-y-auto">
+            {/* <div className="max-h-60 overflow-y-auto">
               {filteredChapterItems.length > 0 ? (
                 filteredChapterItems.map((item, index) => (
                   <MenuItem key={index} className={item.active ? 'active' : ''}>
@@ -309,15 +312,37 @@ const SidebarMenuDashboard = () => {
                   No chapters found
                 </div>
               )}
+            </div> */}
+            
+            <div className="max-h-60 overflow-y-auto">
+              {Array.isArray(chapters) && chapters.length > 0 ? (
+                chapters.map((c, index) => (
+                  <div
+                    key={index}
+                    className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${selectedChapter === c.chapter ? 'bg-gray-200 font-semibold' : ''
+                      }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleChapterClick(c.chapter, c.book_id);
+                    }}
+                  >
+                    Chapter {c.chapter}
+                  </div>
+                ))
+              ) : (
+                <div className="px-3 py-2 text-sm text-gray-500">No chapters found</div>
+              )}
             </div>
+
           </MenuSub>
         </MenuItem>
       </Menu>
 
-      {/* Verses Dropdown */}
+      {/* Verse Dropdown */}
       <div className="px-0 py-1">
-        <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Verse</h3>
+        <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Verses</h3>
       </div>
+
       <Menu highlight={true} className="menu-default w-full p-0">
         <MenuItem
           className="w-full"
@@ -325,20 +350,11 @@ const SidebarMenuDashboard = () => {
           trigger="hover"
           dropdownProps={{
             placement: isRTL() ? 'bottom-start' : 'bottom-end',
-            modifiers: [
-              {
-                name: 'offset',
-                options: {
-                  offset: [0, 0] // [skid, distance]
-                }
-              }
-            ]
+            modifiers: [{ name: 'offset', options: { offset: [0, 0] } }],
           }}
         >
           <MenuToggle className="w-full btn btn-light btn-sm justify-between flex-nowrap">
-            <span className="flex items-center gap-1.5">
-              Verses
-            </span>
+            <span className="flex items-center gap-1.5">Verses</span>
             <span className="flex items-center lg:ms-4">
               <KeenIcon icon="down" className="!text-xs" />
             </span>
@@ -356,17 +372,36 @@ const SidebarMenuDashboard = () => {
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
-            
-            {/* Filtered Results */}
+
+            {/* Filtered Verse List */}
             <div className="max-h-60 overflow-y-auto">
-              {filteredVerseItems.length > 0 ? (
-                filteredVerseItems.map((item, index) => (
-                  <MenuItem key={index} className={item.active ? 'active' : ''}>
-                    <MenuLink path={item.path}>
-                      <MenuTitle>{item.title}</MenuTitle>
-                    </MenuLink>
-                  </MenuItem>
-                ))
+
+              {Array.isArray(verses) && verses.length > 0 ? (
+                verses
+                  .filter((v) =>
+                    verseSearchTerm
+                      ? v.verse.toString().includes(verseSearchTerm)
+                      : true
+                  )
+                  .map((v, index) => (
+                    <div
+                      key={index}
+                      className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log(" Selected Verse:", v);
+                        setSelectedVerse(v);
+
+                        const bookSlug = v.book_name?.toLowerCase().replace(/\s+/g, '-');
+                        // navigate(`/bible/verse-study?bible=${bookSlug}&chapter=${v.chapter}&verse=${v.verse}`);
+                        navigate(`/bible?bible=${bookSlug}&chapter=${v.chapter}&verse=${v.verse}`);
+
+                      }}
+
+                    >
+                      Verse {v.verse}
+                    </div>
+                  ))
               ) : (
                 <div className="px-3 py-2 text-sm text-gray-500">
                   No verses found
@@ -377,21 +412,21 @@ const SidebarMenuDashboard = () => {
         </MenuItem>
       </Menu>
 
+
       <div className='py-4'><hr></hr></div>
 
-     
-           {/* Toggle Buttons */}
+
+      {/* Toggle Buttons */}
       <div className="flex flex-col gap-2">
         {menuItems.map((heading, index) => (
           <div key={index} className="flex flex-col gap-2">
             <div className="px-2 text-xs font-medium text-gray-600">{heading.title}</div>
-            
+
             {heading.children.map((item, itemIndex) => (
               <button
                 key={itemIndex}
-                className={`flex items-center gap-2 py-2 px-2.5 rounded-md border border-transparent hover:bg-light hover:border-gray-200 transition-colors duration-200 ${
-                  item.active ? 'bg-sand border-gray-200 font-medium text-primary' : 'text-gray-800'
-                }`}
+                className={`flex items-center gap-2 py-2 px-2.5 rounded-md border border-transparent hover:bg-light hover:border-gray-200 transition-colors duration-200 ${item.active ? 'bg-sand border-gray-200 font-medium text-primary' : 'text-gray-800'
+                  }`}
                 onClick={() => {
                   // Handle toggle functionality here
                   // if (item.title === 'Deep Study') {
@@ -422,9 +457,9 @@ const SidebarMenuDashboard = () => {
       </div>
 
       {/* Make Note Modal */}
-      <MakeNote 
-        isOpen={showMakeNote} 
-        onClose={() => setShowMakeNote(false)} 
+      <MakeNote
+        isOpen={showMakeNote}
+        onClose={() => setShowMakeNote(false)}
       />
     </div>
   );

@@ -44,25 +44,48 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { currentLayout } = useLayout();
 
+  // const formik = useFormik({
+  //   initialValues,
+  //   validationSchema: signupSchema,
+  //   onSubmit: async (values, { setStatus, setSubmitting }) => {
+  //     setLoading(true);
+  //     try {
+  //       if (!register) {
+  //         throw new Error('JWTProvider is required for this form.');
+  //       }
+  //       await register(values.email, values.password, values.changepassword);
+  //       navigate(from, { replace: true });
+  //     } catch (error) {
+  //       console.error(error);
+  //       setStatus('The sign up details are incorrect');
+  //       setSubmitting(false);
+  //       setLoading(false);
+  //     }
+  //   }
+  // });
+
+
   const formik = useFormik({
     initialValues,
     validationSchema: signupSchema,
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
       try {
-        if (!register) {
-          throw new Error('JWTProvider is required for this form.');
-        }
-        await register(values.email, values.password, values.changepassword);
-        navigate(from, { replace: true });
-      } catch (error) {
+        if (!register) throw new Error('JWTProvider is required for this form.');
+       const response= await register(values.email, values.password, values.changepassword);
+        if(response?.success){
+        navigate('/auth/login', { replace: true });
+      }
+      } catch (error: any) {
         console.error(error);
-        setStatus('The sign up details are incorrect');
+        setStatus(error.message || 'The sign up details are incorrect');
         setSubmitting(false);
         setLoading(false);
       }
     }
+
   });
+
 
   const togglePassword = (event: { preventDefault: () => void }) => {
     event.preventDefault();
@@ -102,8 +125,6 @@ const Signup = () => {
             />
             Use Google
           </a>
-
-         
         </div>
 
         <div className="flex items-center gap-2">

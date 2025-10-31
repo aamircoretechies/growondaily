@@ -8,6 +8,8 @@ import { toAbsoluteUrl } from '@/utils';
 import { useAuthContext } from '@/auth';
 import { useLayout } from '@/providers';
 import { Alert } from '@/components';
+import axios from "axios";
+
 
 const loginSchema = Yup.object().shape({
   email: Yup.string()
@@ -40,29 +42,56 @@ const Login = () => {
   const formik = useFormik({
     initialValues,
     validationSchema: loginSchema,
+
+    // onSubmit: async (values, { setStatus, setSubmitting }) => {
+    //   setLoading(true);
+    //   try {
+    //     if (!login) {
+    //       throw new Error('JWTProvider is required for this form.');
+    //     }
+
+    //     await login('demo@keenthemes.com', values.password);
+
+    //     if (values.remember) {
+    //       localStorage.setItem('email', "demo@keenthemes.com");
+    //     } else {
+    //       localStorage.removeItem('email');
+    //     }
+
+    //     navigate(from, { replace: true });
+    //   } catch {
+    //     setStatus('The login details are incorrect');
+    //     setSubmitting(false);
+    //   }
+    //   setLoading(false);
+    // }
+
+
+
+
     onSubmit: async (values, { setStatus, setSubmitting }) => {
-      setLoading(true);
+  setLoading(true);
+  try {
+    if (!login) throw new Error('JWTProvider is required for login.');
 
-      try {
-        if (!login) {
-          throw new Error('JWTProvider is required for this form.');
-        }
+    await login(values.email, values.password); 
 
-        await login('demo@keenthemes.com', values.password);
-
-        if (values.remember) {
-          localStorage.setItem('email', "demo@keenthemes.com");
-        } else {
-          localStorage.removeItem('email');
-        }
-
-        navigate(from, { replace: true });
-      } catch {
-        setStatus('The login details are incorrect');
-        setSubmitting(false);
-      }
-      setLoading(false);
+    if (values.remember) {
+      localStorage.setItem("email", values.email);
+    } else {
+      localStorage.removeItem("email");
     }
+    navigate(from, { replace: true });
+  } catch (error: any) {
+    console.error("Login error", error);
+    setStatus(error.message || "Invalid email or password");
+    setSubmitting(false);
+  }
+  setLoading(false);
+}
+
+
+
   });
 
   const togglePassword = (event: MouseEvent<HTMLButtonElement>) => {

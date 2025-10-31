@@ -7,10 +7,11 @@ import {
   PersonalizationCard,
 } from './blocks';
 import clsx from 'clsx';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Scrollspy } from '@/components/scrollspy/Scrollspy';
 import { SettingsSidebar } from './SettingsSidebar';
 import { useLayout } from '@/providers';
+import { AuthContext } from '@/auth/providers/JWTProvider';
 
 const stickySidebarClasses: Record<string, string> = {
   'demo1-layout': 'top-[calc(var(--tw-header-height)+1rem)]',
@@ -29,6 +30,23 @@ const SettingsSidebarContent = () => {
   const desktopMode = useResponsive('up', 'lg');
   const { currentLayout } = useLayout();
   const [sidebarSticky, setSidebarSticky] = useState(false);
+
+  // chnage for geting profile data 
+  const { currentUser, getUser, auth } = useContext(AuthContext) || {};
+  const authContext = useContext(AuthContext);
+  // Ensure profile is fetched on page load (refresh) and when context mounts
+  useEffect(() => {
+    if (authContext?.auth?.access_token) {
+      authContext.getUser();
+    }
+  }, [authContext?.auth?.access_token]);
+
+  // Fallback: if token exists but currentUser is empty, try once
+  useEffect(() => {
+    if (authContext?.auth?.access_token && !authContext?.currentUser) {
+      authContext.getUser();
+    }
+  }, [authContext]);
 
   // Initialize ref for parentEl
   const parentRef = useRef<HTMLElement | Document>(document); // Default to document
@@ -52,6 +70,14 @@ const SettingsSidebarContent = () => {
     ? stickySidebarClasses[currentLayout.name] || 'top-[calc(var(--tw-header-height)+1rem)]'
     : 'top-[calc(var(--tw-header-height)+1rem)]';
 
+
+    // Show loader until profile is ready
+
+    // console.log("PERSONALIZATION USER:", currentUser); 
+    if (!currentUser) {
+    return <div className="p-5 text-center">Loading profile...</div>;
+  }
+
   return (
     <div className="flex grow gap-3 sm:gap-5 lg:gap-7.5">
       {desktopMode && (
@@ -67,13 +93,17 @@ const SettingsSidebarContent = () => {
       )}
 
       <div className="flex flex-col items-stretch grow gap-3 sm:gap-5 lg:gap-7.5">
-        <EditProfileCard />
+        {/* <EditProfileCard /> */}
+        <EditProfileCard user={currentUser} />
 
         <ChangePasswordCard />
 
-        <PersonalizationCard />
+        {/* <PersonalizationCard /> */}
+        <PersonalizationCard user={currentUser} />
 
-        <GeneralSettings />
+        {/* <GeneralSettings /> */}
+        <GeneralSettings user={currentUser} />
+        
 
       {/*   <SystemAppSettings /> */}
 

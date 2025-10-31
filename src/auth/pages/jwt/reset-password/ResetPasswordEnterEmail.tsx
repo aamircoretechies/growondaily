@@ -6,6 +6,7 @@ import { useLayout } from '@/providers';
 const ResetPasswordEnterEmail = () => {
   const { currentLayout } = useLayout();
   const [searchInput, setSearchInput] = useState('');
+  
 
   return (
     <div className="card max-w-[370px] w-full">

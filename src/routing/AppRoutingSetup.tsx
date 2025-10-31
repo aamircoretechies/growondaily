@@ -16,7 +16,7 @@ import {
 
 import {
   ProfileActivityPage,
-  ProfileBloggerPage,
+  ProfileBloggerPage, 
   CampaignsCardPage,
   CampaignsListPage,
   ProjectColumn2Page,

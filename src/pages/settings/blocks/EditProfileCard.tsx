@@ -4,7 +4,12 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { UserRound } from 'lucide-react';
 
-const EditProfileCard = () => {
+const EditProfileCard = ({ user }: { user: any }) => {
+
+    const firstName = user?.first_name || '';
+  const lastName = user?.last_name || '';
+  const email = user?.email || '';
+  
   return (
     <Card id="edit_profile" className='bg-white/40 dark:bg-gray-100 '>
       <CardHeader>
@@ -17,15 +22,15 @@ const EditProfileCard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="first_name">First Name</Label>
-            <Input id="first_name" placeholder="First name" defaultValue="Thomas" />
+            <Input id="first_name" placeholder="First name"defaultValue={firstName} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="last_name">Last Name</Label>
-            <Input id="last_name" placeholder="Last name" defaultValue="Mathew" />
+            <Input id="last_name" placeholder="Last name" defaultValue={lastName} />
           </div>
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="name@email.com" defaultValue="thomas@example.com" />
+            <Input id="email" type="email" placeholder="name@email.com" defaultValue={email}  />
           </div>
         </div>
 

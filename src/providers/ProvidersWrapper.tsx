@@ -11,6 +11,9 @@ import {
   TranslationProvider
 } from '@/providers';
 import { HelmetProvider } from 'react-helmet-async';
+import { DashboardProvider } from '@/pages/dashboards/providers/DashboardProvider';
+import { BibleProvider } from '@/providers';
+
 
 const queryClient = new QueryClient();
 
@@ -23,7 +26,11 @@ const ProvidersWrapper = ({ children }: PropsWithChildren) => {
             <HelmetProvider>
               <LayoutProvider>
                 <LoadersProvider>
+                  <DashboardProvider>
+                    <BibleProvider>
                   <MenusProvider>{children}</MenusProvider>
+                  </BibleProvider>
+                  </DashboardProvider>
                 </LoadersProvider>
               </LayoutProvider>
             </HelmetProvider>

@@ -12,7 +12,8 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-const GeneralSettings = () => {
+const GeneralSettings = ({ user }: { user: any }) => {
+  const defaultLanguage = user?.language || 'English';  // for API data
   return (
     <Card id="general_settings" className='bg-white/40 dark:bg-gray-100 '>
       <CardHeader>
@@ -23,10 +24,7 @@ const GeneralSettings = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-          
-     
-          
+    
           <div className="space-y-2">
             <Label htmlFor="language">Default Language</Label>
             <div className="flex items-center gap-2">
@@ -34,7 +32,7 @@ const GeneralSettings = () => {
               <Input 
                 id="language" 
                 placeholder="Select language"
-                defaultValue="English"
+                defaultValue={defaultLanguage} // change for API data
               />
             </div>
           </div>

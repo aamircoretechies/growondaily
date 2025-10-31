@@ -39,6 +39,7 @@ const removeAuth = () => {
 
 export function setupAxios(axios: any) {
   axios.defaults.headers.Accept = 'application/json';
+  axios.defaults.withCredentials = true;
   axios.interceptors.request.use(
     (config: { headers: { Authorization: string } }) => {
       const auth = getAuth();
@@ -53,4 +54,15 @@ export function setupAxios(axios: any) {
   );
 }
 
-export { AUTH_LOCAL_STORAGE_KEY, getAuth, removeAuth, setAuth };
+const getAccessToken = (): string | null => {
+  try {
+    const auth = getAuth();
+    return auth?.access_token || (auth as any)?.api_token || null;
+  } catch (err) {
+    console.error('getAccessToken error', err);
+    return null;
+  }
+};
+
+
+export { AUTH_LOCAL_STORAGE_KEY, getAuth, removeAuth, setAuth, getAccessToken };
