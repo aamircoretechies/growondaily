@@ -4,87 +4,51 @@ import { useLocation } from 'react-router-dom';
 import { useBible } from '@/providers/BibleProvider';
 import { useEffect, useState } from 'react';
 
-
 interface BibleContentProps {
   showDeepStudyButton?: boolean;
   onDeepStudyToggle?: () => void;
   isDeepStudyActive?: boolean;
 }
 
-//
-
-
 const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive }: BibleContentProps) => {
-  // const psalm23Verses = [
-  //   {
-  //     number: 1,
-  //     text: "The LORD is my shepherd; I shall not want.",
-  //     path: "/bible?bible=psalm&chapter=23&verse=1"
-  //   },
-  //   {
-  //     number: 2,
-  //     text: "He maketh me to lie down in green pastures: he leadeth me beside the still waters.",
-  //     path: "/bible?bible=psalm&chapter=23&verse=2"
-  //   },
-  //   {
-  //     number: 3,
-  //     text: "He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.",
-  //     path: "/bible?bible=psalm&chapter=23&verse=3"
-  //   },
-  //   {
-  //     number: 4,
-  //     text: "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.",
-  //     path: "/bible?bible=psalm&chapter=23&verse=4"
-  //   },
-  //   {
-  //     number: 5,
-  //     text: "You prepare a table before me, in the presence of my enemies. You anoint my head with oil; my cup overflows.",
-  //     path: "/bible?bible=psalm&chapter=23&verse=5"
-  //   },
-  //   {
-  //     number: 6,
-  //     text: "Surely goodness and love will follow me all the days of my life, and I will dwell in the house of the LORD forever.",
-  //     path: "/bible?bible=psalm&chapter=23&verse=6"
-  //   }
-  // ];
-
   const location = useLocation();
-  const { fetchVerses, verses, books } = useBible();
+  const {
+    fetchVerses,
+    verses,
+    books,
+    selectedBookId,
+    selectedBookName,
+    selectedChapter,
+    fetchSingleVerse,
+  } = useBible();
 
   const [selectedVerse, setSelectedVerse] = useState<any>(null);
+  const [totalVerses, setTotalVerses] = useState<number>(0);
 
   const query = new URLSearchParams(location.search);
-  const book = query.get("bible") || "genesis";
-  const chapter = Number(query.get("chapter")) || 1;
   const verseNum = query.get("verse") || "all";
 
-
   useEffect(() => {
-    const bookInfo = books.find(
-      (b: any) => b.name.toLowerCase() === book.toLowerCase()
-    );
-    console.log(" Found bookInfo:", bookInfo);
-    if (bookInfo) {
-      console.log("Fetching verses for", bookInfo.book_id, "chapter:", chapter);
-      fetchVerses(bookInfo.book_id, chapter, "KJV");
-    } else {
-      console.warn("No matching book found for:", book);
+    if (selectedBookId && selectedChapter) {
+      fetchVerses(selectedBookId, selectedChapter, 'KJV');
     }
-  }, [book, chapter, books]);
-
+  }, [selectedBookId, selectedChapter]);
 
   useEffect(() => {
-    if (verses && verses.length > 0) {
-      if (verseNum === "all") {
-        setSelectedVerse(null);
-      } else {
-        const v = verses.find((v: any) => v.verse == verseNum);
-        console.log("Selected verse:", v);
-        setSelectedVerse(v);
+    if (Array.isArray(verses)) {
+      setTotalVerses(verses.length);
+    }
+    if (verseNum !== "all" && selectedBookId && selectedChapter) {
+      const num = Number(verseNum);
+      if (!Number.isNaN(num)) {
+        fetchSingleVerse(selectedBookId, selectedChapter, num, 'KJV');
       }
+    } else if (verseNum === "all") {
+      setSelectedVerse(null);
     }
-  }, [verses, verseNum]);
+  }, [verses, verseNum, selectedBookId, selectedChapter]);
 
+  const version = selectedVerse?.version || "KJV";
 
   return (
     <div className="min-h-screen text-primary p-0 ">
@@ -93,12 +57,22 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
             <div className="flex-1">
               <h1 className="font-merriweather text-2xl">
-                Shepherd's Psalm
+                {/* Shepherd's Psalm */}
+                
+                {selectedBookName
+                  ? `${selectedBookName} ${selectedChapter || ''}`
+                  : 'Loading...'}
+                
               </h1>
               <p className="font-merriweather text-sm text-gray-600 dark:text-gray-400 mt-1">
-                (Psalm 23 KJV)
+                (
+                {selectedBookName
+                  ? `${selectedBookName} ${selectedChapter || ''} ${version}`
+                  : 'Loading...'}
+                )
               </p>
             </div>
+
             {showDeepStudyButton && onDeepStudyToggle && (
               <button
                 onClick={onDeepStudyToggle}
@@ -114,22 +88,6 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
           </div>
         </div>
 
-        {/* Verses Section */}
-        {/* <div className="space-y-6">
-          {selectedVerse ? (
-            <div className="flex flex-col">
-              <h1 className="font-merriweather text-2xl mb-2">
-                {selectedVerse.book_name} {selectedVerse.chapter}:{selectedVerse.verse}
-              </h1>
-              <p className="font-merriweather text-lg leading-relaxed">
-                {selectedVerse.text}
-              </p>
-            </div>
-          ) : (
-            <p className="text-gray-500">Loading verse...</p>
-          )}
-        </div> */}
-
         <div className="space-y-6">
           {selectedVerse ? (
             <div className="flex flex-col">
@@ -139,14 +97,10 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
               <p className="font-merriweather text-lg leading-relaxed">
                 {selectedVerse.text}
               </p>
+              <p className="text-gray-500 text-sm">({selectedVerse.version})</p>
             </div>
           ) : (
             verses.map((v) => (
-              // <div key={v.verse} className="border-b pb-2 mb-2">
-              //   <h3 className="font-semibold">{v.book_name} {v.chapter}:{v.verse}</h3>
-              //   <p>{`${v.verse}. ${v.text}`}</p>
-              // </div>
-
               <div
                 key={v.verse}
                 className="flex items-start gap-3 py-2"
@@ -164,7 +118,6 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
                   </Link>
                 </div>
               </div>
-
             ))
           )}
         </div>
@@ -174,9 +127,3 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
 };
 
 export { BibleContent };
-
-
-
-
-
-

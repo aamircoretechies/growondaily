@@ -29,8 +29,11 @@ interface BibleContextType {
   selectedBookName: string | null;
   selectedChapter: number;
   selectedVerse: Verse | null;
+  version: string;
+  setVersion: (v: string) => void;
   fetchChapters: (bookId: string, version: string) => Promise<void>;
   fetchVerses: (bookId: string, chapter: number, version: string) => Promise<void>;
+   fetchSingleVerse: (bookId: string,chapter: number,verse: number,version: string) => Promise<void>;
   setSelectedVerse: (v: Verse | null) => void;
   selectBook: (bookId: string, name: string) => Promise<void>;
   selectChapter: (chapter: number) => Promise<void>;
@@ -47,11 +50,14 @@ const BibleContext = createContext<BibleContextType>({
   selectedBookName: null,
   selectedChapter: 1,
   selectedVerse: null,
-  fetchChapters: async () => {},
-  fetchVerses: async () => {},
-  setSelectedVerse: () => {},
-  selectBook: async () => {},
-  selectChapter: async () => {},
+  version: "KJV",
+  setVersion: () => { },
+  fetchChapters: async () => { },
+  fetchVerses: async () => { },
+  setSelectedVerse: () => { },
+  fetchSingleVerse: async () => {},
+  selectBook: async () => { },
+  selectChapter: async () => { },
 });
 
 
@@ -63,11 +69,13 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedBookName, setSelectedBookName] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
   const [selectedVerse, setSelectedVerse] = useState<Verse | null>(null);
+  const [version, setVersion] = useState<string>('KJV');
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
 
- useEffect(() => {
+  useEffect(() => {
     const fetchBooks = async () => {
       try {
         setLoading(true);
@@ -75,7 +83,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         const data = res.data?.data?.books || [];
         setBooks(data);
 
-        // Hydrate selection from storage if present
         const savedBookId = localStorage.getItem('bible.selectedBookId');
         const savedBookName = localStorage.getItem('bible.selectedBookName');
         const savedChapter = Number(localStorage.getItem('bible.selectedChapter') || '1');
@@ -127,7 +134,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
 
- const fetchVerses = async (bookId: string, chapter: number, version: string) => {
+  const fetchVerses = async (bookId: string, chapter: number, version: string) => {
     console.log("Fetching Verses:", { bookId, chapter, version });
     try {
       setLoading(true);
@@ -144,20 +151,21 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     }
   };
-
-  // Persist selection
   useEffect(() => {
     if (selectedBookId) localStorage.setItem('bible.selectedBookId', selectedBookId);
     if (selectedBookName) localStorage.setItem('bible.selectedBookName', selectedBookName);
     localStorage.setItem('bible.selectedChapter', String(selectedChapter || 1));
   }, [selectedBookId, selectedBookName, selectedChapter]);
 
-  const selectBook = async (bookId: string, name: string) => {
+ 
+
+  const selectBook = async (bookId: string, name: string, chapter: number = 1) => {
     setSelectedBookId(bookId);
     setSelectedBookName(name);
-    setSelectedChapter(1);
+    setSelectedChapter(chapter);
+
     await fetchChapters(bookId, 'KJV');
-    await fetchVerses(bookId, 1, 'KJV');
+    await fetchVerses(bookId, chapter, 'KJV');
   };
 
   const selectChapter = async (chapter: number) => {
@@ -166,7 +174,53 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     await fetchVerses(selectedBookId, chapter, 'KJV');
   };
 
- return (
+
+  const fetchSingleVerse = async (
+    bookId: string,
+    chapter: number,
+    verse: number,
+    version: string
+  ) => {
+    try {
+      setLoading(true);
+      const url = `https://api.growondaily.com/api/bible/books/${bookId}/chapters/${chapter}/verses/${verse}/${version}`;
+      const res = await axios.get(url);
+      const verseData = res.data?.data?.verse as Verse | undefined;
+      if (verseData) {
+        setSelectedVerse(verseData);
+      } else {
+        setSelectedVerse(null);
+      }
+    } catch (error) {
+      console.error("Error fetching single verse:", error);
+      setSelectedVerse(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+    
+
+
+ useEffect(() => {
+  if (!selectedVerse || !selectedBookId || !selectedChapter) return;
+  console.log(
+    "Re-fetching verse because book/chapter/verse/version changed:",
+    { selectedBookId, selectedChapter, verse: selectedVerse.verse, version }
+  );
+
+  fetchSingleVerse(
+    selectedBookId,
+    selectedChapter,
+    selectedVerse.verse,
+    version
+  );
+}, [selectedBookId, selectedChapter, selectedVerse?.verse, version]);
+
+
+
+
+  return (
     <BibleContext.Provider
       value={{
         books,
@@ -174,13 +228,16 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         verses,
         loading,
         error,
+        version,
         selectedBookId,
         selectedBookName,
         selectedChapter,
         selectedVerse,
         fetchChapters,
         fetchVerses,
+        fetchSingleVerse,
         setSelectedVerse,
+        setVersion,
         selectBook,
         selectChapter,
       }}

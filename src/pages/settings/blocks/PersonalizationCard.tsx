@@ -194,7 +194,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         );
         setDailyPref(prefs.dailyPref || 'Daily');
         setDepth(prefs.depth || 'Short (1-2 min read)');
-        return;
+      return;
       } catch {}
     }
 

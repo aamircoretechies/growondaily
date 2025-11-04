@@ -38,7 +38,7 @@ interface IDashboardMenuItem {
 interface IDashboardMenuItems extends Array<IDashboardMenuItem> { }
 
 const SidebarMenuDashboard = () => {
-  const { books, chapters, verses, loading, error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter } = useBible();
+  const { books, chapters, verses, loading, error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter,selectedVerse, fetchSingleVerse, version } = useBible();
   const { isRTL } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [chapterSearchTerm, setChapterSearchTerm] = useState('');
@@ -48,43 +48,6 @@ const SidebarMenuDashboard = () => {
   // selectedChapter comes from context now
   const navigate = useNavigate();
   // const [selectedBook, setSelectedBook] = useState<string>('Select Book');
-
-  
-
-  // useEffect(() => {
-  //   const genesis = books.find((b: any) => b.name.toLowerCase() === 'genesis');
-  //   if (genesis) {
-  //     fetchVerses(genesis.book_id, 1, "KJV");
-  //   }
-  // }, [books]);
-
-  // useEffect(() => {
-    // if (books && books.length > 0) {
-  //     const genesis = books.find(
-  //       (b: any) => b.name.toLowerCase() === "genesis"
-  //     );
-  //     if (genesis) {
-  //       console.log(" Default loading Genesis chapter 1");
-  //       fetchVerses(genesis.book_id, 1, "KJV");
-  //       setSelectedBook("Genesis");
-  //       setSelectedChapter(1);
-  //     }
-  //   }
-  // }, [books]);  
-
-  // console.log(" Bible Context Data:", { books });
-  // useEffect(() => {
-  //   if (books && books.length > 0) {
-  //     const genesis = books.find((b: any) => b.name.toLowerCase() === "genesis");
-  //     console.log(" All Books from API:", books);
-  //     if (genesis) {
-  //       console.log(" Genesis Book Found:", genesis);
-  //       fetchChapters(genesis.book_id, "KJV");
-  //     } else {
-  //       console.log(" Genesis book not found in books array");
-  //     }
-  //   }
-  // }, [books]);
 
   const filteredDropdownItems = useMemo(() => {
     if (!Array.isArray(books)) return [];
@@ -170,10 +133,10 @@ const SidebarMenuDashboard = () => {
     }
   ];
 
- const handleBookClick = async (bookId: string, bookTitle: string) => {
-  console.log("User clicked Book:", bookTitle, "=> ID:", bookId);
-  await selectBook(bookId, bookTitle);
-};
+  const handleBookClick = async (bookId: string, bookTitle: string) => {
+    console.log("User clicked Book:", bookTitle, "=> ID:", bookId);
+    await selectBook(bookId, bookTitle);
+  };
 
 
   const handleChapterClick = (chapterNumber: number, bookId: string) => {
@@ -247,8 +210,6 @@ const SidebarMenuDashboard = () => {
                   <div className="px-3 py-2 text-sm text-gray-500">No books found</div>
                 )}
               </div>
-
-
             </MenuSub>
           </MenuItem>
         </Menu>
@@ -277,7 +238,8 @@ const SidebarMenuDashboard = () => {
         >
           <MenuToggle className="w-full btn btn-light btn-sm justify-between flex-nowrap">
             <span className="flex items-center gap-1.5">
-              Chapters
+              {/* Chapters */}
+              {selectedChapter ? `Chapter ${selectedChapter}` : 'Chapters'}
             </span>
             <span className="flex items-center lg:ms-4">
               <KeenIcon icon="down" className="!text-xs" />
@@ -313,7 +275,7 @@ const SidebarMenuDashboard = () => {
                 </div>
               )}
             </div> */}
-            
+
             <div className="max-h-60 overflow-y-auto">
               {Array.isArray(chapters) && chapters.length > 0 ? (
                 chapters.map((c, index) => (
@@ -354,7 +316,10 @@ const SidebarMenuDashboard = () => {
           }}
         >
           <MenuToggle className="w-full btn btn-light btn-sm justify-between flex-nowrap">
-            <span className="flex items-center gap-1.5">Verses</span>
+            {/* <span className="flex items-center gap-1.5">Verses</span> */}
+            <span className="flex items-center gap-1.5">
+              {selectedVerse ? `Verse ${selectedVerse.verse}` : 'Verses'}
+            </span>
             <span className="flex items-center lg:ms-4">
               <KeenIcon icon="down" className="!text-xs" />
             </span>
@@ -387,13 +352,16 @@ const SidebarMenuDashboard = () => {
                     <div
                       key={index}
                       className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
                         console.log(" Selected Verse:", v);
-                        setSelectedVerse(v);
+                        if (selectedBookId) {
+                          await fetchSingleVerse(selectedBookId, v.chapter, v.verse, version || 'KJV');
+                        } else {
+                          setSelectedVerse(v);
+                        }
 
-                        const bookSlug = v.book_name?.toLowerCase().replace(/\s+/g, '-');
-                        // navigate(`/bible/verse-study?bible=${bookSlug}&chapter=${v.chapter}&verse=${v.verse}`);
+                        const bookSlug = (selectedBookName || v.book_name)?.toLowerCase().replace(/\s+/g, '-');
                         navigate(`/bible?bible=${bookSlug}&chapter=${v.chapter}&verse=${v.verse}`);
 
                       }}

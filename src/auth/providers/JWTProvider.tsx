@@ -98,22 +98,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth?.access_token]);
 
-  // const login = async (email: string, password: string) => {
-  //   console.log("this is user input", email, password)
-  //   try {
-  //     const { data: auth } = await axios.post<AuthModel>(LOGIN_URL, {
-  //       email: email,
-  //       password: password
-  //     });
-  //     console.log("this is respnse", auth)
-  //     saveAuth(auth);
-  //     const { data: user } = await getUser();
-  //     setCurrentUser(user);
-  //   } catch (error) {
-  //     saveAuth(undefined);
-  //     throw new Error(`Error ${error}`);
-  //   }
-  // };
+  
   const login = async (email: string, password: string) => {
     console.log("this is user input", email, password);
     try {
@@ -144,26 +129,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       throw new Error(`Error ${error}`);
     }
   };
-
-  // const register = async (email: string, password: string, password_confirmation: string) => {
-  //   try {
-  //     const { data: auth } = await axios.post(REGISTER_URL, {
-  //       email,
-  //       password,
-  //       re_password: password_confirmation
-  //     }); 
-  //     console.log("REGISTER_URL", REGISTER_URL);
-
-  //     saveAuth(auth);
-  //     console.log("this is respons data", auth)
-  // const { data: user } = await getUser();
-  // setCurrentUser(user);
-  //   } catch (error) {
-  //     saveAuth(undefined);
-  //     throw new Error(`Error ${error}`);
-  //   }
-  // };
-
 
 
   const register = async (email: string, password: string, password_confirmation: string) => {
