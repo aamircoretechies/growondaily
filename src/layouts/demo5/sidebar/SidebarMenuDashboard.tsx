@@ -101,7 +101,7 @@ const SidebarMenuDashboard = () => {
       item.title.toLowerCase().includes(verseSearchTerm.toLowerCase())
     );
   }, [verseItems, verseSearchTerm]);
-  
+
   const menuItems: IDashboardMenuItems = [
     {
       title: 'Options',
@@ -144,6 +144,7 @@ const SidebarMenuDashboard = () => {
     console.log("Fetching verses for chapter:", chapterNumber);
     selectChapter(chapterNumber);
   };
+  
 
 
   return (
@@ -261,22 +262,7 @@ const SidebarMenuDashboard = () => {
             </div>
 
             {/* Filtered Results */}
-            {/* <div className="max-h-60 overflow-y-auto">
-              {filteredChapterItems.length > 0 ? (
-                filteredChapterItems.map((item, index) => (
-                  <MenuItem key={index} className={item.active ? 'active' : ''}>
-                    <MenuLink path={item.path}>
-                      <MenuTitle>{item.title}</MenuTitle>
-                    </MenuLink>
-                  </MenuItem>
-                ))
-              ) : (
-                <div className="px-3 py-2 text-sm text-gray-500">
-                  No chapters found
-                </div>
-              )}
-            </div> */}
-
+          
             <div className="max-h-60 overflow-y-auto">
               {Array.isArray(chapters) && chapters.length > 0 ? (
                 chapters.map((c, index) => (
