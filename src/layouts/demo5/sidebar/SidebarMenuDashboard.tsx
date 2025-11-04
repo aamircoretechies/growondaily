@@ -101,6 +101,7 @@ const SidebarMenuDashboard = () => {
       item.title.toLowerCase().includes(verseSearchTerm.toLowerCase())
     );
   }, [verseItems, verseSearchTerm]);
+  
   const menuItems: IDashboardMenuItems = [
     {
       title: 'Options',
