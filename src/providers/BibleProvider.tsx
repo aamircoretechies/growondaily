@@ -273,7 +273,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       const allResponses = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
       setDeepStudyData((prev: any) => ({
         ...prev,
-        [`${bookId}-${chapter}`]: allResponses,
+        // [`${bookId}-${chapter}`]: allResponses,
+        [`${bookId}-${chapter}-${verse}`]: allResponses,
       }));
 
       return allResponses;
