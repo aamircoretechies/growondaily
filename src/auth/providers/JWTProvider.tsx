@@ -24,6 +24,10 @@ export const RESET_PASSWORD_URL = `${API_URL}/api/auth/reset-password`;
 // export const GET_USER_URL = `${API_URL}/user`;
 export const GET_USER_URL = `${API_URL}/api/auth/profile`;
 
+import { signInWithPopup } from "firebase/auth";
+import { auth as firebaseAuth, googleProvider } from "@/firebaseConfig";
+
+
 
 interface AuthContextProps {
   loading: boolean;
@@ -33,7 +37,7 @@ interface AuthContextProps {
   currentUser: UserModel | undefined;
   setCurrentUser: Dispatch<SetStateAction<UserModel | undefined>>;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle?: () => Promise<void>;
+  loginWithGoogle?: () => Promise<boolean>;
   loginWithFacebook?: () => Promise<void>;
   loginWithGithub?: () => Promise<void>;
   register: (email: string, password: string, password_confirmation: string) => Promise<{ success: boolean; data?: any }>;
@@ -98,7 +102,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth?.access_token]);
 
-  
+
   const login = async (email: string, password: string) => {
     console.log("this is user input", email, password);
     try {
@@ -225,182 +229,274 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
-const saveUserPreferences = async (preferencesData: any) => {
-  // Prefer token from in-memory auth state; fall back to helper
-  let token = auth?.access_token || auth?.api_token || authHelper.getAuth()?.access_token || authHelper.getAuth()?.api_token || "";
+  const saveUserPreferences = async (preferencesData: any) => {
+    // Prefer token from in-memory auth state; fall back to helper
+    let token = auth?.access_token || auth?.api_token || authHelper.getAuth()?.access_token || authHelper.getAuth()?.api_token || "";
 
-  if (!token) {
-    throw new Error("No auth token found. Please login first.");
-  }
+    if (!token) {
+      throw new Error("No auth token found. Please login first.");
+    }
 
-  console.log("Saving user preferences:", preferencesData);
+    console.log("Saving user preferences:", preferencesData);
+
+    try {
+      // Transform UI-shaped preferences into backend canonical format
+      const toBackendEnum = (value: string) =>
+        (value || '')
+          .trim()
+          .toUpperCase()
+          .replace(/[^A-Z0-9]+/g, '_')
+          .replace(/^_|_$/g, '');
+
+      const experienceMap: Record<string, string> = {
+        'FIRST TIME': 'FIRST_TIME',
+        'OCCASIONAL': 'OCCASIONAL',
+        'REGULAR': 'REGULAR',
+        'THEOLOGICAL': 'THEOLOGICAL',
+      };
+
+      const payloadPreferences = {
+        language_code: 'en',
+        bible_version: (preferencesData?.translations?.[0]?.split(' - ')[0] || 'KJV').toUpperCase(),
+        depth_level: preferencesData?.depth?.includes('Short')
+          ? 'short'
+          : preferencesData?.depth?.includes('Medium')
+            ? 'medium'
+            : 'deep',
+        experience_with_bible: [
+          experienceMap[(preferencesData?.experience || '').toString().toUpperCase()] ||
+          toBackendEnum(preferencesData?.experience || 'First Time'),
+        ],
+        what_brings_you: Array.isArray(preferencesData?.brings)
+          ? preferencesData.brings.join(', ')
+          : preferencesData?.brings || '',
+        engagement_preference: Array.isArray(preferencesData?.engage)
+          ? preferencesData.engage.map((e: string) => toBackendEnum(e))
+          : preferencesData?.engage
+            ? [toBackendEnum(preferencesData.engage)]
+            : [],
+        explanation_style: (preferencesData?.explain || '').toLowerCase().includes('simple')
+          ? 'simple'
+          : (preferencesData?.explain || '').toLowerCase().includes('deeper')
+            ? 'balanced'
+            : 'balanced',
+        receive_daily: preferencesData?.dailyPref === 'Daily',
+        historical_context: true,
+        ground_text_analysis: true,
+        special_insights: true,
+        daily_life_application: true,
+        cross_reference: true,
+        commentary_insights: true,
+        key_takeaways: true,
+        reflection_prompts: true,
+      };
+
+      const response = await axios.post(
+        `${API_URL}/api/auth/preferences`,
+        { preferences: payloadPreferences },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          withCredentials: false,
+        }
+      );
+
+      console.log(" Preferences API Response:", response.data);
+
+      const updatedUser = await getUser(token);
+      setCurrentUser(updatedUser);
+
+      return response.data;
+    } catch (error: any) {
+      console.error(" Preferences API Error:", error.response?.data || error.message);
+      throw error;
+    }
+  };
+
+  const updateUserPreferences = async (preferencesData: any) => {
+    let token = auth?.access_token || auth?.api_token || authHelper.getAuth()?.access_token || authHelper.getAuth()?.api_token || "";
+
+    if (!token) {
+      throw new Error("No auth token found. Please login first.");
+    }
+
+    console.log("Updating user preferences:", preferencesData);
+
+    try {
+      const toBackendEnum = (value: string) =>
+        (value || '')
+          .trim()
+          .toUpperCase()
+          .replace(/[^A-Z0-9]+/g, '_')
+          .replace(/^_|_$/g, '');
+
+      const experienceMap: Record<string, string> = {
+        'FIRST TIME': 'NEW_TO_BIBLE',
+        'OCCASIONAL': 'SOME_KNOWLEDGE',
+        'REGULAR': 'REGULAR_STUDY',
+        'THEOLOGICAL': 'ADVANCED_THEOLOGY',
+      };
+
+      const payloadPreferences = {
+        language_code: 'en',
+        bible_version: (preferencesData?.translations?.[0]?.split(' - ')[0] || 'KJV').toUpperCase(),
+        depth_level: preferencesData?.depth?.includes('Short')
+          ? 'short'
+          : preferencesData?.depth?.includes('Medium')
+            ? 'medium'
+            : 'deep',
+        experience_with_bible: [
+          experienceMap[(preferencesData?.experience || '').toString().toUpperCase()] ||
+          toBackendEnum(preferencesData?.experience || 'First Time'),
+        ],
+        what_brings_you: Array.isArray(preferencesData?.brings)
+          ? preferencesData.brings.join(', ')
+          : preferencesData?.brings || '',
+        engagement_preference: Array.isArray(preferencesData?.engage)
+          ? preferencesData.engage.map((e: string) => toBackendEnum(e))
+          : preferencesData?.engage
+            ? [toBackendEnum(preferencesData.engage)]
+            : [],
+        explanation_style: (preferencesData?.explain || '').toLowerCase().includes('simple')
+          ? 'simple'
+          : (preferencesData?.explain || '').toLowerCase().includes('deeper')
+            ? 'balanced'
+            : 'balanced',
+        receive_daily: preferencesData?.dailyPref === 'Daily',
+        historical_context: true,
+        ground_text_analysis: true,
+        special_insights: true,
+        daily_life_application: true,
+        cross_reference: true,
+        commentary_insights: true,
+        key_takeaways: true,
+        reflection_prompts: true,
+      };
+
+      const response = await axios.put(
+        `${API_URL}/api/auth/preferences`,
+        { preferences: payloadPreferences },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          withCredentials: false,
+        }
+      );
+
+      console.log(" Preferences PUT Response:", response.data);
+
+      const updatedUser = await getUser(token);
+      setCurrentUser(updatedUser);
+
+      return response.data;
+    } catch (error: any) {
+      console.error(" Preferences PUT Error:", error.response?.data || error.message);
+      throw error;
+    }
+  };
+
+  const saveOrUpdateUserPreferences = async (preferencesData: any) => {
+    if (currentUser?.is_preference_setup_done) {
+      return updateUserPreferences(preferencesData);
+    }
+    return saveUserPreferences(preferencesData);
+  };
+
+
+
+  const loginWithGoogle = async (): Promise<boolean> => {
+  console.log(" [Step 1] Google login started...");
 
   try {
-    // Transform UI-shaped preferences into backend canonical format
-    const toBackendEnum = (value: string) =>
-      (value || '')
-        .trim()
-        .toUpperCase()
-        .replace(/[^A-Z0-9]+/g, '_')
-        .replace(/^_|_$/g, '');
+    console.log("  Opening Google popup...");
+    const result = await signInWithPopup(firebaseAuth, googleProvider);
+    const user = result.user;
+    console.log(" Firebase Google User:", {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+    });
 
-    const experienceMap: Record<string, string> = {
-      'FIRST TIME': 'FIRST_TIME',
-      'OCCASIONAL': 'OCCASIONAL',
-      'REGULAR': 'REGULAR',
-      'THEOLOGICAL': 'THEOLOGICAL',
-    };
+    console.log("[Step 4] Getting Firebase ID token...");
+    const firebaseToken = await user.getIdToken();
+    console.log("Firebase ID Token received:", firebaseToken);
 
-    const payloadPreferences = {
-      language_code: 'en',
-      bible_version: (preferencesData?.translations?.[0]?.split(' - ')[0] || 'KJV').toUpperCase(),
-      depth_level: preferencesData?.depth?.includes('Short')
-        ? 'short'
-        : preferencesData?.depth?.includes('Medium')
-        ? 'medium'
-        : 'deep',
-      experience_with_bible: [
-        experienceMap[(preferencesData?.experience || '').toString().toUpperCase()] ||
-          toBackendEnum(preferencesData?.experience || 'First Time'),
-      ],
-      what_brings_you: Array.isArray(preferencesData?.brings)
-        ? preferencesData.brings.join(', ')
-        : preferencesData?.brings || '',
-      engagement_preference: Array.isArray(preferencesData?.engage)
-        ? preferencesData.engage.map((e: string) => toBackendEnum(e))
-        : preferencesData?.engage
-        ? [toBackendEnum(preferencesData.engage)]
-        : [],
-      explanation_style: (preferencesData?.explain || '').toLowerCase().includes('simple')
-        ? 'simple'
-        : (preferencesData?.explain || '').toLowerCase().includes('deeper')
-        ? 'balanced'
-        : 'balanced',
-      receive_daily: preferencesData?.dailyPref === 'Daily',
-      historical_context: true,
-      ground_text_analysis: true,
-      special_insights: true,
-      daily_life_application: true,
-      cross_reference: true,
-      commentary_insights: true,
-      key_takeaways: true,
-      reflection_prompts: true,
-    };
-
+    console.log(" Sending token to backend API...");
     const response = await axios.post(
-      `${API_URL}/api/auth/preferences`,
-      { preferences: payloadPreferences },
+      `${API_URL}/api/auth/google-login`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        withCredentials: false,
-      }
+        id_token: firebaseToken, 
+        uid: user.uid,
+        email: user.email,
+      },
+      { withCredentials: false }
     );
 
-    console.log(" Preferences API Response:", response.data);
+    console.log(" Backend Google Login Response:", response.data);
 
-    const updatedUser = await getUser(token);
-    setCurrentUser(updatedUser);
+    const responseData = response.data?.data;
+    if (!responseData) {
+      console.error(" Invalid response structure from backend:", response.data);
+      throw new Error("Invalid response structure from Google login API");
+    }
 
-    return response.data;
+    const token = responseData.token;
+    if (!token) {
+      console.error(" Backend returned no token:", response.data);
+      throw new Error("No token returned from Google login API");
+    }
+
+    console.log("Token received from backend:", token);
+
+    const authData: AuthModel = {
+      access_token: token,
+      api_token: token,
+      refreshToken: undefined,
+    };
+    console.log("Saving auth data:", authData);
+    saveAuth(authData);
+
+    let userProfile: UserModel;
+    if (responseData.user) {
+      console.log(" Using user data from backend...");
+      userProfile = responseData.user as UserModel;
+      setCurrentUser(userProfile);
+    } else {
+      console.log(" Fetching user data from /me API...");
+      userProfile = await getUser(token);
+      setCurrentUser(userProfile);
+    }
+
+    console.log(" Google login successful — User Profile:", userProfile);
+    console.log(" Google login process completed successfully ");
+    return true;
   } catch (error: any) {
-    console.error(" Preferences API Error:", error.response?.data || error.message);
+    if (error.code === "auth/popup-closed-by-user") {
+      console.warn(" Popup Closed User closed the Google login popup manually.");
+      return false;
+    }
+
+    console.error("Google Login Error:", {
+      message: error.message,
+      code: error.code,
+      backendError: error.response?.data,
+    });
+
+    saveAuth(undefined);
+    setCurrentUser(undefined);
     throw error;
   }
 };
 
-const updateUserPreferences = async (preferencesData: any) => {
-  let token = auth?.access_token || auth?.api_token || authHelper.getAuth()?.access_token || authHelper.getAuth()?.api_token || "";
 
-  if (!token) {
-    throw new Error("No auth token found. Please login first.");
-  }
 
-  console.log("Updating user preferences:", preferencesData);
 
-  try {
-    const toBackendEnum = (value: string) =>
-      (value || '')
-        .trim()
-        .toUpperCase()
-        .replace(/[^A-Z0-9]+/g, '_')
-        .replace(/^_|_$/g, '');
 
-    const experienceMap: Record<string, string> = {
-      'FIRST TIME': 'NEW_TO_BIBLE',
-      'OCCASIONAL': 'SOME_KNOWLEDGE',
-      'REGULAR': 'REGULAR_STUDY',
-      'THEOLOGICAL': 'ADVANCED_THEOLOGY',
-    };
-
-    const payloadPreferences = {
-      language_code: 'en',
-      bible_version: (preferencesData?.translations?.[0]?.split(' - ')[0] || 'KJV').toUpperCase(),
-      depth_level: preferencesData?.depth?.includes('Short')
-        ? 'short'
-        : preferencesData?.depth?.includes('Medium')
-        ? 'medium'
-        : 'deep',
-      experience_with_bible: [
-        experienceMap[(preferencesData?.experience || '').toString().toUpperCase()] ||
-          toBackendEnum(preferencesData?.experience || 'First Time'),
-      ],
-      what_brings_you: Array.isArray(preferencesData?.brings)
-        ? preferencesData.brings.join(', ')
-        : preferencesData?.brings || '',
-      engagement_preference: Array.isArray(preferencesData?.engage)
-        ? preferencesData.engage.map((e: string) => toBackendEnum(e))
-        : preferencesData?.engage
-        ? [toBackendEnum(preferencesData.engage)]
-        : [],
-      explanation_style: (preferencesData?.explain || '').toLowerCase().includes('simple')
-        ? 'simple'
-        : (preferencesData?.explain || '').toLowerCase().includes('deeper')
-        ? 'balanced'
-        : 'balanced',
-      receive_daily: preferencesData?.dailyPref === 'Daily',
-      historical_context: true,
-      ground_text_analysis: true,
-      special_insights: true,
-      daily_life_application: true,
-      cross_reference: true,
-      commentary_insights: true,
-      key_takeaways: true,
-      reflection_prompts: true,
-    };
-
-    const response = await axios.put(
-      `${API_URL}/api/auth/preferences`,
-      { preferences: payloadPreferences },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        withCredentials: false,
-      }
-    );
-
-    console.log(" Preferences PUT Response:", response.data);
-
-    const updatedUser = await getUser(token);
-    setCurrentUser(updatedUser);
-
-    return response.data;
-  } catch (error: any) {
-    console.error(" Preferences PUT Error:", error.response?.data || error.message);
-    throw error;
-  }
-};
-
-const saveOrUpdateUserPreferences = async (preferencesData: any) => {
-  if (currentUser?.is_preference_setup_done) {
-    return updateUserPreferences(preferencesData);
-  }
-  return saveUserPreferences(preferencesData);
-};
 
 
   const logout = () => {
@@ -425,6 +521,7 @@ const saveOrUpdateUserPreferences = async (preferencesData: any) => {
         saveUserPreferences,
         updateUserPreferences,
         saveOrUpdateUserPreferences,
+        loginWithGoogle,
         logout,
         verify
       }}

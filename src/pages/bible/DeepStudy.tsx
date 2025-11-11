@@ -15,9 +15,21 @@ interface DeepStudyProps {
   isDeepStudyActive?: boolean;
 }
 
-const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive }: DeepStudyProps) => {
+const DeepStudy = ({
+  showDeepStudyButton,
+  onDeepStudyToggle,
+  isDeepStudyActive,
+}: DeepStudyProps) => {
   const [activeTab, setActiveTab] = useState('original');
-  const { selectedBookId, selectedChapter, version, deepStudyData, fetchDeepStudy, selectedBookName, loading } = useBible();
+  const {
+    selectedBookId,
+    selectedChapter,
+    version,
+    deepStudyData,
+    fetchDeepStudy,
+    selectedBookName,
+    loading,
+  } = useBible();
 
   useEffect(() => {
     if (selectedBookId && selectedChapter && version) {
@@ -42,20 +54,18 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive }
   ];
 
   const getTabContent = (tabId: string) => {
-    if (loading) return "Loading...";
-    if (!deepStudyData) return "No data available.";
-    const ctx = deepStudyData?.[tabId];
-    if (!ctx) return "Content not available.";
-    const cleanText = (ctx.content || "")
-      .replace(/\*/g, "")
-    if (tabId === "original") return cleanText || "Original text not available.";
-    return cleanText || "Content not available.";
+    if (loading) return 'Loading...';
+    if (!deepStudyData) return 'No data available.';
+    const currentKey = `${selectedBookId}-${selectedChapter}`;
+    const ctx = deepStudyData?.[currentKey]?.[tabId];
+    if (!ctx) return 'Content not available.';
+    return (ctx.content || '').replace(/\*/g, '') || 'Content not available.';
   };
-
 
   return (
     <div className="min-h-screen text-primary overflow-hidden">
       <div className="max-w-4xl mx-auto overflow-hidden">
+        {/* Title Section */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-2">
             <div className="flex-1 min-w-0">
@@ -69,10 +79,11 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive }
             {showDeepStudyButton && onDeepStudyToggle && (
               <button
                 onClick={onDeepStudyToggle}
-                className={`flex items-center justify-center gap-2 px-4 py-2 w-full lg:w-auto rounded-lg font-medium transition-colors text-sm ${isDeepStudyActive
+                className={`flex items-center justify-center gap-2 px-4 py-2 w-full lg:w-auto rounded-lg font-medium transition-colors text-sm ${
+                  isDeepStudyActive
                     ? 'bg-primary text-white hover:bg-primary/90'
                     : 'bg-sand text-primary hover:bg-sand/80'
-                  }`}
+                }`}
               >
                 <KeenIcon icon="book" className="w-4 h-4" />
                 {isDeepStudyActive ? 'Hide Deep Study' : 'Deep Study'}
@@ -81,16 +92,18 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive }
           </div>
         </div>
 
+        {/* Tab Buttons - Outside Card */}
         <div className="mb-4">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`grid grid-flow-col auto-cols-max items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
+                className={`grid grid-flow-col auto-cols-max items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap ${
+                  activeTab === tab.id
                     ? 'bg-primary text-white shadow-sm'
                     : 'bg-gray-100 dark:bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
-                  }`}
+                }`}
               >
                 <KeenIcon icon={tab.icon} className="text-base" />
                 <span>{tab.title}</span>
@@ -99,34 +112,67 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive }
           </div>
         </div>
 
+        {/* Main Content Card */}
         <div className="bg-white/40 dark:bg-transparent backdrop-blur-sm rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
           <div className="p-4 sm:p-6 w-full overflow-hidden">
             {tabs.map((tab) => (
-              <div key={tab.id} className={`${activeTab === tab.id ? 'block' : 'hidden'}`}>
+              <div
+                key={tab.id}
+                className={`${activeTab === tab.id ? 'block' : 'hidden'}`}
+              >
+                {/* Main Content */}
                 <div className="mb-4 sm:mb-6">
                   <p className="font-merriweather text-base sm:text-lg leading-relaxed text-primary break-words whitespace-pre-line">
                     {getTabContent(tab.id)}
                   </p>
                 </div>
 
-                {deepStudyData && (
-                  <div className="bg-white/60 dark:bg-gray-200 rounded-lg p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
-                    <div className="flex items-center gap-3 mb-2">
-                      <KeenIcon icon="calendar" className="text-gray-500 text-sm dark:text-gray-700" />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-700">
-                        {(() => {
-                          const ctx = deepStudyData?.[tab.id];
-                          const date = ctx?.generated_at ? new Date(ctx.generated_at).toLocaleDateString() : '';
-                          const chapterLabel = ctx?.chapter ?? selectedChapter;
-                          return `${date} - ${selectedBookName || ''} ${chapterLabel}`.trim();
-                        })()}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 font-merriweather dark:text-gray-800">
-                      {deepStudyData?.[tab.id]?.emotion_tags?.join(', ') || 'No emotion tags'}
-                    </p>
+                {/* Nested Card (Notes & Date Section) */}
+                <div className="bg-white/60 dark:bg-gray-200 rounded-lg p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
+                  <div className="flex items-center gap-3 mb-2">
+                    <KeenIcon
+                      icon="calendar"
+                      className="text-gray-500 text-sm dark:text-gray-700"
+                    />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-700">
+                      {(() => {
+                        const currentKey = `${selectedBookId}-${selectedChapter}`;
+                        const ctx = deepStudyData?.[currentKey]?.[tab.id];
+                        const date = ctx?.generated_at
+                          ? new Date(ctx.generated_at).toLocaleDateString()
+                          : '';
+                        const chapterLabel = ctx?.chapter ?? selectedChapter;
+                        return `${date} - ${
+                          selectedBookName || ''
+                        } ${chapterLabel}`.trim();
+                      })()}
+                    </span>
                   </div>
-                )}
+
+                  {/* User Notes Section */}
+                  {deepStudyData?.[`${selectedBookId}-${selectedChapter}`]?.[tab.id]
+                    ?.notes?.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {deepStudyData[`${selectedBookId}-${selectedChapter}`][
+                        tab.id
+                      ].notes.map((note: any, idx: number) => (
+                        <div
+                          key={note.note_id || idx}
+                          className="border border-gray-200 bg-white/80 dark:bg-gray-100 rounded-lg p-2 sm:p-3"
+                        >
+                          <p className="text-sm text-gray-800 font-merriweather whitespace-pre-wrap">
+                            {note.content}
+                          </p>
+                          {note.emotion_tags?.length > 0 && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              {note.emotion_tags.join(', ')}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -137,14 +183,3 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive }
 };
 
 export { DeepStudy };
-
-
-
-
-
-
-
-
-
-
-

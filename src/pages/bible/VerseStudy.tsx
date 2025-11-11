@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { KeenIcon } from '@/components';
@@ -12,23 +13,62 @@ interface TabItem {
 const VerseStudy = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('original');
+  const [activeTab, setActiveTab] = useState('explanations');
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportIssue, setReportIssue] = useState('');
   const [reportCategory, setReportCategory] = useState('');
+  const [note, setNote] = useState("");
+  const [savedNote, setSavedNote] = useState("");
 
-  const {
-    books,
-    selectedVerse,
-    loading,
-    fetchSingleVerse,
-    fetchDeepStudyForVerse,
-    deepStudyData,
-  } = useBible();
 
-  const book = searchParams.get('bible') || 'psalm';
-  const chapter = searchParams.get('chapter') || '23';
+  const { books, loading, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, } = useBible();
+
+  const book = searchParams.get('bible') || 'genesis';
+  const chapter = searchParams.get('chapter') || '1';
   const verse = searchParams.get('verse') || '1';
+
+  const verseKey = `${book}-${chapter}-${verse}`;
+
+  const [isRead, setIsRead] = useState(() => {
+    const saved = localStorage.getItem(`verse-read-${verseKey}`);
+    return saved === 'true';
+  });
+
+  const toggleReadStatus = () => {
+    const newStatus = !isRead;
+    setIsRead(newStatus);
+    localStorage.setItem(`verse-read-${verseKey}`, newStatus.toString());
+  };
+
+  useEffect(() => {
+    const loadVerse = async () => {
+      let bookId = book;
+      if (books.length > 0 && book.length !== 36) {
+        const found = books.find(
+          (b) =>
+            (b.name || '').toLowerCase().replace(/\s+/g, '-') ===
+            book.toLowerCase()
+        );
+        if (found) bookId = found.book_id;
+      }
+
+      if (bookId) {
+        await Promise.all([
+          fetchSingleVerse(bookId, Number(chapter), Number(verse), 'KJV'),
+          fetchDeepStudyForVerse(bookId, Number(chapter), Number(verse), 'KJV'),
+        ]);
+      }
+    };
+
+    const noteKey = `note-${book}-${chapter}-${verse}`;
+    const saved = localStorage.getItem(noteKey);
+    if (saved) {
+      setSavedNote(saved);
+    } else {
+      setSavedNote("");
+    }
+    loadVerse();
+  }, [book, chapter, verse, books]);
 
   const tabs: TabItem[] = [
     { id: 'original', title: 'Original', icon: 'document' },
@@ -46,134 +86,285 @@ const VerseStudy = () => {
     { id: 'reflection', title: 'Reflection Prompts', icon: 'question' },
   ];
 
-  useEffect(() => {
-  const loadVerse = async () => {
-    let bookId = book;
-
-    // Try to get from already loaded books list
-    if (books.length > 0 && book.length !== 36) {
-      const found = books.find(
-        (b) =>
-          (b.name || "").toLowerCase().replace(/\s+/g, "-") ===
-          book.toLowerCase()
-      );
-      if (found) bookId = found.book_id;
-    }
-
-    // ✅ Don't wait for books if we already have a valid bookId in URL
-    if (bookId) {
-      // run both calls in parallel (faster)
-      await Promise.all([
-        fetchSingleVerse(bookId, Number(chapter), Number(verse), "KJV"),
-        fetchDeepStudyForVerse(bookId, Number(chapter), Number(verse), "KJV"),
-      ]);
-    }
-  };
-
-  // run immediately, not waiting for books to finish
-  loadVerse();
-}, [book, chapter, verse]);
-
-
-
-
   const getTabContent = (tabId: string) => {
-    if (loading) return "Loading...";
-    if (!deepStudyData) return "No data available.";
-    const ctx = deepStudyData?.[tabId];
-    if (!ctx) return "Content not available.";
-    const cleanText = (ctx.content || "").replace(/\*/g, "");
-    if (tabId === "original") return cleanText || "Original text not available.";
-    return cleanText || "Content not available.";
-  };
+  if (loading) return 'Loading...';
+  if (!deepStudyData) return 'No data available.';
+
+  const verseKey = `${book}-${chapter}`;
+  const deepData = deepStudyData?.[verseKey] || deepStudyData;
+
+  const ctx = deepData?.[tabId];
+  if (!ctx) return 'Content not available.';
+  const cleanText = (ctx.content || '').replace(/\*/g, '');
+  return cleanText || 'Content not available.';
+};
+
 
   const currentDate = new Date().toLocaleDateString();
 
+  const handleReportSubmit = () => {
+    if (!reportIssue.trim() || !reportCategory) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    console.log('Report submitted:', {
+      verse: `${book} ${chapter}:${verse}`,
+      issue: reportIssue,
+      category: reportCategory,
+      timestamp: new Date().toISOString(),
+    });
+
+    setReportIssue('');
+    setReportCategory('');
+    setShowReportModal(false);
+    alert('Report submitted successfully!');
+  };
+
   return (
-    <div className="min-h-screen text-primary overflow-hidden">
-      <div className="max-w-4xl mx-auto overflow-hidden">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-2">
-            <div className="flex-1 min-w-0">
-              <h1 className="font-merriweather text-2xl sm:text-2xl text-primary break-words">
-                {book.charAt(0).toUpperCase() + book.slice(1)} {chapter}:{verse}
-              </h1>
-              <p className="font-merriweather text-sm text-gray-600 mt-1 break-words">
-                (KJV)
-              </p>
-            </div>
+    <div className="max-w-4xl mx-auto">
+
+      <div className="mb-8">
+
+        <div className="mb-4">
+          <button
+            onClick={() => navigate('/bible')}
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
+          >
+            <KeenIcon icon="black-left-line" className="w-5 h-5" />
+            <span className="text-sm font-medium">Back to Bible</span>
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="font-merriweather text-4xl text-primary">
+            {book.charAt(0).toUpperCase() + book.slice(1)} {chapter}:{verse}
+          </h1>
+          <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate('/bible')}
-              className="flex items-center justify-center gap-2 px-4 py-2 w-full lg:w-auto rounded-lg font-medium transition-colors text-sm bg-sand text-primary hover:bg-sand/80"
+              onClick={toggleReadStatus}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-sm ${isRead
+                ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                }`}
             >
-              <KeenIcon icon="black-left-line" className="w-4 h-4" />
-              Back
+              <KeenIcon icon={isRead ? 'check' : 'book'} className="w-4 h-4" />
+              {isRead ? 'Mark as Unread' : 'Mark as Read'}
+            </button>
+
+
+            <button
+              className="p-2 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors"
+              onClick={() => setShowReportModal(true)}
+              title="Options"
+            >
+              <KeenIcon icon="dots-vertical" className="w-5 h-5" />
             </button>
           </div>
         </div>
+        <p className="font-merriweather text-xl text-gray-600 dark:text-gray-400">
+          ({book.charAt(0).toUpperCase() + book.slice(1)} {chapter}:{verse} KJV)
+        </p>
+      </div>
 
-        {/* Tabs */}
-        <div className="mb-4">
-          <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="bg-white/40 dark:bg-gray-200 backdrop-blur-sm rounded-xl shadow-sm border border-gray-200 dark:border-gray-400">
+
+        <div className="p-6 pb-0">
+          <div className="flex flex-wrap gap-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`grid grid-flow-col auto-cols-max items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'bg-gray-100 dark:bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${activeTab === tab.id
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-gray-100 dark:bg-gray-300 text-gray-600 dark:text-gray-800 hover:bg-gray-200 dark:hover:bg-gray-400 hover:text-gray-800'
+                  }`}
               >
                 <KeenIcon icon={tab.icon} className="text-base" />
-                <span>{tab.title}</span>
+                {tab.title}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Tab Content (same as DeepStudy) */}
-        <div className="bg-white/40 dark:bg-transparent backdrop-blur-sm rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full">
-          <div className="p-4 sm:p-6 w-full overflow-hidden">
-            {tabs.map((tab) => (
-              <div key={tab.id} className={`${activeTab === tab.id ? 'block' : 'hidden'}`}>
-                <div className="mb-4 sm:mb-6">
-                  <p className="font-merriweather text-base sm:text-lg leading-relaxed text-primary break-words whitespace-pre-line">
-                    {getTabContent(tab.id)}
-                  </p>
-                </div>
-
-                {deepStudyData && (
-                  <div className="bg-white/60 dark:bg-gray-200 rounded-lg p-2 sm:p-3 lg:p-4 overflow-hidden w-full">
-                    <div className="flex items-center gap-3 mb-2">
-                      <KeenIcon icon="calendar" className="text-gray-500 text-sm dark:text-gray-700" />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-700">
-                        {(() => {
-                          const ctx = deepStudyData?.[tab.id];
-                          const date = ctx?.generated_at
-                            ? new Date(ctx.generated_at).toLocaleDateString()
-                            : currentDate;
-                          return `${date} - ${book.charAt(0).toUpperCase() + book.slice(1)} ${chapter}:${verse}`;
-                        })()}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 font-merriweather dark:text-gray-800">
-                      {deepStudyData?.[tab.id]?.emotion_tags?.join(', ') || 'No emotion tags'}
-                    </p>
-                  </div>
-                )}
+        <div className="p-6">
+          {tabs.map((tab) => (
+            <div
+              key={tab.id}
+              className={`${activeTab === tab.id ? 'block' : 'hidden'}`}
+            >
+              <div className="mb-6">
+                <p className="font-merriweather text-lg leading-relaxed text-primary whitespace-pre-line">
+                  {getTabContent(tab.id)}
+                </p>
               </div>
-            ))}
-          </div>
+
+              {/* Nested Card */}
+              {tab.id === "original" && (
+                <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
+                  <h3 className="text-lg font-semibold text-primary mb-3">Your Notes</h3>
+
+                  {deepStudyData?.original?.notes && deepStudyData.original.notes.length > 0 ? (
+                    <div className="space-y-3">
+                      {deepStudyData.original.notes.map((note: any, index: number) => (
+                        <div
+                          key={note.note_id || index}
+                          className="p-3 bg-white/80 dark:bg-gray-100 rounded-lg border border-gray-200 dark:border-gray-400 shadow-sm"
+                        >
+                          <p className="text-gray-700 dark:text-gray-800 mb-2 whitespace-pre-line font-merriweather">
+                            {note.content}
+                          </p>
+                          {note.emotion_tags?.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {note.emotion_tags.map((tag: string, i: number) => (
+                                <span
+                                  key={i}
+                                  className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                                >
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <p className="text-xs text-gray-500 mt-2">
+                            {new Date(note.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 italic">No saved notes yet.</p>
+                  )}
+
+
+
+                  {/* 
+        {deepStudyData?.original?.notes &&
+ deepStudyData.original.notes.filter(
+   (n: any) =>
+     n.chapter === Number(chapter) &&
+     n.book_id === book &&
+     (n.verse === 0 || n.verse === Number(verse))
+ ).length > 0 ? (
+  <div className="space-y-3">
+    {deepStudyData.original.notes
+      .filter(
+        (n: any) =>
+          n.chapter === Number(chapter) &&
+          n.book_id === book &&
+          (n.verse === 0 || n.verse === Number(verse))
+      )
+      .map((note: any, index: number) => (
+        <div
+          key={note.note_id || index}
+          className="p-3 bg-white/80 dark:bg-gray-100 rounded-lg border border-gray-200 dark:border-gray-400 shadow-sm"
+        >
+          <p className="text-gray-700 dark:text-gray-800 mb-2 whitespace-pre-line font-merriweather">
+            {note.content}
+          </p>
+          {note.emotion_tags?.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {note.emotion_tags.map((tag: string, i: number) => (
+                <span
+                  key={i}
+                  className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-gray-500 mt-2">
+            {new Date(note.created_at).toLocaleDateString()}
+          </p>
+        </div>
+      ))}
+  </div>
+) : (
+  <p className="text-gray-500 italic">No saved notes yet.</p>
+)} */}
+
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white/40 dark:bg-gray-200 backdrop-blur-sm rounded-xl shadow-xl max-w-md w-full mx-4 border border-gray-200 dark:border-gray-400">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-400">
+              <h3 className="text-lg font-semibold text-primary">REPORT</h3>
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="text-gray-400 hover:text-primary transition-colors"
+              >
+                <KeenIcon icon="cross" className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-3 flex items-center gap-3 border border-primary/20">
+                <KeenIcon icon="document" className="text-primary w-5 h-5" />
+                <span className="text-primary font-medium">
+                  {book.charAt(0).toUpperCase() + book.slice(1)} {chapter}:{verse}
+                </span>
+              </div>
+
+              <div className="bg-gray-50 dark:bg-gray-300 rounded-lg p-3 border border-gray-200 dark:border-gray-400">
+                <p className="text-sm text-primary">
+                  {deepStudyData?.[activeTab]?.emotion_tags?.join(', ') ||
+                    'I feel like I’m learning to rest more instead of stressing...'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-primary mb-2">
+                  Describe the issue and share your thoughts
+                </label>
+                <textarea
+                  value={reportIssue}
+                  onChange={(e) => setReportIssue(e.target.value)}
+                  placeholder="Describe the issue and share your thoughts"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white dark:bg-gray-100 text-primary placeholder-gray-400"
+                  rows={4}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-primary mb-2">
+                  Category
+                </label>
+                <div className="flex gap-2">
+                  {['Content', 'Audio', 'Other'].map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setReportCategory(category)}
+                      className={`px-3 py-1 text-sm rounded-full transition-colors ${reportCategory === category
+                        ? 'bg-primary text-white'
+                        : 'bg-gray-200 dark:bg-gray-300 text-primary hover:bg-primary/10 dark:hover:bg-primary/20'
+                        }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={handleReportSubmit}
+                className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export { VerseStudy };
-
-
-
-

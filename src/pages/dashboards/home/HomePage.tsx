@@ -4,11 +4,15 @@ import { LucideVolume2, LucideBook, LightbulbIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
+import { useBible } from '@/providers/BibleProvider';
+
 
 
 const HomePage = () => {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const navigate = useNavigate();
+  const { selectBook, selectChapter, fetchSingleVerse, books } = useBible();
+
 
   const { dashboardData, loading } = useDashboard();
   if (loading) {
@@ -40,9 +44,32 @@ const HomePage = () => {
     console.log('Resume reading clicked');
   };
 
-  const handleStartReflection = (title: string) => {
-    console.log(`Start reflection: ${title}`);
-  };
+  // const handleStartReflection = (title: string) => {
+  //   console.log(`Start reflection: ${title}`);
+  // };
+
+  const handleStartReflection = async (reference: string) => {
+  if (!reference) return;
+  const match = reference.match(/([A-Za-z ]+)\s+(\d+):(\d+)/);
+  if (!match) return;
+  
+  const [, bookName, chapter, verse] = match;
+  const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
+  const book = books?.find((b: any) => 
+    b.name.toLowerCase() === bookName.trim().toLowerCase()
+  );
+
+  if (book) {
+    await selectBook(book.book_id, book.name);
+    await selectChapter(Number(chapter));
+    await fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
+  }
+
+  navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+};
+
+
+
 
   const handleReadBible = () => {
     console.log('Read Bible clicked');
@@ -253,92 +280,6 @@ const HomePage = () => {
         </div>
 
 
-
-        {/* Suggested Reflections Section */}
-        {/* <div className="mb-6">
-          <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
-            <h2 className="font-merriweather text-xl text-primary mb-4">
-              Suggested Reflections
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              <div className="bg-gray-50 dark:bg-gray-200 rounded-xl p-3 sm:p-4 border border-transparent dark:border-gray-400">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-primary text-sm sm:text-base mb-1 truncate">
-                      Understanding Grace
-                    </h3>
-                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                      A 3-min read on God's unmerited favor
-                    </p>
-                  </div>
-                  <div className="ml-2 sm:ml-3 flex-shrink-0">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-                      <LightbulbIcon className="text-yellow-800 text-xs sm:text-sm" />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => handleStartReflection('Understanding Grace')}
-                    className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    Start
-                  </button>
-                </div>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-100 rounded-xl p-3 sm:p-4 border border-transparent dark:border-gray-400">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-primary text-sm sm:text-base mb-1 truncate">
-                      Faith in Difficult Times
-                    </h3>
-                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                      Finding hope during life's trials
-                    </p>
-                  </div>
-                  <div className="ml-2 sm:ml-3 flex-shrink-0">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-                      <LightbulbIcon className="text-yellow-800 text-xs sm:text-sm" />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => handleStartReflection('Faith in Difficult Times')}
-                    className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    Start
-                  </button>
-                </div>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-200 rounded-xl p-3 sm:p-4 border border-transparent dark:border-gray-400">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-primary text-sm sm:text-base mb-1 truncate">
-                      Faith in Difficult Times
-                    </h3>
-                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                      Finding hope during life's trials
-                    </p>
-                  </div>
-                  <div className="ml-2 sm:ml-3 flex-shrink-0">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-                      <LightbulbIcon className="text-yellow-800 text-xs sm:text-sm" />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => handleStartReflection('Faith in Difficult Times')}
-                    className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    Start
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> */}
 
         {/* Suggested Reflections Section (Dynamic from API) */}
         <div className="mb-6">

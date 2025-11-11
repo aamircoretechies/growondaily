@@ -11,6 +11,7 @@ import { Alert } from '@/components';
 import axios from "axios";
 
 
+
 const loginSchema = Yup.object().shape({
   email: Yup.string()
     .email('Wrong email format')
@@ -32,7 +33,7 @@ const initialValues = {
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
-  const { login } = useAuthContext();
+  const { login,loginWithGoogle } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/home';
@@ -70,25 +71,25 @@ const Login = () => {
 
 
     onSubmit: async (values, { setStatus, setSubmitting }) => {
-  setLoading(true);
-  try {
-    if (!login) throw new Error('JWTProvider is required for login.');
+      setLoading(true);
+      try {
+        if (!login) throw new Error('JWTProvider is required for login.');
 
-    await login(values.email, values.password); 
+        await login(values.email, values.password);
 
-    if (values.remember) {
-      localStorage.setItem("email", values.email);
-    } else {
-      localStorage.removeItem("email");
+        if (values.remember) {
+          localStorage.setItem("email", values.email);
+        } else {
+          localStorage.removeItem("email");
+        }
+        navigate(from, { replace: true });
+      } catch (error: any) {
+        console.error("Login error", error);
+        setStatus(error.message || "Invalid email or password");
+        setSubmitting(false);
+      }
+      setLoading(false);
     }
-    navigate(from, { replace: true });
-  } catch (error: any) {
-    console.error("Login error", error);
-    setStatus(error.message || "Invalid email or password");
-    setSubmitting(false);
-  }
-  setLoading(false);
-}
 
 
 
@@ -120,13 +121,40 @@ const Login = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-2.5">
-          <a href="#" className="btn btn-light btn-sm justify-center">
+          {/* <a href="#" className="btn btn-light btn-sm justify-center">
             <img
               src={toAbsoluteUrl('/media/brand-logos/google.svg')}
               className="size-3.5 shrink-0"
             />
             Continue with Google
-          </a>
+          </a> */}
+
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                setLoading(true);
+                if (!loginWithGoogle) throw new Error("Google login not found");
+                const success = await loginWithGoogle();
+                if (success) {
+                  navigate(from, { replace: true });
+                }
+                // If success is false, user closed the popup - do nothing
+              } catch (error: any) {
+                console.error(error);
+                alert(error.message || "Google Sign-In failed");
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="btn btn-light btn-sm justify-center"
+          >
+            <img
+              src={toAbsoluteUrl('/media/brand-logos/google.svg')}
+              className="size-3.5 shrink-0"
+            />
+            Continue with Google
+          </button>
 
         </div>
 
@@ -136,7 +164,7 @@ const Login = () => {
           <span className="border-t border-gray-200 w-full"></span>
         </div>
 
-      
+
 
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
 

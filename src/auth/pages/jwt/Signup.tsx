@@ -36,13 +36,14 @@ const signupSchema = Yup.object().shape({
 
 const Signup = () => {
   const [loading, setLoading] = useState(false);
-  const { register } = useAuthContext();
+  const { register, loginWithGoogle } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || '/home';
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { currentLayout } = useLayout();
+  
 
   // const formik = useFormik({
   //   initialValues,
@@ -72,10 +73,10 @@ const Signup = () => {
       setLoading(true);
       try {
         if (!register) throw new Error('JWTProvider is required for this form.');
-       const response= await register(values.email, values.password, values.changepassword);
-        if(response?.success){
-        navigate('/auth/login', { replace: true });
-      }
+        const response = await register(values.email, values.password, values.changepassword);
+        if (response?.success) {
+          navigate('/auth/login', { replace: true });
+        }
       } catch (error: any) {
         console.error(error);
         setStatus(error.message || 'The sign up details are incorrect');
@@ -118,13 +119,38 @@ const Signup = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-2.5">
-          <a href="#" className="btn btn-light btn-sm justify-center">
+          {/* <a href="#" className="btn btn-light btn-sm justify-center">
             <img
               src={toAbsoluteUrl('/media/brand-logos/google.svg')}
               className="size-3.5 shrink-0"
             />
             Use Google
-          </a>
+          </a> */}
+
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                setLoading(true);
+                if (!loginWithGoogle) throw new Error("Google login not found");
+                const success = await loginWithGoogle();
+                if (success) {
+                  navigate(from, { replace: true });
+                }
+                // If success is false, user closed the popup - do nothing
+              } catch (error: any) {
+                console.error(error);
+                alert(error.message || "Google Sign-Up failed");
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="btn btn-light btn-sm justify-center"
+          >
+            <img src={toAbsoluteUrl('/media/brand-logos/google.svg')} className="size-3.5 shrink-0" />
+            Continue with Google
+          </button>
+
         </div>
 
         <div className="flex items-center gap-2">

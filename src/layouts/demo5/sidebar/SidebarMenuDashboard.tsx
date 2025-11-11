@@ -38,7 +38,7 @@ interface IDashboardMenuItem {
 interface IDashboardMenuItems extends Array<IDashboardMenuItem> { }
 
 const SidebarMenuDashboard = () => {
-  const { books, chapters, verses, loading, error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter,selectedVerse, fetchSingleVerse, version } = useBible();
+  const { books, chapters, verses, loading, error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter, selectedVerse, fetchSingleVerse, version } = useBible();
   const { isRTL } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [chapterSearchTerm, setChapterSearchTerm] = useState('');
@@ -134,9 +134,19 @@ const SidebarMenuDashboard = () => {
     }
   ];
 
+  // const handleBookClick = async (bookId: string, bookTitle: string) => {
+  //   console.log("User clicked Book:", bookTitle, "=> ID:", bookId);
+  //   await selectBook(bookId, bookTitle);
+  // };
+
+
   const handleBookClick = async (bookId: string, bookTitle: string) => {
     console.log("User clicked Book:", bookTitle, "=> ID:", bookId);
-    await selectBook(bookId, bookTitle);
+
+    await selectBook(bookId, bookTitle,);
+
+    const bookSlug = bookTitle.toLowerCase().replace(/\s+/g, '-');
+    navigate(`/bible?bible=${bookSlug}&chapter=1&verses`);
   };
 
 
@@ -144,7 +154,7 @@ const SidebarMenuDashboard = () => {
     console.log("Fetching verses for chapter:", chapterNumber);
     selectChapter(chapterNumber);
   };
-  
+
 
 
   return (
@@ -262,7 +272,7 @@ const SidebarMenuDashboard = () => {
             </div>
 
             {/* Filtered Results */}
-          
+
             <div className="max-h-60 overflow-y-auto">
               {Array.isArray(chapters) && chapters.length > 0 ? (
                 chapters.map((c, index) => (
