@@ -49,6 +49,17 @@ interface BibleContextType {
     content: string,
     emotion_tags: string[]
   ) => Promise<void>;
+
+  toggleVerseBookmark: (
+    book: string,
+    chapter: number,
+    verse: number,
+    version: string
+  ) => Promise<void>;
+
+  showDeepStudy: boolean;
+  setShowDeepStudy: React.Dispatch<React.SetStateAction<boolean>>;
+
 }
 
 const BibleContext = createContext<BibleContextType>({
@@ -73,6 +84,12 @@ const BibleContext = createContext<BibleContextType>({
   fetchDeepStudy: async () => { },
   fetchDeepStudyForVerse: async () => { },
   saveNote: async () => { },
+
+  toggleVerseBookmark: async () => { },
+
+  showDeepStudy: false,
+  setShowDeepStudy: () => { },
+
 });
 
 export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
@@ -89,6 +106,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   // const [deepStudyData, setDeepStudyData] = useState<any | null>(null);
   // const [deepStudyData, setDeepStudyData] = useState<Record<string, any>>({});
   const [deepStudyData, setDeepStudyData] = useState<Record<string, any> | null>(null);
+
+  const [showDeepStudy, setShowDeepStudy] = useState(false);
+
 
 
 
@@ -221,25 +241,83 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const fetchDeepStudy = async (bookId: string, chapter: number, version: string) => {
+  // const fetchDeepStudy = async (bookId: string, chapter: number, version: string) => {
+  //   try {
+  //     setLoading(true);
+
+  //     const contexts = ["original", "explanations", "historical", "cultural", "theological", "practical", "commentary", "ground_text", "special", "daily_life", "cross_reference", "key_takeaways", "reflection",];
+
+  //     const requests = contexts.map(ctx =>
+  //       axios
+  //         .get(`https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${version}?deep-study-context=${ctx}`)
+  //         .then(res => ({ [ctx]: res.data?.data || null }))
+  //         .catch(() => ({ [ctx]: null }))
+  //     );
+
+  //     const results = await Promise.all(requests);
+  //     const allResponses = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+  //     setDeepStudyData((prev: any) => ({
+  //       ...prev,
+  //       [`${bookId}-${chapter}`]: allResponses,
+  //     }));
+
+  //     return allResponses;
+  //   } catch (error) {
+  //     console.error("Deep Study Fetch Error:", error);
+  //     setDeepStudyData(null);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const fetchDeepStudy = async (
+    bookId: string,
+    chapter: number,
+    version: string,
+    verse?: string | number // optional verse param
+  ) => {
     try {
       setLoading(true);
 
-      const contexts = ["original", "explanations", "historical", "cultural", "theological", "practical", "commentary", "ground_text", "special", "daily_life", "cross_reference", "key_takeaways", "reflection",];
+      const contexts = [
+        "original",
+        "explanations",
+        "historical",
+        "cultural",
+        "theological",
+        "practical",
+        "commentary",
+        "ground_text",
+        "special",
+        "daily_life",
+        "cross_reference",
+        "key_takeaways",
+        "reflection",
+      ];
 
-      const requests = contexts.map(ctx =>
+      // Check if verse is passed
+      const baseUrl = verse
+        ? `https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}`
+        : `https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${version}`;
+
+      const requests = contexts.map((ctx) =>
         axios
-          .get(`https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${version}?deep-study-context=${ctx}`)
-          .then(res => ({ [ctx]: res.data?.data || null }))
+          .get(`${baseUrl}?deep-study-context=${ctx}`)
+          .then((res) => ({ [ctx]: res.data?.data || null }))
           .catch(() => ({ [ctx]: null }))
       );
 
       const results = await Promise.all(requests);
       const allResponses = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
 
+      const key = verse
+        ? `${bookId}-${chapter}-${verse}`
+        : `${bookId}-${chapter}`;
+
       setDeepStudyData((prev: any) => ({
         ...prev,
-        [`${bookId}-${chapter}`]: allResponses,
+        [key]: allResponses,
       }));
 
       return allResponses;
@@ -250,6 +328,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     }
   };
+
 
   const fetchDeepStudyForVerse = async (
     bookId: string,
@@ -296,53 +375,55 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     emotion_tags: string[] = []
   ) => {
     try {
-      setLoading(true);
       let res;
-      if (verse === 0) {
 
+      // API call (chapter vs verse note)
+      if (verse === 0) {
         const payload = { book_id, chapter, content, emotion_tags };
         res = await axios.post("https://api.growondaily.com/api/bible/chapter-notes", payload);
       } else {
-
         const payload = { book_id, chapter, verse, content, emotion_tags };
         res = await axios.post("https://api.growondaily.com/api/bible/notes", payload);
       }
 
+      // Save local backup
       const noteKey = verse === 0 ? `${book_id}-${chapter}-all` : `${book_id}-${chapter}-${verse}`;
       const localNotes = JSON.parse(localStorage.getItem("localNotes") || "{}");
       localNotes[noteKey] = { content, emotion_tags };
       localStorage.setItem("localNotes", JSON.stringify(localNotes));
 
+      // Instantly update UI (without waiting for refetch)
       setDeepStudyData((prev: any) => {
-        const key = `${book_id}-${chapter}`;
-        const prevChapter = prev?.[key] || {};
-        const updated = { ...prev };
+        const safePrev = prev || {}; // null guard
+        const key = verse === 0 ? `${book_id}-${chapter}` : `${book_id}-${chapter}-${verse}`;
+        const prevData = safePrev[key] || {};
+        const updated = { ...safePrev };
 
-        const ctx = prevChapter["original"] || {};
+        const ctx = prevData["original"] || {};
         const newNote = {
           content,
           emotion_tags,
           note_id: res.data?.data?.note?.note_id || Date.now().toString(),
-          created_at: res.data?.data?.note?.created_at || new Date().toISOString()
+          created_at: res.data?.data?.note?.created_at || new Date().toISOString(),
         };
 
-        const updatedChapter = {
-          ...prevChapter,
+        const updatedData = {
+          ...prevData,
           original: {
             ...ctx,
             notes: ctx.notes ? [...ctx.notes, newNote] : [newNote],
           },
         };
 
-        updated[key] = updatedChapter;
+        updated[key] = updatedData;
         return updated;
       });
 
-
+      // Background refresh (non-blocking)
       if (verse === 0) {
-        await fetchDeepStudy(book_id, chapter, version);
+        fetchDeepStudy(book_id, chapter, version);
       } else {
-        await fetchDeepStudyForVerse(book_id, chapter, verse, version);
+        fetchDeepStudyForVerse(book_id, chapter, verse, version);
       }
 
       console.log("Note saved successfully:", res.data);
@@ -352,9 +433,31 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       setError("Failed to save note");
       throw err;
     } finally {
+      //  Don’t trigger loading spinner here (keeps UI instant)
       setLoading(false);
     }
   };
+
+
+
+  const toggleVerseBookmark = async (book: string, chapter: number, verse: number, version: string) => {
+    try {
+      const res = await axios.post("https://api.growondaily.com/api/bible/toggle-verse-bookmark",
+        { book, chapter, verse, version }
+      );
+
+      const data = res.data;
+      if (data?.status === 1) {
+        console.log(data.message, data.data);
+      } else {
+        console.warn("Bookmark toggle failed:", data);
+      }
+    } catch (error) {
+      console.error("Bookmark API Error:", error);
+    }
+  };
+
+
 
 
 
@@ -382,6 +485,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         selectChapter,
         fetchDeepStudy,
         fetchDeepStudyForVerse,
+        toggleVerseBookmark,
+        showDeepStudy,
+        setShowDeepStudy
       }}
     >
       {children}

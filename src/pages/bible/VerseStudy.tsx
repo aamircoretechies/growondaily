@@ -70,6 +70,9 @@ const VerseStudy = () => {
     loadVerse();
   }, [book, chapter, verse, books]);
 
+
+  
+
   const tabs: TabItem[] = [
     { id: 'original', title: 'Original', icon: 'document' },
     { id: 'explanations', title: 'Explanation', icon: 'book-open' },
@@ -86,20 +89,30 @@ const VerseStudy = () => {
     { id: 'reflection', title: 'Reflection Prompts', icon: 'question' },
   ];
 
+
+
   const getTabContent = (tabId: string) => {
-  if (loading) return 'Loading...';
-  if (!deepStudyData) return 'No data available.';
+    if (loading) return 'Loading...';
+    if (!deepStudyData) return 'No data available.';
 
-  // const verseKey = `${book}-${chapter}`;
-  const verseKey = `${book}-${chapter}-${verse}`;
+    // Find the correct bookId
+    let bookId = book;
+    if (books.length > 0 && book.length !== 36) {
+      const found = books.find(
+        (b) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === book.toLowerCase()
+      );
+      if (found) bookId = found.book_id;
+    }
 
-  const deepData = deepStudyData?.[verseKey] || deepStudyData;
+    const verseKey = `${bookId}-${chapter}-${verse}`;
 
-  const ctx = deepData?.[tabId];
-  if (!ctx) return 'Content not available.';
-  const cleanText = (ctx.content || '').replace(/\*/g, '');
-  return cleanText || 'Content not available.';
-};
+    const deepData = deepStudyData?.[verseKey];
+    const ctx = deepData?.[tabId];
+    if (!ctx) return 'Content not available.';
+    const cleanText = (ctx.content || '').replace(/\*/g, '');
+    return cleanText || 'Content not available.';
+  };
+
 
 
   // const currentDate = new Date().toLocaleDateString();
@@ -203,42 +216,42 @@ const VerseStudy = () => {
 
               {/* Nested Card */}
               {tab.id === "original" && (
-  <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
-    <h3 className="text-lg font-semibold text-primary mb-3">Your Notes</h3>
+                <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
+                  <h3 className="text-lg font-semibold text-primary mb-3">Your Notes</h3>
 
-    {deepStudyData?.[`${book}-${chapter}-${verse}`]?.original?.notes?.length > 0 ? (
-      <div className="space-y-3">
-        {deepStudyData[`${book}-${chapter}-${verse}`].original.notes.map((note: any, index: number) => (
-          <div
-            key={note.note_id || index}
-            className="p-3 bg-white/80 dark:bg-gray-100 rounded-lg border border-gray-200 dark:border-gray-400 shadow-sm"
-          >
-            <p className="text-gray-700 dark:text-gray-800 mb-2 whitespace-pre-line font-merriweather">
-              {note.content}
-            </p>
+                  {deepStudyData?.[`${book}-${chapter}-${verse}`]?.original?.notes?.length > 0 ? (
+                    <div className="space-y-3">
+                      {deepStudyData[`${book}-${chapter}-${verse}`].original.notes.map((note: any, index: number) => (
+                        <div
+                          key={note.note_id || index}
+                          className="p-3 bg-white/80 dark:bg-gray-100 rounded-lg border border-gray-200 dark:border-gray-400 shadow-sm"
+                        >
+                          <p className="text-gray-700 dark:text-gray-800 mb-2 whitespace-pre-line font-merriweather">
+                            {note.content}
+                          </p>
 
-            {note.emotion_tags?.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {note.emotion_tags.map((tag: string, i: number) => (
-                  <span
-                    key={i}
-                    className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
+                          {note.emotion_tags?.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {note.emotion_tags.map((tag: string, i: number) => (
+                                <span
+                                  key={i}
+                                  className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                                >
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
 
-            <p className="text-xs text-gray-500 mt-2">
-              {new Date(note.created_at).toLocaleDateString()}
-            </p>
-          </div>
-        ))}
-      </div>
-    ) : (
-      <p className="text-gray-500 italic">No saved notes yet.</p>
-    )}
+                          <p className="text-xs text-gray-500 mt-2">
+                            {new Date(note.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 italic">No saved notes yet.</p>
+                  )}
 
 
 

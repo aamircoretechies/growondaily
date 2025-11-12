@@ -38,7 +38,7 @@ interface IDashboardMenuItem {
 interface IDashboardMenuItems extends Array<IDashboardMenuItem> { }
 
 const SidebarMenuDashboard = () => {
-  const { books, chapters, verses, loading, error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter, selectedVerse, fetchSingleVerse, version } = useBible();
+  const { books, chapters, verses, loading, error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter, selectedVerse, fetchSingleVerse, version, toggleVerseBookmark, fetchDeepStudy, fetchDeepStudyForVerse } = useBible();
   const { isRTL } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [chapterSearchTerm, setChapterSearchTerm] = useState('');
@@ -150,10 +150,23 @@ const SidebarMenuDashboard = () => {
   };
 
 
-  const handleChapterClick = (chapterNumber: number, bookId: string) => {
+
+
+  // const handleChapterClick = (chapterNumber: number, bookId: string) => {
+  //   console.log("Fetching verses for chapter:", chapterNumber);
+  //   selectChapter(chapterNumber);
+  // };
+
+  const handleChapterClick = async (chapterNumber: number, bookId: string) => {
     console.log("Fetching verses for chapter:", chapterNumber);
-    selectChapter(chapterNumber);
+    await selectChapter(chapterNumber);
+
+    if (bookId && chapterNumber && version && selectedVerse) {
+      await fetchDeepStudy(bookId, chapterNumber, version);
+    }
   };
+
+
 
 
 
@@ -232,10 +245,7 @@ const SidebarMenuDashboard = () => {
       </div>
       {/* Chapters Dropdown */}
       <Menu highlight={true} className="menu-default w-full p-0">
-        <MenuItem
-          className="w-full"
-          toggle="dropdown"
-          trigger="hover"
+        <MenuItem className="w-full" toggle="dropdown" trigger="hover"
           dropdownProps={{
             placement: isRTL() ? 'bottom-start' : 'bottom-end',
             modifiers: [
@@ -407,6 +417,23 @@ const SidebarMenuDashboard = () => {
                   //   });
                   //   window.dispatchEvent(event);
                   // } else 
+
+                  if (item.title === 'Bookmark') {
+                    if (!selectedBookName || !selectedVerse) {
+                      console.warn("No verse selected for bookmark");
+                      return;
+                    }
+                    toggleVerseBookmark(
+                      selectedBookName,
+                      selectedVerse.chapter,
+                      selectedVerse.verse,
+                      version || "KJV"
+                    );
+                  }
+
+
+
+
                   if (item.title === 'Make Note') {
                     setShowMakeNote(true);
                   }

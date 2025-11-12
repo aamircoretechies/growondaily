@@ -13,6 +13,9 @@ import {
 import { HelmetProvider } from 'react-helmet-async';
 import { DashboardProvider } from '@/pages/dashboards/providers/DashboardProvider';
 import { BibleProvider } from '@/providers';
+import { ReflectionProvider } from "@/providers/ReflectionProvider";
+import { SettingEditProvider } from '@/pages/settings/Provider/SettingeEditProvider';
+
 
 
 const queryClient = new QueryClient();
@@ -28,7 +31,11 @@ const ProvidersWrapper = ({ children }: PropsWithChildren) => {
                 <LoadersProvider>
                   <DashboardProvider>
                     <BibleProvider>
+                      <ReflectionProvider>
+                        <SettingEditProvider>
                   <MenusProvider>{children}</MenusProvider>
+                        </SettingEditProvider>
+                    </ReflectionProvider>
                   </BibleProvider>
                   </DashboardProvider>
                 </LoadersProvider>

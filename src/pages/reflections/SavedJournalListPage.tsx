@@ -2,9 +2,45 @@ import { Container } from '@/components/container';
 import { KeenIcon } from '@/components';
 import { LucideSearch, LucideCalendar, LucidePencil, LucideTrash2, LucideArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useReflection } from '@/providers/ReflectionProvider';
+import { useBible } from "@/providers/BibleProvider";
+
+
 
 const SavedJournalListPage = () => {
   const navigate = useNavigate();
+  const { allNotes, fetchAllNotes, notesLoading } = useReflection();
+  const { selectBook, selectChapter, fetchSingleVerse, books, version, fetchDeepStudy, setShowDeepStudy } = useBible();
+
+
+  const handleOpenNote = async (entry: any) => {
+    const { book, chapter, verse, version: noteVersion } = entry;
+    if (!book || !chapter) return;
+
+    const bookSlug = book.trim().toLowerCase().replace(/\s+/g, "-");
+    const foundBook = books?.find(
+      (b: any) => b.name.toLowerCase() === book.trim().toLowerCase()
+    );
+
+    if (!foundBook) return;
+
+    await selectBook(foundBook.book_id, foundBook.name);
+    await selectChapter(Number(chapter));
+
+    if (verse) {
+      await fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
+      navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+    } else {
+      // await fetchDeepStudy(foundBook.book_id, Number(chapter), noteVersion || version || "KJV");
+      // navigate(`/bible?bible=${bookSlug}&chapter=${chapter}`);
+      setShowDeepStudy(true);
+      await fetchDeepStudy(foundBook.book_id, Number(chapter), noteVersion || version || "KJV");
+      navigate(`/bible?bible=${bookSlug}&chapter=${chapter}`);
+
+    }
+  };
+
 
   const handleEditReflection = (id: string) => {
     console.log('Edit reflection:', id);
@@ -15,36 +51,43 @@ const SavedJournalListPage = () => {
   };
 
   // Mock data for journal entries
-  const journalEntries = [
-    {
-      id: '1',
-      date: 'August 6, 2025',
-      verse: 'Romans 8:28',
-      content: "I've been reminded that even hard moments are being used for something good...",
-      tags: ['faith', 'growth']
-    },
-    {
-      id: '2',
-      date: 'August 3, 2025',
-      verse: 'Psalm 23:1',
-      content: "I feel like I'm learning to rest more instead of stressing...",
-      tags: ['peace', 'trust']
-    },
-    {
-      id: '3',
-      date: 'August 1, 2025',
-      verse: 'John 3:16',
-      content: "God's love is so overwhelming that He gave His only Son for us...",
-      tags: ['love', 'sacrifice']
-    },
-    {
-      id: '4',
-      date: 'July 30, 2025',
-      verse: 'Philippians 4:13',
-      content: "I can do all things through Christ who strengthens me...",
-      tags: ['strength', 'perseverance']
-    }
-  ];
+  // const journalEntries = [
+  //   {
+  //     id: '1',
+  //     date: 'August 6, 2025',
+  //     verse: 'Romans 8:28',
+  //     content: "I've been reminded that even hard moments are being used for something good...",
+  //     tags: ['faith', 'growth']
+  //   },
+  //   {
+  //     id: '2',
+  //     date: 'August 3, 2025',
+  //     verse: 'Psalm 23:1',
+  //     content: "I feel like I'm learning to rest more instead of stressing...",
+  //     tags: ['peace', 'trust']
+  //   },
+  //   {
+  //     id: '3',
+  //     date: 'August 1, 2025',
+  //     verse: 'John 3:16',
+  //     content: "God's love is so overwhelming that He gave His only Son for us...",
+  //     tags: ['love', 'sacrifice']
+  //   },
+  //   {
+  //     id: '4',
+  //     date: 'July 30, 2025',
+  //     verse: 'Philippians 4:13',
+  //     content: "I can do all things through Christ who strengthens me...",
+  //     tags: ['strength', 'perseverance']
+  //   }
+  // ];
+
+  const journalEntries = allNotes || [];
+
+
+  useEffect(() => {
+    fetchAllNotes();
+  }, [fetchAllNotes]);
 
   return (
     <Container>
@@ -61,7 +104,7 @@ const SavedJournalListPage = () => {
               <span className="text-sm font-medium">Back to Reflections</span>
             </button>
           </div>
-          
+
           <h1 className="font-merriweather text-4xl text-primary mb-2">
             Saved Journal List
           </h1>
@@ -96,50 +139,65 @@ const SavedJournalListPage = () => {
 
         {/* Journal Entries Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {journalEntries.map((entry) => (
-            <div key={entry.id} className="bg-white/80 dark:bg-transparent rounded-xl p-6 border border-transparent dark:border-gray-400 hover:shadow-lg transition-shadow">
+
+          {journalEntries.map((entry: any) => (
+            <div key={entry.note_id} onClick={() => handleOpenNote(entry)} className="bg-white/80 dark:bg-transparent rounded-xl p-6 border border-transparent dark:border-gray-400 hover:shadow-lg transition-shadow">
               {/* Entry Header */}
               <div className="flex items-center gap-2 mb-4">
                 <LucideCalendar className="text-amber-600 w-4 h-4" />
                 <span className="text-gray-600 text-sm font-medium">
-                  {entry.date}
+                  {new Date(entry.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </span>
               </div>
-              
+
               {/* Verse */}
               <div className="mb-4">
                 <h3 className="font-merriweather text-lg text-primary font-semibold">
-                  {entry.verse}
+                  {entry.book && entry.chapter
+                    ? `${entry.book} ${entry.chapter}${entry.verse ? ':' + entry.verse : ''}`
+                    : '—'}
                 </h3>
               </div>
-              
+
               {/* Entry Content */}
               <p className="text-primary text-sm leading-relaxed mb-4 line-clamp-3">
-                {entry.content}
+                {entry.content || 'No content'}
               </p>
-              
-               {/* Tags */}
-               <div className="flex flex-wrap gap-2 mb-4">
-                 {entry.tags.map((tag, index) => (
-                   <span
-                     key={index}
-                     className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-full font-medium"
-                   >
-                     {tag}
-                   </span>
-                 ))}
-               </div>
-              
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {(entry.emotion_tags?.length
+                  ? entry.emotion_tags
+                  : entry.original_tags || []
+                ).map((tag: string, index: number) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-full font-medium"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
               {/* Action Buttons */}
               <div className="flex justify-end gap-2">
                 <button
-                  onClick={() => handleEditReflection(entry.id)}
+                  // onClick={() => handleEditReflection(entry.note_id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditReflection(entry.note_id);
+                  }}
+
                   className="w-8 h-8 bg-sand rounded-full flex items-center justify-center hover:bg-primary transition-colors"
                 >
                   <LucidePencil className="text-white w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => handleDeleteReflection(entry.id)}
+                  // onClick={() => handleDeleteReflection(entry.note_id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteReflection(entry.note_id);
+                  }}
                   className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center hover:bg-red-300 transition-colors"
                 >
                   <LucideTrash2 className="text-red-500 w-4 h-4" />
@@ -147,6 +205,8 @@ const SavedJournalListPage = () => {
               </div>
             </div>
           ))}
+
+
         </div>
 
         {/* Load More Button */}

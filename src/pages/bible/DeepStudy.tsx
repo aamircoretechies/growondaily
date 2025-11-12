@@ -15,21 +15,9 @@ interface DeepStudyProps {
   isDeepStudyActive?: boolean;
 }
 
-const DeepStudy = ({
-  showDeepStudyButton,
-  onDeepStudyToggle,
-  isDeepStudyActive,
-}: DeepStudyProps) => {
+const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, }: DeepStudyProps) => {
   const [activeTab, setActiveTab] = useState('original');
-  const {
-    selectedBookId,
-    selectedChapter,
-    version,
-    deepStudyData,
-    fetchDeepStudy,
-    selectedBookName,
-    loading,
-  } = useBible();
+  const { selectedBookId, selectedChapter, version, deepStudyData, fetchDeepStudy, selectedBookName, loading, } = useBible();
 
   useEffect(() => {
     if (selectedBookId && selectedChapter && version) {
@@ -79,11 +67,10 @@ const DeepStudy = ({
             {showDeepStudyButton && onDeepStudyToggle && (
               <button
                 onClick={onDeepStudyToggle}
-                className={`flex items-center justify-center gap-2 px-4 py-2 w-full lg:w-auto rounded-lg font-medium transition-colors text-sm ${
-                  isDeepStudyActive
+                className={`flex items-center justify-center gap-2 px-4 py-2 w-full lg:w-auto rounded-lg font-medium transition-colors text-sm ${isDeepStudyActive
                     ? 'bg-primary text-white hover:bg-primary/90'
                     : 'bg-sand text-primary hover:bg-sand/80'
-                }`}
+                  }`}
               >
                 <KeenIcon icon="book" className="w-4 h-4" />
                 {isDeepStudyActive ? 'Hide Deep Study' : 'Deep Study'}
@@ -99,11 +86,10 @@ const DeepStudy = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`grid grid-flow-col auto-cols-max items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap ${
-                  activeTab === tab.id
+                className={`grid grid-flow-col auto-cols-max items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
                     ? 'bg-primary text-white shadow-sm'
                     : 'bg-gray-100 dark:bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
-                }`}
+                  }`}
               >
                 <KeenIcon icon={tab.icon} className="text-base" />
                 <span>{tab.title}</span>
@@ -142,9 +128,8 @@ const DeepStudy = ({
                           ? new Date(ctx.generated_at).toLocaleDateString()
                           : '';
                         const chapterLabel = ctx?.chapter ?? selectedChapter;
-                        return `${date} - ${
-                          selectedBookName || ''
-                        } ${chapterLabel}`.trim();
+                        return `${date} - ${selectedBookName || ''
+                          } ${chapterLabel}`.trim();
                       })()}
                     </span>
                   </div>
@@ -152,26 +137,26 @@ const DeepStudy = ({
                   {/* User Notes Section */}
                   {deepStudyData?.[`${selectedBookId}-${selectedChapter}`]?.[tab.id]
                     ?.notes?.length > 0 && (
-                    <div className="mt-3 space-y-2">
-                      {deepStudyData[`${selectedBookId}-${selectedChapter}`][
-                        tab.id
-                      ].notes.map((note: any, idx: number) => (
-                        <div
-                          key={note.note_id || idx}
-                          className="border border-gray-200 bg-white/80 dark:bg-gray-100 rounded-lg p-2 sm:p-3"
-                        >
-                          <p className="text-sm text-gray-800 font-merriweather whitespace-pre-wrap">
-                            {note.content}
-                          </p>
-                          {note.emotion_tags?.length > 0 && (
-                            <p className="text-xs text-gray-500 mt-1">
-                              {note.emotion_tags.join(', ')}
+                      <div className="mt-3 space-y-2">
+                        {deepStudyData[`${selectedBookId}-${selectedChapter}`][
+                          tab.id
+                        ].notes.map((note: any, idx: number) => (
+                          <div
+                            key={note.note_id || idx}
+                            className="border border-gray-200 bg-white/80 dark:bg-gray-100 rounded-lg p-2 sm:p-3"
+                          >
+                            <p className="text-sm text-gray-800 font-merriweather whitespace-pre-wrap">
+                              {note.content}
                             </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                            {note.emotion_tags?.length > 0 && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                {note.emotion_tags.join(', ')}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                 </div>
               </div>
             ))}
