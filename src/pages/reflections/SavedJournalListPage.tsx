@@ -10,7 +10,7 @@ import { useBible } from "@/providers/BibleProvider";
 
 const SavedJournalListPage = () => {
   const navigate = useNavigate();
-  const { allNotes, fetchAllNotes, notesLoading } = useReflection();
+  const { allNotes, fetchAllNotes, notesLoading,deleteNote } = useReflection();
   const { selectBook, selectChapter, fetchSingleVerse, books, version, fetchDeepStudy, setShowDeepStudy } = useBible();
 
 
@@ -46,9 +46,13 @@ const SavedJournalListPage = () => {
     console.log('Edit reflection:', id);
   };
 
-  const handleDeleteReflection = (id: string) => {
-    console.log('Delete reflection:', id);
-  };
+  // const handleDeleteReflection = (id: string) => {
+  //   console.log('Delete reflection:', id);
+  // };
+
+  const handleDeleteReflection = async(id:string) =>{
+    await deleteNote(id);
+  }
 
   // Mock data for journal entries
   // const journalEntries = [
@@ -141,7 +145,7 @@ const SavedJournalListPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
           {journalEntries.map((entry: any) => (
-            <div key={entry.note_id} onClick={() => handleOpenNote(entry)} className="bg-white/80 dark:bg-transparent rounded-xl p-6 border border-transparent dark:border-gray-400 hover:shadow-lg transition-shadow">
+            <div key={entry.note_id} onClick={() => handleOpenNote(entry)} className="bg-white/80 dark:bg-transparent rounded-xl p-6 border border-transparent dark:border-gray-400 hover:shadow-lg transition-shadow cursor-pointer">
               {/* Entry Header */}
               <div className="flex items-center gap-2 mb-4">
                 <LucideCalendar className="text-amber-600 w-4 h-4" />
@@ -160,19 +164,19 @@ const SavedJournalListPage = () => {
               </div>
 
               {/* Entry Content */}
-              <p className="text-primary text-sm leading-relaxed mb-4 line-clamp-3">
+              <p className="text-primary text-sm leading-relaxed mb-4 line-clamp-3 ">
                 {entry.content || 'No content'}
               </p>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap gap-2 mb-4 ">
                 {(entry.emotion_tags?.length
                   ? entry.emotion_tags
                   : entry.original_tags || []
                 ).map((tag: string, index: number) => (
                   <span
                     key={index}
-                    className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-full font-medium"
+                    className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-full font-medium "
                   >
                     {tag}
                   </span>

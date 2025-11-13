@@ -9,7 +9,7 @@
 //     const firstName = user?.first_name || '';
 //   const lastName = user?.last_name || '';
 //   const email = user?.email || '';
-  
+
 //   return (
 //     <Card id="edit_profile" className='bg-white/40 dark:bg-gray-100 '>
 //       <CardHeader>
@@ -53,20 +53,35 @@
 
 
 
-import { useState } from "react";
+import { useState , useEffect} from "react";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { UserRound } from 'lucide-react';
 import { useSettingEdit } from '../Provider/SettingeEditProvider';
+import { useAuthContext } from "@/auth";
+
 
 const EditProfileCard = () => {
   const { user, updateProfile, loading } = useSettingEdit();
+  const { currentUser } = useAuthContext();
 
-  const [firstName, setFirstName] = useState(user?.first_name || '');
-  const [lastName, setLastName] = useState(user?.last_name || '');
-  const [email, setEmail] = useState(user?.email || '');
+  // const [firstName, setFirstName] = useState(user?.first_name || '');
+  // const [lastName, setLastName] = useState(user?.last_name || '');
+  // const [email, setEmail] = useState(user?.email || '');
+
+  const [firstName, setFirstName] = useState(
+    user?.first_name || currentUser?.first_name || currentUser?.first_name?.split(" ")[0] || ""
+  );
+  const [lastName, setLastName] = useState(
+    user?.last_name || currentUser?.last_name || currentUser?.first_name?.split(" ")[1] || ""
+  );
+  const [email, setEmail] = useState(
+    user?.email || currentUser?.email || ""
+  );
+
+
   const [message, setMessage] = useState('');
 
   const handleUpdate = async () => {
@@ -82,6 +97,14 @@ const EditProfileCard = () => {
       setTimeout(() => setMessage(''), 3000);
     }
   };
+
+   useEffect(() => {
+    if (currentUser) {
+      setFirstName(currentUser?.first_name || currentUser?.first_name?.split(" ")[0] || "");
+      setLastName(currentUser?.last_name || currentUser?.first_name?.split(" ")[1] || "");
+      setEmail(currentUser?.email || "");
+    }
+  }, [currentUser]);
 
   return (
     <Card id="edit_profile" className='bg-white/40 dark:bg-gray-100'>

@@ -13,7 +13,7 @@ import axios from "axios";
 const ReflectionsPage = () => {
   const navigate = useNavigate();
   const { selectBook, selectChapter, fetchSingleVerse, books, toggleVerseBookmark } = useBible();
-  const { dailyReflection, loading, error, bookmarks, bmLoading, fetchBookmarks, setBookmarks, allNotes, fetchAllNotes, notesLoading, } = useReflection();
+  const { dailyReflection, loading, error, bookmarks, bmLoading, fetchBookmarks, setBookmarks, allNotes, fetchAllNotes, notesLoading, deleteNote } = useReflection();
 
 
 
@@ -70,9 +70,30 @@ const ReflectionsPage = () => {
     console.log('Edit reflection:', id);
   };
 
-  const handleDeleteReflection = (id: string) => {
-    console.log('Delete reflection:', id);
+  // const handleDeleteReflection = (id: string) => {
+  //   console.log('Delete reflection:', id);
+  // };
+
+  // const handleDeleteReflection = async (entry: any) => {
+  //   try {
+  //     const noteId = entry.note_id;
+  //     await axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/reflections/notes/${noteId}`);
+
+  //     await fetchAllNotes();
+
+  //     console.log("Note deleted successfully:", noteId);
+  //   } catch (err: any) {
+  //     console.error(" Error deleting note:", err.response?.data || err.message);
+  //   }
+  // };
+
+  const handleDeleteReflection = async (entry: any) => {
+    const noteId = entry.note_id;
+    await deleteNote(noteId);
   };
+
+
+
 
   // Mock data for journal entries
   // const journalEntries = [
@@ -132,6 +153,36 @@ const ReflectionsPage = () => {
     fetchAllNotes();
   }, []);
 
+  // open notes (similar to bookmarks)
+  const handleOpenNote = async (entry: any) => {
+    try {
+      const { book, chapter, verse, version } = entry;
+      if (!book || !chapter) return;
+
+      const bookSlug = book.trim().toLowerCase().replace(/\s+/g, "-");
+      const foundBook = books?.find(
+        (b: any) => b.name.toLowerCase() === book.trim().toLowerCase()
+      );
+
+      if (foundBook) {
+        await selectBook(foundBook.book_id, foundBook.name);
+        await selectChapter(Number(chapter));
+
+        if (verse) {
+          // verse-level note
+          await fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), version || "KJV");
+          navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+        } else {
+          // chapter-level note
+          navigate(`/bible?bible=${bookSlug}&chapter=${chapter}`);
+        }
+      }
+    } catch (err) {
+      console.error("Error opening note:", err);
+    }
+  };
+
+
 
 
   return (
@@ -181,7 +232,8 @@ const ReflectionsPage = () => {
                 latestNotes.map((entry: any) => (
                   <div
                     key={entry.note_id}
-                    className="bg-white/80 dark:bg-transparent rounded-xl p-4 border border-transparent dark:border-gray-400"
+                    onClick={() => handleOpenNote(entry)}
+                    className="bg-white/80 dark:bg-transparent rounded-xl p-4 border border-transparent dark:border-gray-400 cursor-pointer"
                   >
                     {/* Entry Header */}
                     <div className="flex items-center gap-2 mb-3">
@@ -200,9 +252,11 @@ const ReflectionsPage = () => {
                     </div>
 
                     {/* Entry Content */}
-                    <p className="text-primary text-sm leading-relaxed mb-4">
+                  
+                    <p className="text-primary text-sm leading-relaxed mb-4 line-clamp-3 overflow-hidden text-ellipsis">
                       {entry.content || 'No content'}
                     </p>
+
 
                     {/* Action Buttons */}
                     <div className="flex justify-end gap-2">
@@ -213,7 +267,10 @@ const ReflectionsPage = () => {
                         <LucidePencil className="text-white w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDeleteReflection(entry.note_id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteReflection(entry);
+                        }}
                         className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center hover:bg-red-300 transition-colors"
                       >
                         <LucideTrash2 className="text-red-500 w-4 h-4" />

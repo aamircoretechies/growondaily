@@ -68,6 +68,23 @@ export const ReflectionProvider = ({ children }: any) => {
     }
   };
 
+  const deleteNote = async (noteId: string) => {
+    try {
+      const res = await axios.delete(`https://api.growondaily.com/api/reflections/notes/${noteId}`,
+        { withCredentials: true }
+      );
+
+      if (res.data?.status === 1) {
+        setAllNotes((prev) => prev.filter((n) => n.note_id !== noteId));
+        console.log("Note deleted successfully:", noteId);
+      } else {
+        console.error("Failed to delete note:", res.data?.message);
+      }
+    } catch (err: any) {
+      console.error("Error deleting note:", err.response?.data || err.message);
+    }
+  };
+
 
 
   // Auto-fetch on load
@@ -95,6 +112,7 @@ export const ReflectionProvider = ({ children }: any) => {
         allNotes,
         notesLoading,
         fetchAllNotes,
+        deleteNote,
       }}
     >
       {children}

@@ -7,15 +7,11 @@ import { toAbsoluteUrl } from '@/utils';
 import { DropdownUserLanguages } from './DropdownUserLanguages';
 import { useSettings } from '@/providers/SettingsProvider';
 import { DefaultTooltip, KeenIcon } from '@/components';
-import {
-  MenuItem,
-  MenuLink,
-  MenuSub,
-  MenuTitle,
-  MenuSeparator,
-  MenuArrow,
-  MenuIcon
-} from '@/components/menu';
+import {MenuItem,MenuLink,MenuSub,MenuTitle,MenuSeparator,MenuArrow,MenuIcon} from '@/components/menu';
+import { useContext } from "react";
+import { AuthContext } from "@/auth/providers/JWTProvider";
+
+
 
 interface IDropdownUserProps {
   menuItemRef: any;
@@ -25,6 +21,8 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
   const { settings, storeSettings } = useSettings();
   const { logout } = useAuthContext();
   const { isRTL } = useLanguage();
+  const { currentUser } = useAuthContext();
+
 
   const handleThemeMode = (event: ChangeEvent<HTMLInputElement>) => {
     const newThemeMode = event.target.checked ? 'dark' : 'light';
@@ -48,13 +46,15 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
               to="/account"
               className="text-sm text-gray-800 hover:text-primary font-semibold leading-none"
             >
-              Cody Fisher
+              {/* Cody Fisher */}
+              {currentUser?.first_name || "User"}
             </Link>
             <a
               href="mailto:c.fisher@gmail.com"
               className="text-xs text-gray-600 hover:text-primary font-medium leading-none"
             >
-              c.fisher@gmail.com
+              {/* c.fisher@gmail.com */}
+              {currentUser?.email || "example@gmail.com"}
             </a>
           </div>
         </div>

@@ -1,11 +1,16 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import { useLanguage } from '@/providers/TranslationProvider';
+import { I18N_LANGUAGES, I18N_CONFIG_KEY } from '@/i18n';
+import { setData } from '@/utils';
+
 
 const SettingEditContext = createContext<any>(null);
 
 export const SettingEditProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const { changeLanguage } = useLanguage();
 
   // Get user details (initially from localStorage or backend)
   useEffect(() => {
@@ -46,7 +51,7 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
     }
   };
 
-    // Function to change password
+  // Function to change password
   const changePassword = async (passwordData: { current_password: string; new_password: string; confirm_password: string }) => {
     try {
       setLoading(true);
@@ -76,7 +81,7 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
   };
 
 
-    // Function to get notification preferences
+  // Function to get notification preferences
   const getNotificationPreferences = async () => {
     try {
       setLoading(true);
@@ -115,7 +120,7 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
   };
 
 
-   const updateNotificationPreferences = async (preferences: { email_notification: boolean; push_notification: boolean }) => {
+  const updateNotificationPreferences = async (preferences: { email_notification: boolean; push_notification: boolean }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("accessToken");
@@ -142,9 +147,53 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
     }
   };
 
+  // Function to select language for onboarding
+  const selectLanguage = async (language_code: string) => {
+  try {
+    setLoading(true);
+    const token = localStorage.getItem("accessToken");
+    const response = await axios.post(
+      "https://api.growondaily.com/api/auth/select-language",
+      { language_code },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.data.status === 1) {
+      const updatedUser = { ...user, language_code };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      // Persist i18n config and update TranslationProvider
+      const selectedLang = I18N_LANGUAGES.find((l) => l.code === language_code);
+      if (selectedLang) {
+        setData(I18N_CONFIG_KEY, selectedLang); // persist
+        changeLanguage(selectedLang); // update context immediately
+      }
+
+      return { success: true, message: response.data.message || "Language selected successfully" };
+    } else {
+      return { success: false, message: response.data.message || "Failed to select language" };
+    }
+  } catch (error: any) {
+    console.error("Error selecting language:", error);
+    return { success: false, message: error.response?.data?.message || "Something went wrong" };
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  // const { changeLanguage } = useLanguage();
+
+
 
   return (
-    <SettingEditContext.Provider value={{ user, loading, updateProfile,changePassword,getNotificationPreferences,updateNotificationPreferences,  }}>
+    <SettingEditContext.Provider value={{ user, loading, updateProfile, changePassword, getNotificationPreferences, updateNotificationPreferences, selectLanguage, }}>
       {children}
     </SettingEditContext.Provider>
   );
