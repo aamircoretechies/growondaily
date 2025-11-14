@@ -76,8 +76,6 @@
 // export { GeneralSettings };
 
 
-
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -87,14 +85,12 @@ import { useSettingEdit } from "../Provider/SettingeEditProvider";
 import { useState } from "react";
 import { useLanguage } from '@/providers/TranslationProvider';
 import { I18N_LANGUAGES, I18N_CONFIG_KEY } from '@/i18n';  
-import { setData } from '@/utils';
-import { useIntl } from 'react-intl';   
+import { setData } from '@/utils';                         
 
 const GeneralSettings = ({ user }: { user: any }) => {
   const { selectLanguage, loading } = useSettingEdit();
-  const { changeLanguage, currentLanguage } = useLanguage();
-  const [language, setLanguage] = useState(user?.language_code || currentLanguage.code);
-  const { formatMessage } = useIntl();
+  const { changeLanguage } = useLanguage();
+  const [language, setLanguage] = useState(user?.language_code || "en");
 
   const handleSave = async () => {
     const res = await selectLanguage(language);
@@ -104,8 +100,9 @@ const GeneralSettings = ({ user }: { user: any }) => {
       if (selectedLang) {
         setData(I18N_CONFIG_KEY, selectedLang);
         changeLanguage(selectedLang);
+        window.location.reload();
       }
-      alert(formatMessage({ id: "language_changed" }));
+      // alert(res.message);
     } else {
       alert("Failed: " + res.message);
     }
@@ -120,19 +117,19 @@ const GeneralSettings = ({ user }: { user: any }) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="w-5 h-5" />
-          {formatMessage({ id: "general_settings" })}
+          General Settings
         </CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="language">{formatMessage({ id: "default_language" })}</Label>
+            <Label htmlFor="language">Default Language</Label>
             <div className="flex items-center gap-2">
               <Languages className="w-4 h-4 text-gray-400" />
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className="w-full bg-gray-100 rounded-xl border border-gray-300 text-gray-700 focus:ring-2 focus:ring-sand/50">
-                  <SelectValue placeholder={formatMessage({ id: "select_language" })} />
+                  <SelectValue placeholder="Select language" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="en">English</SelectItem>
@@ -150,7 +147,7 @@ const GeneralSettings = ({ user }: { user: any }) => {
             disabled={loading}
           >
             <Save className="w-4 h-4" />
-            {loading ? formatMessage({ id: "saving" }) : formatMessage({ id: "save_settings" })}
+            {loading ? "Saving..." : "Save Settings"}
           </Button>
 
           <Button
@@ -159,7 +156,7 @@ const GeneralSettings = ({ user }: { user: any }) => {
             onClick={handleReset}
           >
             <RefreshCw className="w-4 h-4" />
-            {formatMessage({ id: "reset_default" })}
+            Reset to Default
           </Button>
         </div>
       </CardContent>
@@ -168,7 +165,6 @@ const GeneralSettings = ({ user }: { user: any }) => {
 };
 
 export { GeneralSettings };
-
 
 
 

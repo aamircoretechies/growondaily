@@ -12,5 +12,20 @@
   "USER.MENU.PAYMENT_&_SUBSCRIPTION_INFO": "Payment & subscription info",
   "USER.MENU.DARK_MODE": "Dark Mode",
   "USER.MENU.LOGOUT": "Logout",
-  "USER.MENU.LANGUAGE": "Language"
+  "USER.MENU.LANGUAGE": "Language",
+
+
+
+  "HOME.LOADING_DASHBOARD": "Loading dashboard...",
+  "HOME.READ_BIBLE": "Read Bible",
+  "HOME.COMPLETE_PROFILE_SETUP": "Complete Profile Setup",
+  "HOME.PROFILE_PROGRESS": "{progress}% completed • {remaining}% remaining",
+  "HOME.YOUR_DAILY_WORD": "Your Daily Word",
+  "HOME.CONTINUE_READING": "Continue Reading",
+  "HOME.RESUME": "Resume",
+  "HOME.START_READING": "Start Reading",
+  "HOME.NO_REFLECTIONS": "No reflections available.",
+  "HOME.SUGGESTED_REFLECTIONS": "Suggested Reflections",
+  "HOME.NO_READING_YET": "You haven't started reading yet.",
+  "HOME.START": "Start"
 }

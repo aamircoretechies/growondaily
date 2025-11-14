@@ -1,3 +1,316 @@
+// import { Container } from '@/components/container';
+// import { KeenIcon, ProfileSetupModal } from '@/components';
+// import { LucideVolume2, LucideBook, LightbulbIcon } from 'lucide-react';
+// import { useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
+// import { useBible } from '@/providers/BibleProvider';
+
+
+
+// const HomePage = () => {
+//   const [showProfileSetup, setShowProfileSetup] = useState(false);
+//   const navigate = useNavigate();
+//   const { selectBook, selectChapter, fetchSingleVerse, books } = useBible();
+
+
+//   const { dashboardData, loading } = useDashboard();
+//   if (loading) {
+//     return <div className="text-center mt-10">Loading dashboard...</div>;
+//   }
+
+
+//   console.log('Dashboard Data:', dashboardData);
+
+//   const getCurrentDate = () => {
+//     const date = new Date();
+//     return date.toLocaleDateString('en-US', {
+//       weekday: 'short',
+//       month: 'short',
+//       day: '2-digit',
+//       year: 'numeric'
+//     });
+//   };
+
+//   const handleAudioPlay = () => {
+//     console.log('Audio play clicked');
+//   };
+
+//   const handleReadMore = () => {
+//     console.log('Read more clicked');
+//   };
+
+//   const handleResume = () => {
+//     console.log('Resume reading clicked');
+//   };
+
+
+//   const handleStartReflection = async (reference: string) => {
+//   if (!reference) return;
+//   const match = reference.match(/([A-Za-z ]+)\s+(\d+):(\d+)/);
+//   if (!match) return;
+  
+//   const [, bookName, chapter, verse] = match;
+//   const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
+//   const book = books?.find((b: any) => 
+//     b.name.toLowerCase() === bookName.trim().toLowerCase()
+//   );
+
+//   if (book) {
+//     await selectBook(book.book_id, book.name);
+//     await selectChapter(Number(chapter));
+//     await fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
+//   }
+
+//   navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+// };
+
+
+
+
+//   const handleReadBible = () => {
+//     console.log('Read Bible clicked');
+//     navigate('/bible');
+//   };
+
+//   const profileProgress = 75;
+
+//   return (
+//     <Container>
+//       <div className=" mx-auto min-h-screen p-0">
+      
+//         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+//           <div className="flex-1">
+          
+//             <h1 className="font-merriweather text-xl sm:text-2xl text-primary">
+//               {dashboardData?.greeting || 'Good Morning'}, {dashboardData?.user?.first_name || 'User'}
+//             </h1>
+
+//             <p className="text-gray-600 text-xs sm:text-sm">
+//               {getCurrentDate()}
+//             </p>
+//           </div>
+//           <div className="relative w-full sm:w-auto sm:min-w-[200px]">
+//             <button
+//               onClick={handleReadBible}
+//               className="w-full bg-gray-200 text-primary py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-medium flex items-center justify-center gap-3 sm:gap-4 hover:bg-gray-300 transition-colors text-base sm:text-lg"
+//             >
+//               <KeenIcon icon="book" className="text-sand text-lg sm:text-xl" />
+//               <span>Read Bible</span>
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Profile Setup Progress Section */}
+//         <div className="mb-6">
+//           <div
+//             className="bg-white/60 hover:bg-white/80 dark:bg-gray-300 hover:cursor-pointer dark:hover:bg-gray-400 rounded-2xl shadow-sm py-2 px-6"
+//             onClick={() => setShowProfileSetup(true)}
+//           >
+//             <div className="flex items-center justify-between">
+//               <div className="flex-1">
+//                 <h2 className="font-merriweather text-xl text-primary mb-2">
+//                   Complete Profile Setup
+//                 </h2>
+//                 <p className="text-gray-600 dark:text-gray-700 text-sm">
+//                   {profileProgress}% completed • {100 - profileProgress}% remaining
+//                 </p>
+//               </div>
+//               <div className="flex-shrink-0 ml-4">
+//                 <div className="relative w-20 h-20">
+//                   {/* Circular Progress Background */}
+//                   <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 80 80">
+//                     <circle
+//                       cx="40"
+//                       cy="40"
+//                       r="32"
+//                       stroke="currentColor"
+//                       strokeWidth="6"
+//                       fill="none"
+//                       className="text-gray-200 dark:text-gray-300"
+//                     />
+//                     {/* Progress Circle */}
+//                     <circle
+//                       cx="40"
+//                       cy="40"
+//                       r="32"
+//                       stroke="currentColor"
+//                       strokeWidth="6"
+//                       fill="none"
+//                       strokeLinecap="round"
+//                       className="text-sand transition-all duration-300"
+//                       strokeDasharray={`${2 * Math.PI * 32}`}
+//                       strokeDashoffset={`${2 * Math.PI * 32 * (1 - profileProgress / 100)}`}
+//                     />
+//                   </svg>
+//                   {/* Progress Text */}
+//                   <div className="absolute inset-0 flex items-center justify-center">
+//                     <span className="text-lg font-semibold text-primary">
+//                       {profileProgress}%
+//                     </span>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+
+//         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+
+//           <div className="mb-6 lg:col-span-2">
+//             <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
+//               <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-3 sm:mb-4">
+//                 Your Daily Word
+//               </h2>
+//               <div className="bg-white/40 dark:bg-gray-200 rounded-xl p-3 sm:p-4 relative">
+//                 <div className="mb-3 sm:mb-4">
+                
+//                   <h3 className="font-merriweather text-base sm:text-lg text-primary leading-relaxed mb-2 sm:mb-3">
+//                     "{dashboardData?.daily_word?.reference || 'The Lord is my shepherd; I shall not want...'}"
+//                   </h3>
+//                   <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
+//                     {dashboardData?.daily_word?.context || 'He maketh me to lie down in green pastures...'}
+//                   </p>
+
+
+//                 </div>
+//                 <div className="flex gap-2 sm:gap-3 justify-end">
+//                   <button
+//                     onClick={handleAudioPlay}
+//                     className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
+//                   >
+//                     <LucideVolume2 className='text-white text-sm sm:text-base' />
+//                   </button>
+//                   <button
+//                     onClick={handleReadMore}
+//                     className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
+//                   >
+//                     <LucideBook className='text-white text-sm sm:text-base' />
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+
+         
+
+//           <div className="mb-6 lg:col-span-1">
+//             <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
+//               <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-2">
+//                 Continue Reading
+//               </h2>
+
+//               {dashboardData?.continue_reading ? (
+//                 <>
+//                   <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3">
+//                     {`${dashboardData.continue_reading.book} ${dashboardData.continue_reading.chapter}:${dashboardData.continue_reading.verse} (${dashboardData.continue_reading.version})`}
+//                   </p>
+//                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+//                     <div className="w-full sm:flex-1 bg-white/70 dark:bg-gray-200 rounded-full h-2">
+//                       <div
+//                         className="bg-sand h-2 rounded-full"
+//                         style={{ width: `${dashboardData.continue_reading.progress || 0}%` }}
+//                       ></div>
+//                     </div>
+//                     <button
+//                       onClick={handleResume}
+//                       className="w-full sm:w-auto bg-sand dark:bg-gray-200 dark:hover:bg-sand-300 text-primary dark:text-primary px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-transparent dark:border-gray-400"
+//                     >
+//                       Resume
+//                     </button>
+//                   </div>
+//                 </>
+//               ) : (
+//                 <>
+//                   <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3">
+//                     You haven’t started reading yet.
+//                   </p>
+//                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+//                     <div className="w-full sm:flex-1 bg-white/70 dark:bg-gray-200 rounded-full h-2">
+//                       <div className="bg-sand h-2 rounded-full" style={{ width: '0%' }}></div>
+//                     </div>
+//                     <button
+//                       onClick={handleReadBible}
+//                       className="w-full sm:w-auto bg-sand dark:bg-gray-200 dark:hover:bg-sand-300 text-primary dark:text-primary px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-transparent dark:border-gray-400"
+//                     >
+//                       Start Reading
+//                     </button>
+//                   </div>
+//                 </>
+//               )}
+//             </div>
+//           </div>
+
+
+
+//         </div>
+
+
+
+//         {/* Suggested Reflections Section (Dynamic from API) */}
+//         <div className="mb-6">
+//           <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
+//             <h2 className="font-merriweather text-xl text-primary mb-4">
+//               Suggested Reflections
+//             </h2>
+
+//             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+//               {dashboardData?.daily_word?.suggestions &&
+//                 dashboardData.daily_word.suggestions.length > 0 ? (
+//                 dashboardData.daily_word.suggestions.slice(0, 3).map((reflection: any, index: number) => (
+//                   <div
+//                     key={index}
+//                     className="bg-gray-50 dark:bg-gray-200 rounded-xl p-3 sm:p-4 border border-transparent dark:border-gray-400 hover:shadow-md transition-shadow"
+//                   >
+//                     <div className="flex items-start justify-between mb-3">
+//                       <div className="flex-1 min-w-0">
+//                         <h3 className="font-semibold text-primary text-sm sm:text-base mb-1 truncate">
+//                           {reflection.reference || `Reflection ${index + 1}`}
+//                         </h3>
+//                         <p className="text-gray-600 text-xs sm:text-sm leading-relaxed line-clamp-2">
+//                           {reflection.text || reflection.context || "No description available."}
+//                         </p>
+//                       </div>
+//                       <div className="ml-2 sm:ml-3 flex-shrink-0">
+//                         <div className="w-6 h-6 sm:w-8 sm:h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+//                           <LightbulbIcon className="text-yellow-800 text-xs sm:text-sm" />
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     <div className="flex justify-end">
+//                       <button
+//                         onClick={() => handleStartReflection(reflection.reference)}
+//                         className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
+//                       >
+//                         Start
+//                       </button>
+//                     </div>
+//                   </div>
+//                 ))
+//               ) : (
+//                 <p className="text-gray-600 text-sm">No reflections available.</p>
+//               )}
+//             </div>
+//           </div>
+//         </div>
+
+
+        
+//         <ProfileSetupModal
+//           isOpen={showProfileSetup}
+//           onClose={() => setShowProfileSetup(false)}
+//         />
+//       </div>
+//     </Container>
+//   );
+// };
+
+// export { HomePage };
+
+
+
+
 import { Container } from '@/components/container';
 import { KeenIcon, ProfileSetupModal } from '@/components';
 import { LucideVolume2, LucideBook, LightbulbIcon } from 'lucide-react';
@@ -5,22 +318,18 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
 import { useBible } from '@/providers/BibleProvider';
-
-
+import { useIntl } from 'react-intl';
 
 const HomePage = () => {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const navigate = useNavigate();
   const { selectBook, selectChapter, fetchSingleVerse, books } = useBible();
-
-
   const { dashboardData, loading } = useDashboard();
+  const intl = useIntl();
+
   if (loading) {
-    return <div className="text-center mt-10">Loading dashboard...</div>;
+    return <div className="text-center mt-10">{intl.formatMessage({ id: 'HOME.LOADING_DASHBOARD' })}</div>;
   }
-
-
-  console.log('Dashboard Data:', dashboardData);
 
   const getCurrentDate = () => {
     const date = new Date();
@@ -32,69 +341,46 @@ const HomePage = () => {
     });
   };
 
-  const handleAudioPlay = () => {
-    console.log('Audio play clicked');
-  };
-
-  const handleReadMore = () => {
-    console.log('Read more clicked');
-  };
-
-  const handleResume = () => {
-    console.log('Resume reading clicked');
-  };
-
-  // const handleStartReflection = (title: string) => {
-  //   console.log(`Start reflection: ${title}`);
-  // };
+  const handleAudioPlay = () => console.log('Audio play clicked');
+  const handleReadMore = () => console.log('Read more clicked');
+  const handleResume = () => console.log('Resume reading clicked');
 
   const handleStartReflection = async (reference: string) => {
-  if (!reference) return;
-  const match = reference.match(/([A-Za-z ]+)\s+(\d+):(\d+)/);
-  if (!match) return;
-  
-  const [, bookName, chapter, verse] = match;
-  const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
-  const book = books?.find((b: any) => 
-    b.name.toLowerCase() === bookName.trim().toLowerCase()
-  );
+    if (!reference) return;
+    const match = reference.match(/([A-Za-z ]+)\s+(\d+):(\d+)/);
+    if (!match) return;
 
-  if (book) {
-    await selectBook(book.book_id, book.name);
-    await selectChapter(Number(chapter));
-    await fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
-  }
+    const [, bookName, chapter, verse] = match;
+    const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
+    const book = books?.find((b: any) =>
+      b.name.toLowerCase() === bookName.trim().toLowerCase()
+    );
 
-  navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
-};
+    if (book) {
+      await selectBook(book.book_id, book.name);
+      await selectChapter(Number(chapter));
+      await fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
+    }
 
-
-
+    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+  };
 
   const handleReadBible = () => {
-    console.log('Read Bible clicked');
     navigate('/bible');
   };
 
-  // Profile setup progress (example: 75%)
   const profileProgress = 75;
 
   return (
     <Container>
-      <div className=" mx-auto min-h-screen p-0">
+      <div className="mx-auto min-h-screen p-0">
         {/* Top Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex-1">
-            {/* <h1 className="font-merriweather text-xl sm:text-2xl text-primary">
-              Good Morning, Thomas
-            </h1> */}
             <h1 className="font-merriweather text-xl sm:text-2xl text-primary">
               {dashboardData?.greeting || 'Good Morning'}, {dashboardData?.user?.first_name || 'User'}
             </h1>
-
-            <p className="text-gray-600 text-xs sm:text-sm">
-              {getCurrentDate()}
-            </p>
+            <p className="text-gray-600 text-xs sm:text-sm">{getCurrentDate()}</p>
           </div>
           <div className="relative w-full sm:w-auto sm:min-w-[200px]">
             <button
@@ -102,7 +388,7 @@ const HomePage = () => {
               className="w-full bg-gray-200 text-primary py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-medium flex items-center justify-center gap-3 sm:gap-4 hover:bg-gray-300 transition-colors text-base sm:text-lg"
             >
               <KeenIcon icon="book" className="text-sand text-lg sm:text-xl" />
-              <span>Read Bible</span>
+              <span>{intl.formatMessage({ id: 'HOME.READ_BIBLE' })}</span>
             </button>
           </div>
         </div>
@@ -116,15 +402,17 @@ const HomePage = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h2 className="font-merriweather text-xl text-primary mb-2">
-                  Complete Profile Setup
+                  {intl.formatMessage({ id: 'HOME.COMPLETE_PROFILE_SETUP' })}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-700 text-sm">
-                  {profileProgress}% completed • {100 - profileProgress}% remaining
+                  {intl.formatMessage(
+                    { id: 'HOME.PROFILE_PROGRESS' },
+                    { progress: profileProgress, remaining: 100 - profileProgress }
+                  )}
                 </p>
               </div>
               <div className="flex-shrink-0 ml-4">
                 <div className="relative w-20 h-20">
-                  {/* Circular Progress Background */}
                   <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 80 80">
                     <circle
                       cx="40"
@@ -135,7 +423,6 @@ const HomePage = () => {
                       fill="none"
                       className="text-gray-200 dark:text-gray-300"
                     />
-                    {/* Progress Circle */}
                     <circle
                       cx="40"
                       cy="40"
@@ -149,11 +436,8 @@ const HomePage = () => {
                       strokeDashoffset={`${2 * Math.PI * 32 * (1 - profileProgress / 100)}`}
                     />
                   </svg>
-                  {/* Progress Text */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-lg font-semibold text-primary">
-                      {profileProgress}%
-                    </span>
+                    <span className="text-lg font-semibold text-primary">{profileProgress}%</span>
                   </div>
                 </div>
               </div>
@@ -161,44 +445,34 @@ const HomePage = () => {
           </div>
         </div>
 
+        {/* Your Daily Word Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
-
-          {/* Your Daily Word Section */}
           <div className="mb-6 lg:col-span-2">
             <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
               <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-3 sm:mb-4">
-                Your Daily Word
+                {intl.formatMessage({ id: 'HOME.YOUR_DAILY_WORD' })}
               </h2>
               <div className="bg-white/40 dark:bg-gray-200 rounded-xl p-3 sm:p-4 relative">
                 <div className="mb-3 sm:mb-4">
-                  {/* <h3 className="font-merriweather text-base sm:text-lg text-primary leading-relaxed mb-2 sm:mb-3">
-                    "The Lord is my shepherd; I shall not want..."
-                  </h3>
-                  <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
-                    He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake...
-                  </p> */}
-
                   <h3 className="font-merriweather text-base sm:text-lg text-primary leading-relaxed mb-2 sm:mb-3">
                     "{dashboardData?.daily_word?.reference || 'The Lord is my shepherd; I shall not want...'}"
                   </h3>
                   <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
                     {dashboardData?.daily_word?.context || 'He maketh me to lie down in green pastures...'}
                   </p>
-
-
                 </div>
                 <div className="flex gap-2 sm:gap-3 justify-end">
                   <button
                     onClick={handleAudioPlay}
                     className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
                   >
-                    <LucideVolume2 className='text-white text-sm sm:text-base' />
+                    <LucideVolume2 className="text-white text-sm sm:text-base" />
                   </button>
                   <button
                     onClick={handleReadMore}
                     className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
                   >
-                    <LucideBook className='text-white text-sm sm:text-base' />
+                    <LucideBook className="text-white text-sm sm:text-base" />
                   </button>
                 </div>
               </div>
@@ -206,32 +480,10 @@ const HomePage = () => {
           </div>
 
           {/* Continue Reading Section */}
-          {/* <div className="mb-6 lg:col-span-1">
-            <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
-              <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-2">
-                Continue Reading
-              </h2>
-              <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3">
-                Genesis 3:5-10 (KJV)
-              </p>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                <div className="w-full sm:flex-1 bg-white/70 dark:bg-gray-200 rounded-full h-2">
-                  <div className="bg-sand h-2 rounded-full" style={{ width: '35%' }}></div>
-                </div>
-                <button
-                  onClick={handleResume}
-                  className="w-full sm:w-auto bg-sand dark:bg-gray-200 dark:hover:bg-sand-300 text-primary dark:text-primary px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-transparent dark:border-gray-400"
-                >
-                  Resume
-                </button>
-              </div>
-            </div>
-          </div> */}
-
           <div className="mb-6 lg:col-span-1">
             <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
               <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-2">
-                Continue Reading
+                {intl.formatMessage({ id: 'HOME.CONTINUE_READING' })}
               </h2>
 
               {dashboardData?.continue_reading ? (
@@ -250,14 +502,14 @@ const HomePage = () => {
                       onClick={handleResume}
                       className="w-full sm:w-auto bg-sand dark:bg-gray-200 dark:hover:bg-sand-300 text-primary dark:text-primary px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-transparent dark:border-gray-400"
                     >
-                      Resume
+                      {intl.formatMessage({ id: 'HOME.RESUME' })}
                     </button>
                   </div>
                 </>
               ) : (
                 <>
                   <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3">
-                    You haven’t started reading yet.
+                    {intl.formatMessage({ id: 'HOME.NO_READING_YET' })}
                   </p>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                     <div className="w-full sm:flex-1 bg-white/70 dark:bg-gray-200 rounded-full h-2">
@@ -267,30 +519,25 @@ const HomePage = () => {
                       onClick={handleReadBible}
                       className="w-full sm:w-auto bg-sand dark:bg-gray-200 dark:hover:bg-sand-300 text-primary dark:text-primary px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-transparent dark:border-gray-400"
                     >
-                      Start Reading
+                      {intl.formatMessage({ id: 'HOME.START_READING' })}
                     </button>
                   </div>
                 </>
               )}
             </div>
           </div>
-
-
-
         </div>
 
-
-
-        {/* Suggested Reflections Section (Dynamic from API) */}
+        {/* Suggested Reflections Section */}
         <div className="mb-6">
           <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
             <h2 className="font-merriweather text-xl text-primary mb-4">
-              Suggested Reflections
+              {intl.formatMessage({ id: 'HOME.SUGGESTED_REFLECTIONS' })}
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {dashboardData?.daily_word?.suggestions &&
-                dashboardData.daily_word.suggestions.length > 0 ? (
+              dashboardData.daily_word.suggestions.length > 0 ? (
                 dashboardData.daily_word.suggestions.slice(0, 3).map((reflection: any, index: number) => (
                   <div
                     key={index}
@@ -317,32 +564,41 @@ const HomePage = () => {
                         onClick={() => handleStartReflection(reflection.reference)}
                         className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
                       >
-                        Start
+                        {intl.formatMessage({ id: 'HOME.START' })}
                       </button>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-600 text-sm">No reflections available.</p>
+                <p className="text-gray-600 text-sm">
+                  {intl.formatMessage({ id: 'HOME.NO_REFLECTIONS' })}
+                </p>
               )}
             </div>
           </div>
         </div>
 
-
-        {/* Bottom Global Action Button */}
-        {/*  <div className="fixed bottom-6 left-4 right-4">
-         
-        </div> */}
-
-        {/* Profile Setup Modal */}
-        <ProfileSetupModal
-          isOpen={showProfileSetup}
-          onClose={() => setShowProfileSetup(false)}
-        />
+        <ProfileSetupModal isOpen={showProfileSetup} onClose={() => setShowProfileSetup(false)} />
       </div>
     </Container>
   );
 };
 
 export { HomePage };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

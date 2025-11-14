@@ -93,8 +93,8 @@ const SettingsSidebarContent = () => {
       )}
 
       <div className="flex flex-col items-stretch grow gap-3 sm:gap-5 lg:gap-7.5">
-        {/* <EditProfileCard /> */}
-        <EditProfileCard user={currentUser} />
+        <EditProfileCard />
+        {/* <EditProfileCard user={currentUser} /> */}
 
         <ChangePasswordCard />
 
