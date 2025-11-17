@@ -159,14 +159,16 @@ export const ReflectionProvider = ({ children }: any) => {
   const [allNotes, setAllNotes] = useState<any[]>([]);
   const [notesLoading, setNotesLoading] = useState(false);
 
-  // ✅ Fetch today's reflection (with language param)
+  //  Fetch today's reflection (with language param)
   const fetchDailyReflection = async (timezone = "UTC", personalize = true) => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        `https://api.growondaily.com/api/reflections/daily?timezone=${timezone}&personalize=${personalize}&lang=${currentLanguage.code}`,
-        { withCredentials: true }
-      );
+      // const res = await axios.get(
+      //   `https://api.growondaily.com/api/reflections/daily?timezone=${timezone}&personalize=${personalize}&lang=${currentLanguage.code}`,
+      //   { withCredentials: true }
+      // );
+      const res = await axios.get(`/api/reflections/daily?timezone=${timezone}&personalize=${personalize}&lang=${currentLanguage.code}`, { withCredentials: true });
+
       setDailyReflection(res.data?.data?.reflection || null);
       setError(null);
     } catch (err: any) {
@@ -177,14 +179,16 @@ export const ReflectionProvider = ({ children }: any) => {
     }
   };
 
-  // ✅ Fetch bookmarks (with language param)
+  //  Fetch bookmarks (with language param)
   const fetchBookmarks = async () => {
     try {
       setBmLoading(true);
-      const res = await axios.get(
-        `https://api.growondaily.com/api/bible/bookmarks?limit=100&offset=0&lang=${currentLanguage.code}`,
-        { withCredentials: true }
-      );
+      // const res = await axios.get(
+      //   `https://api.growondaily.com/api/bible/bookmarks?limit=100&offset=0&lang=${currentLanguage.code}`,
+      //   { withCredentials: true }
+      // );
+      const res = await axios.get(`/api/bible/bookmarks?limit=100&offset=0&lang=${currentLanguage.code}`, { withCredentials: true });
+
       if (res.data?.status === 1) {
         const list = res.data.data.bookmarks || [];
         setBookmarks(list);
@@ -196,14 +200,17 @@ export const ReflectionProvider = ({ children }: any) => {
     }
   };
 
-  // ✅ Fetch all notes (with language param)
+  // Fetch all notes (with language param)
   const fetchAllNotes = async () => {
     try {
       setNotesLoading(true);
-      const res = await axios.get(
-        `https://api.growondaily.com/api/reflections/notes?lang=${currentLanguage.code}`,
-        { withCredentials: true }
-      );
+      // const res = await axios.get(
+      //   `https://api.growondaily.com/api/reflections/notes?lang=${currentLanguage.code}`,
+      //   { withCredentials: true }
+      // );
+
+      const res = await axios.get(`/api/reflections/notes?lang=${currentLanguage.code}`, { withCredentials: true });
+
       if (res.data?.status === 1) {
         const notes = res.data.data?.notes || [];
         setAllNotes(notes);
@@ -219,13 +226,15 @@ export const ReflectionProvider = ({ children }: any) => {
     }
   };
 
-  // ✅ Delete note (no need for language param)
+  // Delete note (no need for language param)
   const deleteNote = async (noteId: string) => {
     try {
-      const res = await axios.delete(
-        `https://api.growondaily.com/api/reflections/notes/${noteId}`,
-        { withCredentials: true }
-      );
+      // const res = await axios.delete(
+      //   `https://api.growondaily.com/api/reflections/notes/${noteId}`,
+      //   { withCredentials: true }
+      // );
+      const res = await axios.delete(`/api/reflections/notes/${noteId}`, { withCredentials: true });
+
 
       if (res.data?.status === 1) {
         setAllNotes((prev) => prev.filter((n) => n.note_id !== noteId));
@@ -238,7 +247,7 @@ export const ReflectionProvider = ({ children }: any) => {
     }
   };
 
-  // ✅ Re-fetch data whenever language changes
+  //  Re-fetch data whenever language changes
   useEffect(() => {
     fetchDailyReflection();
     fetchBookmarks();

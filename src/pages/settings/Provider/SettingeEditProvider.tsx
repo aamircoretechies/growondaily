@@ -25,15 +25,24 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
     try {
       setLoading(true);
       const token = localStorage.getItem("accessToken");
-      const response = await axios.put("https://api.growondaily.com/api/auth/profile",
+      // const response = await axios.put("https://api.growondaily.com/api/auth/profile",
+      //   updatedData,
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
+      const response = await axios.put("/api/auth/profile",
         updatedData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+            "Content-Type": "application/json"
+          }
+        });
+
 
       if (response.data.status === 1) {
         const updatedUser = response.data.data.user;
@@ -57,15 +66,18 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
       setLoading(true);
       const token = localStorage.getItem("accessToken");
 
-      const response = await axios.put("https://api.growondaily.com/api/auth/change-password",
-        passwordData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      // const response = await axios.put("https://api.growondaily.com/api/auth/change-password",
+      //   passwordData,
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
+
+      const response = await axios.put("/api/auth/change-password", passwordData, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
+
 
       if (response.data.status === 1) {
         return { success: true, message: "Password changed successfully" };
@@ -87,14 +99,16 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
       setLoading(true);
       const token = localStorage.getItem("accessToken");
 
-      const response = await axios.get("https://api.growondaily.com/api/notifications/preferences",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      // const response = await axios.get("https://api.growondaily.com/api/notifications/preferences",
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
+      const response = await axios.get("/api/notifications/preferences", { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
+
 
       if (response.data.status === 1) {
         return {
@@ -124,15 +138,17 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
     try {
       setLoading(true);
       const token = localStorage.getItem("accessToken");
-      const response = await axios.put("https://api.growondaily.com/api/notifications/preferences",
-        preferences,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      // const response = await axios.put("https://api.growondaily.com/api/notifications/preferences",
+      //   preferences,
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
+      const response = await axios.put("/api/notifications/preferences", preferences, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
+
 
       if (response.data.status === 1) {
         return { success: true, message: "Notification preferences updated successfully" };
@@ -149,43 +165,45 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
 
   // Function to select language for onboarding
   const selectLanguage = async (language_code: string) => {
-  try {
-    setLoading(true);
-    const token = localStorage.getItem("accessToken");
-    const response = await axios.post(
-      "https://api.growondaily.com/api/auth/select-language",
-      { language_code },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("accessToken");
+      // const response = await axios.post(
+      //   "https://api.growondaily.com/api/auth/select-language",
+      //   { language_code },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
+      const response = await axios.post("/api/auth/select-language", { language_code }, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
+
+
+      if (response.data.status === 1) {
+        const updatedUser = { ...user, language_code };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        // Persist i18n config and update TranslationProvider
+        const selectedLang = I18N_LANGUAGES.find((l) => l.code === language_code);
+        if (selectedLang) {
+          setData(I18N_CONFIG_KEY, selectedLang); // persist
+          changeLanguage(selectedLang); // update context immediately
+        }
+
+        return { success: true, message: response.data.message || "Language selected successfully" };
+      } else {
+        return { success: false, message: response.data.message || "Failed to select language" };
       }
-    );
-
-    if (response.data.status === 1) {
-      const updatedUser = { ...user, language_code };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-
-      // Persist i18n config and update TranslationProvider
-      const selectedLang = I18N_LANGUAGES.find((l) => l.code === language_code);
-      if (selectedLang) {
-        setData(I18N_CONFIG_KEY, selectedLang); // persist
-        changeLanguage(selectedLang); // update context immediately
-      }
-
-      return { success: true, message: response.data.message || "Language selected successfully" };
-    } else {
-      return { success: false, message: response.data.message || "Failed to select language" };
+    } catch (error: any) {
+      console.error("Error selecting language:", error);
+      return { success: false, message: error.response?.data?.message || "Something went wrong" };
+    } finally {
+      setLoading(false);
     }
-  } catch (error: any) {
-    console.error("Error selecting language:", error);
-    return { success: false, message: error.response?.data?.message || "Something went wrong" };
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   // const { changeLanguage } = useLanguage();

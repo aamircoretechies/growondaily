@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import { useAuthContext } from "@/auth";
 
 interface DashboardContextType {
   dashboardData: any;
@@ -15,20 +16,34 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+   const { auth,currentUser } = useAuthContext(); 
+
   const fetchDashboardData = async () => {
+    console.log("dashboard");
+    if (!auth?.access_token) return;
     try {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem("token"); 
-      const res = await axios.post("https://api.growondaily.com/api/dashboard",
+      const token = localStorage.getItem("token");
+      // const res = await axios.post("https://api.growondaily.com/api/dashboard",
+      //   {},
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      //   }
+      // );
+      const res = await axios.post("/api/dashboard",
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            // Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${auth.access_token}`, 
           },
         }
       );
+
 
       if (res.data.status === 1) {
         setDashboardData(res.data.data);
@@ -43,9 +58,21 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  // useEffect(() => {
+  //   fetchDashboardData();
+  // }, []);
+
+  //  useEffect(() => {
+  //   if (auth?.access_token) {
+  //     fetchDashboardData();    
+  //   }
+  // }, []);
+
   useEffect(() => {
+  if (auth?.access_token && currentUser) {
     fetchDashboardData();
-  }, []);
+  }
+}, [currentUser]);
 
   return (
     <DashboardContext.Provider

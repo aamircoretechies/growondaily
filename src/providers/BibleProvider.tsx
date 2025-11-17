@@ -116,7 +116,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     const fetchBooks = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("https://api.growondaily.com/api/bible/books");
+        // const res = await axios.get("https://api.growondaily.com/api/bible/books");
+        const res = await axios.get("/api/bible/books");
+
         const data = res.data?.data?.books || [];
         setBooks(data);
 
@@ -160,7 +162,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchChapters = async (bookId: string, version: string) => {
     try {
       setLoading(true);
-      const url = `https://api.growondaily.com/api/bible/books/${bookId}/chapters/${version}`;
+      // const url = `https://api.growondaily.com/api/bible/books/${bookId}/chapters/${version}`;
+      const url = `/api/bible/books/${bookId}/chapters/${version}`;
+
       const res = await axios.get(url);
       setChapters(res.data?.data?.chapters || []);
     } catch (err) {
@@ -174,7 +178,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchVerses = async (bookId: string, chapter: number, version: string) => {
     try {
       setLoading(true);
-      const url = `https://api.growondaily.com/api/bible/books/${bookId}/chapters/${chapter}/verses/${version}`;
+      // const url = `https://api.growondaily.com/api/bible/books/${bookId}/chapters/${chapter}/verses/${version}`;
+      const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${version}`;
+
       const res = await axios.get(url);
       setVerses(res.data?.data?.verses || []);
       setSelectedVerse(null);
@@ -229,7 +235,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   ) => {
     try {
       setLoading(true);
-      const url = `https://api.growondaily.com/api/bible/books/${bookId}/chapters/${chapter}/verses/${verse}/${version}`;
+      // const url = `https://api.growondaily.com/api/bible/books/${bookId}/chapters/${chapter}/verses/${verse}/${version}`;
+      const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${verse}/${version}`
       const res = await axios.get(url);
       const verseData = res.data?.data?.verse as Verse | undefined;
       setSelectedVerse(verseData || null);
@@ -241,36 +248,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // const fetchDeepStudy = async (bookId: string, chapter: number, version: string) => {
-  //   try {
-  //     setLoading(true);
-
-  //     const contexts = ["original", "explanations", "historical", "cultural", "theological", "practical", "commentary", "ground_text", "special", "daily_life", "cross_reference", "key_takeaways", "reflection",];
-
-  //     const requests = contexts.map(ctx =>
-  //       axios
-  //         .get(`https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${version}?deep-study-context=${ctx}`)
-  //         .then(res => ({ [ctx]: res.data?.data || null }))
-  //         .catch(() => ({ [ctx]: null }))
-  //     );
-
-  //     const results = await Promise.all(requests);
-  //     const allResponses = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-
-  //     setDeepStudyData((prev: any) => ({
-  //       ...prev,
-  //       [`${bookId}-${chapter}`]: allResponses,
-  //     }));
-
-  //     return allResponses;
-  //   } catch (error) {
-  //     console.error("Deep Study Fetch Error:", error);
-  //     setDeepStudyData(null);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
+  
   const fetchDeepStudy = async (
     bookId: string,
     chapter: number,
@@ -297,9 +275,13 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       ];
 
       // Check if verse is passed
+      // const baseUrl = verse
+      //   ? `https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}`
+      //   : `https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${version}`;
       const baseUrl = verse
-        ? `https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}`
-        : `https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${version}`;
+        ? `/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}`
+        : `/api/bible/deep-study/${bookId}/${chapter}/${version}`;
+
 
       const requests = contexts.map((ctx) =>
         axios
@@ -343,7 +325,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
 
       const requests = contexts.map(ctx =>
         axios
-          .get(`https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}?deep-study-context=${ctx}`)
+          // .get(`https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}?deep-study-context=${ctx}`)
+          .get(`/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}?deep-study-context=${ctx}`)
           .then(res => ({ [ctx]: res.data?.data || null }))
           .catch(() => ({ [ctx]: null }))
       );
@@ -380,10 +363,12 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       // API call (chapter vs verse note)
       if (verse === 0) {
         const payload = { book_id, chapter, content, emotion_tags };
-        res = await axios.post("https://api.growondaily.com/api/bible/chapter-notes", payload);
+        // res = await axios.post("https://api.growondaily.com/api/bible/chapter-notes", payload);
+        res = await axios.post("/api/bible/chapter-notes", payload);
       } else {
         const payload = { book_id, chapter, verse, content, emotion_tags };
-        res = await axios.post("https://api.growondaily.com/api/bible/notes", payload);
+        // res = await axios.post("https://api.growondaily.com/api/bible/notes", payload);
+        res = await axios.post("/api/bible/notes", payload);
       }
 
       // Save local backup
@@ -442,9 +427,13 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
 
   const toggleVerseBookmark = async (book: string, chapter: number, verse: number, version: string) => {
     try {
-      const res = await axios.post("https://api.growondaily.com/api/bible/toggle-verse-bookmark",
+      // const res = await axios.post("https://api.growondaily.com/api/bible/toggle-verse-bookmark",
+      //   { book, chapter, verse, version }
+      // );
+      const res = await axios.post("/api/bible/toggle-verse-bookmark",
         { book, chapter, verse, version }
       );
+
 
       const data = res.data;
       if (data?.status === 1) {

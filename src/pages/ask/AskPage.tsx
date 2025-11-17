@@ -208,11 +208,13 @@ const AskPage = () => {
   ]);
 
   const [inputText, setInputText] = useState("");
+  // const [inputText, setInputText] = useState("");
+  // const [isTyping, setIsTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
-
+    
     const newMessage: Message = {
       id: Date.now().toString(),
       type: "user",
@@ -231,14 +233,14 @@ const AskPage = () => {
             {
               role: "system",
               content: `You are a knowledgeable and spiritually insightful Bible assistant. 
-When a user asks a question, respond clearly and faithfully based on the Bible. 
-Include the relevant Bible verse reference if possible.
+                When a user asks a question, respond clearly and faithfully based on the Bible. 
+                Include the relevant Bible verse reference if possible.
 
-Your output should follow this format:
-{
-  "answer": "Full, clear answer with spiritual meaning and short reflection.",
-  "reference": "Book Chapter:Verse (if applicable)"
-}`,
+                Your output should follow this format:
+                {
+                  "answer": "Full, clear answer with spiritual meaning and short reflection.",
+                  "reference": "Book Chapter:Verse (if applicable)"
+                }`,
             },
             {
               role: "user",
@@ -284,7 +286,7 @@ Your output should follow this format:
         id: (Date.now() + 1).toString(),
         type: "ai",
         content:
-          "Sorry, I couldn’t fetch a response right now. Please try again later.",
+          "Sorry, I couldn't fetch a response right now. Please try again later.",
         timestamp: "Error",
         reference: "",
       };

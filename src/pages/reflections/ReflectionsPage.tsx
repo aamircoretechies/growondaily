@@ -739,7 +739,8 @@ const ReflectionsPage = () => {
             </div>
 
             <h4 className="font-merriweather text-sm text-gray-600 mb-2">
-              Showing 2 Items
+              {/* Showing 2 Items */}
+              Showing {latestNotes.length} Item{latestNotes.length !== 1 ? "s" : ""}
             </h4>
 
             {/* Journal Entries List */}
@@ -919,7 +920,8 @@ const ReflectionsPage = () => {
             </div>
 
             <h4 className="font-merriweather text-sm text-gray-600 mb-2">
-              Showing {bookmarks && bookmarks.length > 0 ? Math.min(2, bookmarks.length) : 2} Items
+              {/* Showing {bookmarks && bookmarks.length > 0 ? Math.min(2, bookmarks.length) : 2} Items */}
+              Showing {Math.min(2, bookmarks?.length || 0)} Item{Math.min(2, bookmarks?.length || 0) !== 1 ? "s" : ""}
             </h4>
 
             <div className="space-y-4">

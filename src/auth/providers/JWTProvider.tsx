@@ -1,33 +1,568 @@
+// /* eslint-disable no-unused-vars */
+// import axios, { AxiosResponse } from 'axios';
+// import {
+//   createContext,
+//   type Dispatch,
+//   type PropsWithChildren,
+//   type SetStateAction,
+//   useEffect,
+//   useState
+// } from 'react';
+
+// import * as authHelper from '../_helpers';
+// import { type AuthModel, type UserModel } from '@/auth';
+
+// const API_URL = import.meta.env.VITE_APP_API_URL;
+// // export const LOGIN_URL = `${API_URL}/login`;
+// export const LOGIN_URL = `/api/auth/login`;
+
+// // export const REGISTER_URL = `${API_URL}/register`;
+// export const REGISTER_URL = `/api/auth/create-account`;
+// export const FORGOT_PASSWORD_URL = `/api/auth/forgot-password`;
+// // export const RESET_PASSWORD_URL = `${API_URL}/reset-password`;
+// export const RESET_PASSWORD_URL = `/api/auth/reset-password`;
+// // export const GET_USER_URL = `${API_URL}/user`;
+// export const GET_USER_URL = `/api/auth/profile`;
+
+// import { signInWithPopup } from "firebase/auth";
+// import { auth as firebaseAuth, googleProvider } from "@/firebaseConfig";
+
+
+
+// interface AuthContextProps {
+//   loading: boolean;
+//   setLoading: Dispatch<SetStateAction<boolean>>;     
+//   auth: AuthModel | undefined;
+//   saveAuth: (auth: AuthModel | undefined) => void;
+//   currentUser: UserModel | undefined;
+//   setCurrentUser: Dispatch<SetStateAction<UserModel | undefined>>;
+//   login: (email: string, password: string) => Promise<void>;
+//   loginWithGoogle?: () => Promise<boolean>;
+//   loginWithFacebook?: () => Promise<void>;
+//   loginWithGithub?: () => Promise<void>;
+//   register: (email: string, password: string, password_confirmation: string) => Promise<{ success: boolean; data?: any }>;
+//   requestPasswordResetLink: (email: string) => Promise<void>;
+//   changePassword: (
+//     email: string,
+//     token: string,
+//     password: string,
+//     password_confirmation: string
+//   ) => Promise<void>;
+//   // getUser: () => Promise<AxiosResponse<any>>;
+//   getUser: (tokenFromLogin?: string) => Promise<UserModel>;
+//   saveUserPreferences: (preferencesData: any) => Promise<any>;
+//   updateUserPreferences: (preferencesData: any) => Promise<any>;
+//   saveOrUpdateUserPreferences: (preferencesData: any) => Promise<any>;
+
+//   logout: () => void;
+//   verify: () => Promise<void>;
+// }
+
+// const AuthContext = createContext<AuthContextProps | null>(null);
+
+// const AuthProvider = ({ children }: PropsWithChildren) => {
+//   const [loading, setLoading] = useState(true);
+//   const [auth, setAuth] = useState<AuthModel | undefined>(authHelper.getAuth());
+//   const [currentUser, setCurrentUser] = useState<UserModel | undefined>();
+
+//   const verify = async () => {
+//     if (auth) {
+//       try {
+//         const user = await getUser();
+
+//         setCurrentUser(user);
+//       } catch {
+//         saveAuth(undefined);
+//         setCurrentUser(undefined);
+//       }
+//     }
+//   };
+
+//   const saveAuth = (auth: AuthModel | undefined) => {
+//     setAuth(auth);
+//     if (auth) {
+//       authHelper.setAuth(auth);
+//     } else {
+//       authHelper.removeAuth();
+//     }
+//   };
+
+//   // Initialize user on app load or when auth changes
+//   useEffect(() => {
+//     const init = async () => {
+//       try {
+//         if (auth) {
+//           await verify();
+//         }
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     init();
+//     // eslint-disable-next-line react-hooks/exhaustive-deps
+//   }, [auth?.access_token]);
+
+
+//   const login = async (email: string, password: string) => {
+//     console.log("this is user input", email, password);
+//     try {
+//       const response = await axios.post(LOGIN_URL,
+//         { email, password },
+//         { withCredentials: true }
+//       );
+
+//       console.log("LOGIN RESPONSE:", response.data);
+
+//       const authData = response.data.data;
+
+//       if (!authData?.token) {
+//         throw new Error("No token found in response");
+//       }
+//       const auth: AuthModel = {
+//         access_token: authData.token,
+//         api_token: authData.token,
+//         refreshToken: undefined
+//       };
+//       saveAuth(auth);
+//       const user = await getUser(authData.token);
+//       setCurrentUser(user);
+//     } catch (error: any) {
+//       console.error("LOGIN ERROR:", error);
+//       saveAuth(undefined);
+//       throw new Error(`Error ${error}`);
+//     }
+//   };
+
+
+//   const register = async (email: string, password: string, password_confirmation: string) => {
+//     try {
+//       const { data: auth } = await axios.post(REGISTER_URL, {
+//         email,
+//         password,
+//         re_password: password_confirmation,
+//       });
+
+//       console.log("REGISTER_URL:", REGISTER_URL);
+//       console.log("REGISTER RESPONSE:", auth);
+
+//       if (auth?.success || auth?.message?.toLowerCase().includes("success")) {
+//         return { success: true, data: auth };
+//       }
+
+//       return { success: false, data: auth };
+//     } catch (error: any) {
+//       saveAuth(undefined);
+//       console.error("REGISTER ERROR:", error.response?.data || error.message);
+
+//       if (error.response?.data?.message) {
+//         throw new Error(error.response.data.message);
+//       } else {
+//         throw new Error(error.message || "Registration failed. Please try again.");
+//       }
+//     }
+//   };
+
+
+
+
+//   // const requestPasswordResetLink = async (email: string) => {
+//   //   await axios.post(FORGOT_PASSWORD_URL, {
+//   //     email
+//   //   });
+//   // };
+//   const requestPasswordResetLink = async (email: string) => {
+//     console.log("Sending forgot password request for:", email);
+//     console.log("API URL:", FORGOT_PASSWORD_URL);
+
+//     try {
+//       const response = await axios.post(FORGOT_PASSWORD_URL, { email });
+
+//       console.log("Forgot password API success:", response.data);
+//       return response.data;
+//     } catch (error: any) {
+//       console.error("Forgot password API error:", error.response?.data || error.message);
+//       throw error;
+//     }
+//   };
+
+
+//   const changePassword = async (
+//     email: string,
+//     token: string,
+//     password: string,
+//     password_confirmation: string
+//   ) => {
+//     await axios.post(RESET_PASSWORD_URL, {
+//       email,
+//       token,
+//       password,
+//       password_confirmation
+//     });
+//   };
+
+//   // const getUser = async () => {
+//   //   return await axios.get<UserModel>(GET_USER_URL);
+//   // };
+
+
+//   // Profile GET API, in Context way 
+//   const getUser = async (tokenFromLogin?: string): Promise<UserModel> => {
+//     const token = tokenFromLogin || auth?.access_token || auth?.api_token;
+//     if (!token) throw new Error("No token found");
+
+//     console.log("GET_USER TOKEN:", token);
+
+//     try {
+//       const response = await axios.get(GET_USER_URL, {
+//         headers: { Authorization: `Bearer ${token}` },
+//         withCredentials: false,
+//       });
+//       const apiUser = response.data?.data?.user as UserModel;
+//       const apiPreferences = response.data?.data?.preferences;
+//       // Merge preferences into the user for easier hydration downstream
+//       return { ...apiUser, preferences: apiPreferences } as UserModel;
+
+//     } catch (error: any) {
+//       console.error("PROFILE ERROR:", error.response?.data || error);
+//       throw error;
+//     }
+//   };
+
+//   const saveUserPreferences = async (preferencesData: any) => {
+//     // Prefer token from in-memory auth state; fall back to helper
+//     let token = auth?.access_token || auth?.api_token || authHelper.getAuth()?.access_token || authHelper.getAuth()?.api_token || "";
+
+//     if (!token) {
+//       throw new Error("No auth token found. Please login first.");
+//     }
+
+//     console.log("Saving user preferences:", preferencesData);
+
+//     try {
+//       // Transform UI-shaped preferences into backend canonical format
+//       const toBackendEnum = (value: string) =>
+//         (value || '')
+//           .trim()
+//           .toUpperCase()
+//           .replace(/[^A-Z0-9]+/g, '_')
+//           .replace(/^_|_$/g, '');
+
+//       const experienceMap: Record<string, string> = {
+//         'FIRST TIME': 'FIRST_TIME',
+//         'OCCASIONAL': 'OCCASIONAL',
+//         'REGULAR': 'REGULAR',
+//         'THEOLOGICAL': 'THEOLOGICAL',
+//       };
+
+//       const payloadPreferences = {
+//         language_code: 'en',
+//         bible_version: (preferencesData?.translations?.[0]?.split(' - ')[0] || 'KJV').toUpperCase(),
+//         depth_level: preferencesData?.depth?.includes('Short')
+//           ? 'short'
+//           : preferencesData?.depth?.includes('Medium')
+//             ? 'medium'
+//             : 'deep',
+//         experience_with_bible: [
+//           experienceMap[(preferencesData?.experience || '').toString().toUpperCase()] ||
+//           toBackendEnum(preferencesData?.experience || 'First Time'),
+//         ],
+//         what_brings_you: Array.isArray(preferencesData?.brings)
+//           ? preferencesData.brings.join(', ')
+//           : preferencesData?.brings || '',
+//         engagement_preference: Array.isArray(preferencesData?.engage)
+//           ? preferencesData.engage.map((e: string) => toBackendEnum(e))
+//           : preferencesData?.engage
+//             ? [toBackendEnum(preferencesData.engage)]
+//             : [],
+//         explanation_style: (preferencesData?.explain || '').toLowerCase().includes('simple')
+//           ? 'simple'
+//           : (preferencesData?.explain || '').toLowerCase().includes('deeper')
+//             ? 'balanced'
+//             : 'balanced',
+//         receive_daily: preferencesData?.dailyPref === 'Daily',
+//         historical_context: true,
+//         ground_text_analysis: true,
+//         special_insights: true,
+//         daily_life_application: true,
+//         cross_reference: true,
+//         commentary_insights: true,
+//         key_takeaways: true,
+//         reflection_prompts: true,
+//       };
+
+//       const response = await axios.post(`${API_URL}/api/auth/preferences`,
+//         { preferences: payloadPreferences },
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//             "Content-Type": "application/json",
+//           },
+//           withCredentials: false,
+//         }
+//       );
+
+//       console.log(" Preferences API Response:", response.data);
+
+//       const updatedUser = await getUser(token);
+//       setCurrentUser(updatedUser);
+
+//       return response.data;
+//     } catch (error: any) {
+//       console.error(" Preferences API Error:", error.response?.data || error.message);
+//       throw error;
+//     }
+//   };
+
+//   const updateUserPreferences = async (preferencesData: any) => {
+//     let token = auth?.access_token || auth?.api_token || authHelper.getAuth()?.access_token || authHelper.getAuth()?.api_token || "";
+
+//     if (!token) {
+//       throw new Error("No auth token found. Please login first.");
+//     }
+
+//     console.log("Updating user preferences:", preferencesData);
+
+//     try {
+//       const toBackendEnum = (value: string) =>
+//         (value || '')
+//           .trim()
+//           .toUpperCase()
+//           .replace(/[^A-Z0-9]+/g, '_')
+//           .replace(/^_|_$/g, '');
+
+//       const experienceMap: Record<string, string> = {
+//         'FIRST TIME': 'NEW_TO_BIBLE',
+//         'OCCASIONAL': 'SOME_KNOWLEDGE',
+//         'REGULAR': 'REGULAR_STUDY',
+//         'THEOLOGICAL': 'ADVANCED_THEOLOGY',
+//       };
+
+//       const payloadPreferences = {
+//         language_code: 'en',
+//         bible_version: (preferencesData?.translations?.[0]?.split(' - ')[0] || 'KJV').toUpperCase(),
+//         depth_level: preferencesData?.depth?.includes('Short')
+//           ? 'short'
+//           : preferencesData?.depth?.includes('Medium')
+//             ? 'medium'
+//             : 'deep',
+//         experience_with_bible: [
+//           experienceMap[(preferencesData?.experience || '').toString().toUpperCase()] ||
+//           toBackendEnum(preferencesData?.experience || 'First Time'),
+//         ],
+//         what_brings_you: Array.isArray(preferencesData?.brings)
+//           ? preferencesData.brings.join(', ')
+//           : preferencesData?.brings || '',
+//         engagement_preference: Array.isArray(preferencesData?.engage)
+//           ? preferencesData.engage.map((e: string) => toBackendEnum(e))
+//           : preferencesData?.engage
+//             ? [toBackendEnum(preferencesData.engage)]
+//             : [],
+//         explanation_style: (preferencesData?.explain || '').toLowerCase().includes('simple')
+//           ? 'simple'
+//           : (preferencesData?.explain || '').toLowerCase().includes('deeper')
+//             ? 'balanced'
+//             : 'balanced',
+//         receive_daily: preferencesData?.dailyPref === 'Daily',
+//         historical_context: true,
+//         ground_text_analysis: true,
+//         special_insights: true,
+//         daily_life_application: true,
+//         cross_reference: true,
+//         commentary_insights: true,
+//         key_takeaways: true,
+//         reflection_prompts: true,
+//       };
+
+//       const response = await axios.put(`${API_URL}/api/auth/preferences`,
+//         { preferences: payloadPreferences },
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//             "Content-Type": "application/json",
+//           },
+//           withCredentials: false,
+//         }
+//       );
+
+//       console.log(" Preferences PUT Response:", response.data);
+
+//       const updatedUser = await getUser(token);
+//       setCurrentUser(updatedUser);
+
+//       return response.data;
+//     } catch (error: any) {
+//       console.error(" Preferences PUT Error:", error.response?.data || error.message);
+//       throw error;
+//     }
+//   };
+
+//   const saveOrUpdateUserPreferences = async (preferencesData: any) => {
+//     if (currentUser?.is_preference_setup_done) {
+//       return updateUserPreferences(preferencesData);
+//     }
+//     return saveUserPreferences(preferencesData);
+//   };
+
+
+
+//   const loginWithGoogle = async (): Promise<boolean> => {
+//   console.log(" [Step 1] Google login started...");
+
+//   try {
+//     console.log("  Opening Google popup...");
+//     const result = await signInWithPopup(firebaseAuth, googleProvider);
+//     const user = result.user;
+//     console.log(" Firebase Google User:", {
+//       uid: user.uid,
+//       email: user.email,
+//       displayName: user.displayName,
+//       photoURL: user.photoURL,
+//     });
+
+//     console.log("[Step 4] Getting Firebase ID token...");
+//     const firebaseToken = await user.getIdToken();
+//     console.log("Firebase ID Token received:", firebaseToken);
+
+//     console.log(" Sending token to backend API...");
+//     const response = await axios.post(
+//       `${API_URL}/api/auth/google-login`,
+//       {
+//         id_token: firebaseToken, 
+//         uid: user.uid,
+//         email: user.email,
+//       },
+//       { withCredentials: false }
+//     );
+
+//     console.log(" Backend Google Login Response:", response.data);
+
+//     const responseData = response.data?.data;
+//     if (!responseData) {
+//       console.error(" Invalid response structure from backend:", response.data);
+//       throw new Error("Invalid response structure from Google login API");
+//     }
+
+//     const token = responseData.token;
+//     if (!token) {
+//       console.error(" Backend returned no token:", response.data);
+//       throw new Error("No token returned from Google login API");
+//     }
+
+//     console.log("Token received from backend:", token);
+
+//     const authData: AuthModel = {
+//       access_token: token,
+//       api_token: token,
+//       refreshToken: undefined,
+//     };
+//     console.log("Saving auth data:", authData);
+//     saveAuth(authData);
+
+//     let userProfile: UserModel;
+//     if (responseData.user) {
+//       console.log(" Using user data from backend...");
+//       userProfile = responseData.user as UserModel;
+//       setCurrentUser(userProfile);
+//     } else {
+//       console.log(" Fetching user data from /me API...");
+//       userProfile = await getUser(token);
+//       setCurrentUser(userProfile);
+//     }
+
+//     console.log(" Google login successful — User Profile:", userProfile);
+//     console.log(" Google login process completed successfully ");
+//     return true;
+//   } catch (error: any) {
+//     if (error.code === "auth/popup-closed-by-user") {
+//       console.warn(" Popup Closed User closed the Google login popup manually.");
+//       return false;
+//     }
+
+//     console.error("Google Login Error:", {
+//       message: error.message,
+//       code: error.code,
+//       backendError: error.response?.data,
+//     });
+
+//     saveAuth(undefined);
+//     setCurrentUser(undefined);
+//     throw error;
+//   }
+// };
+
+
+
+
+
+
+
+//   const logout = () => {
+//     saveAuth(undefined);
+//     setCurrentUser(undefined);
+//   };
+
+//   return (
+//     <AuthContext.Provider
+//       value={{
+//         loading,
+//         setLoading,
+//         auth,
+//         saveAuth,
+//         currentUser,
+//         setCurrentUser,
+//         login,
+//         register,
+//         requestPasswordResetLink,
+//         changePassword,
+//         getUser,
+//         saveUserPreferences,
+//         updateUserPreferences,
+//         saveOrUpdateUserPreferences,
+//         loginWithGoogle,
+//         logout,
+//         verify
+//       }}
+//     >
+//       {children}
+//     </AuthContext.Provider>
+//   );
+// };
+
+// export { AuthContext, AuthProvider };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* eslint-disable no-unused-vars */
 import axios, { AxiosResponse } from 'axios';
-import {
-  createContext,
-  type Dispatch,
-  type PropsWithChildren,
-  type SetStateAction,
-  useEffect,
-  useState
-} from 'react';
+import { createContext, type Dispatch, type PropsWithChildren, type SetStateAction, useEffect, useState } from 'react';
 
 import * as authHelper from '../_helpers';
 import { type AuthModel, type UserModel } from '@/auth';
 
 const API_URL = import.meta.env.VITE_APP_API_URL;
-// export const LOGIN_URL = `${API_URL}/login`;
-export const LOGIN_URL = `${API_URL}/api/auth/login`;
-
-// export const REGISTER_URL = `${API_URL}/register`;
-export const REGISTER_URL = `${API_URL}/api/auth/create-account`;
-export const FORGOT_PASSWORD_URL = `${API_URL}/api/auth/forgot-password`;
-// export const RESET_PASSWORD_URL = `${API_URL}/reset-password`;
-export const RESET_PASSWORD_URL = `${API_URL}/api/auth/reset-password`;
-// export const GET_USER_URL = `${API_URL}/user`;
-export const GET_USER_URL = `${API_URL}/api/auth/profile`;
+export const LOGIN_URL = `/api/auth/login`;
+export const REGISTER_URL = `/api/auth/create-account`;
+export const FORGOT_PASSWORD_URL = `/api/auth/forgot-password`;
+export const RESET_PASSWORD_URL = `/api/auth/reset-password`;
+export const GET_USER_URL = `/api/auth/profile`;
 
 import { signInWithPopup } from "firebase/auth";
 import { auth as firebaseAuth, googleProvider } from "@/firebaseConfig";
-
-
 
 interface AuthContextProps {
   loading: boolean;
@@ -48,14 +583,16 @@ interface AuthContextProps {
     password: string,
     password_confirmation: string
   ) => Promise<void>;
-  // getUser: () => Promise<AxiosResponse<any>>;
   getUser: (tokenFromLogin?: string) => Promise<UserModel>;
-  saveUserPreferences: (preferencesData: any) => Promise<any>;
-  updateUserPreferences: (preferencesData: any) => Promise<any>;
-  saveOrUpdateUserPreferences: (preferencesData: any) => Promise<any>;
-
+  saveUserPreferences: (preferencesData: any) => Promise<UserModel>;
+  updateUserPreferences: (preferencesData: any) => Promise<UserModel>;
+  saveOrUpdateUserPreferences: (preferencesData: any) => Promise<UserModel | null>;
   logout: () => void;
   verify: () => Promise<void>;
+  profileProgress: number;
+  setProfileProgress: Dispatch<SetStateAction<number>>;
+  refreshDashboard: () => Promise<void>;
+  updateProfileImage: (file: File) => Promise<UserModel | null>;
 }
 
 const AuthContext = createContext<AuthContextProps | null>(null);
@@ -64,12 +601,32 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   const [loading, setLoading] = useState(true);
   const [auth, setAuth] = useState<AuthModel | undefined>(authHelper.getAuth());
   const [currentUser, setCurrentUser] = useState<UserModel | undefined>();
+  const [profileProgress, setProfileProgress] = useState(Number(localStorage.getItem("profileProgress") || 0));
+
+  const refreshDashboard = async () => {
+    try {
+      const updated = await getUser();
+      if (updated) {
+        setCurrentUser(updated);
+      }
+    } catch (err) {
+      console.error("Failed to refresh dashboard", err);
+    }
+  };
+
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("profileProgress", String(profileProgress));
+    } catch (err) {
+    }
+  }, [profileProgress]);
+
 
   const verify = async () => {
     if (auth) {
       try {
         const user = await getUser();
-
         setCurrentUser(user);
       } catch {
         saveAuth(undefined);
@@ -87,7 +644,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
-  // Initialize user on app load or when auth changes
   useEffect(() => {
     const init = async () => {
       try {
@@ -99,33 +655,51 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       }
     };
     init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth?.access_token]);
+  }, []);
 
+  const calculateProfileProgress = (user: UserModel): number => {
+    if (!user) return 0;
+    const prefs = user.preferences || {};
+
+    const checks = [
+      user.first_name,
+      user.last_name,
+      prefs.experience_with_bible?.length,
+      prefs.what_brings_you,
+      prefs.engagement_preference?.length,
+      prefs.explanation_style,
+      prefs.bible_version,
+      prefs.receive_daily !== undefined,
+      prefs.depth_level,
+    ];
+
+    const completed = checks.filter(Boolean).length;
+    const total = checks.length;
+
+    return Math.round((completed / total) * 100);
+  };
 
   const login = async (email: string, password: string) => {
-    console.log("this is user input", email, password);
     try {
-      const response = await axios.post(
-        LOGIN_URL,
+      const response = await axios.post(LOGIN_URL,
         { email, password },
         { withCredentials: true }
       );
 
-      console.log("LOGIN RESPONSE:", response.data);
-
       const authData = response.data.data;
+      if (!authData?.token) throw new Error("No token found in response");
 
-      if (!authData?.token) {
-        throw new Error("No token found in response");
-      }
-      const auth: AuthModel = {
+      const authObj: AuthModel = {
         access_token: authData.token,
         api_token: authData.token,
         refreshToken: undefined
       };
-      saveAuth(auth);
+      saveAuth(authObj);
+
+      // fetch authoritative user and set
       const user = await getUser(authData.token);
+      setProfileProgress(calculateProfileProgress(user));
+      localStorage.removeItem("profileProgress");
       setCurrentUser(user);
     } catch (error: any) {
       console.error("LOGIN ERROR:", error);
@@ -134,7 +708,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
-
   const register = async (email: string, password: string, password_confirmation: string) => {
     try {
       const { data: auth } = await axios.post(REGISTER_URL, {
@@ -142,9 +715,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         password,
         re_password: password_confirmation,
       });
-
-      console.log("REGISTER_URL:", REGISTER_URL);
-      console.log("REGISTER RESPONSE:", auth);
 
       if (auth?.success || auth?.message?.toLowerCase().includes("success")) {
         return { success: true, data: auth };
@@ -163,29 +733,15 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
-
-
-
-  // const requestPasswordResetLink = async (email: string) => {
-  //   await axios.post(FORGOT_PASSWORD_URL, {
-  //     email
-  //   });
-  // };
   const requestPasswordResetLink = async (email: string) => {
-    console.log("Sending forgot password request for:", email);
-    console.log("API URL:", FORGOT_PASSWORD_URL);
-
     try {
       const response = await axios.post(FORGOT_PASSWORD_URL, { email });
-
-      console.log("Forgot password API success:", response.data);
       return response.data;
     } catch (error: any) {
       console.error("Forgot password API error:", error.response?.data || error.message);
       throw error;
     }
   };
-
 
   const changePassword = async (
     email: string,
@@ -201,46 +757,55 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     });
   };
 
-  // const getUser = async () => {
-  //   return await axios.get<UserModel>(GET_USER_URL);
-  // };
-
-
-  // Profile GET API, in Context way 
   const getUser = async (tokenFromLogin?: string): Promise<UserModel> => {
     const token = tokenFromLogin || auth?.access_token || auth?.api_token;
     if (!token) throw new Error("No token found");
-
-    console.log("GET_USER TOKEN:", token);
 
     try {
       const response = await axios.get(GET_USER_URL, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: false,
       });
+
       const apiUser = response.data?.data?.user as UserModel;
       const apiPreferences = response.data?.data?.preferences;
-      // Merge preferences into the user for easier hydration downstream
-      return { ...apiUser, preferences: apiPreferences } as UserModel;
+      const fullUser = { ...apiUser, preferences: apiPreferences } as UserModel;
 
+      const progress = calculateProfileProgress(fullUser);
+      setProfileProgress(progress);
+
+      // persist a lightweight currentUser for page reload convenience
+      try {
+        localStorage.setItem("growondaily_currentUser", JSON.stringify(fullUser));
+      } catch (err) {
+        // ignore localStorage errors
+      }
+
+      return fullUser;
     } catch (error: any) {
       console.error("PROFILE ERROR:", error.response?.data || error);
       throw error;
     }
   };
 
-  const saveUserPreferences = async (preferencesData: any) => {
-    // Prefer token from in-memory auth state; fall back to helper
+  // Save preferences (first-time POST)
+  const saveUserPreferences = async (preferencesData: any): Promise<UserModel> => {
     let token = auth?.access_token || auth?.api_token || authHelper.getAuth()?.access_token || authHelper.getAuth()?.api_token || "";
-
-    if (!token) {
-      throw new Error("No auth token found. Please login first.");
-    }
-
-    console.log("Saving user preferences:", preferencesData);
+    await axios.put(`/api/auth/profile`,
+      {
+        first_name: preferencesData?.firstName,
+        last_name: preferencesData?.lastName,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (!token) throw new Error("No auth token found. Please login first.");
 
     try {
-      // Transform UI-shaped preferences into backend canonical format
       const toBackendEnum = (value: string) =>
         (value || '')
           .trim()
@@ -275,9 +840,9 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
           : preferencesData?.engage
             ? [toBackendEnum(preferencesData.engage)]
             : [],
-        explanation_style: (preferencesData?.explain || '').toLowerCase().includes('simple')
+        explanation_style: (preferencesData?.explainStyle || '').toLowerCase().includes('simple')
           ? 'simple'
-          : (preferencesData?.explain || '').toLowerCase().includes('deeper')
+          : (preferencesData?.explainStyle || '').toLowerCase().includes('deeper')
             ? 'balanced'
             : 'balanced',
         receive_daily: preferencesData?.dailyPref === 'Daily',
@@ -291,8 +856,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         reflection_prompts: true,
       };
 
-      const response = await axios.post(
-        `${API_URL}/api/auth/preferences`,
+      await axios.post(`/api/auth/preferences`,
         { preferences: payloadPreferences },
         {
           headers: {
@@ -303,68 +867,87 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         }
       );
 
-      console.log(" Preferences API Response:", response.data);
-
+      // fetch refreshed user and update context
       const updatedUser = await getUser(token);
       setCurrentUser(updatedUser);
+      setProfileProgress(calculateProfileProgress(updatedUser));
+      try {
+        localStorage.setItem("growondaily_currentUser", JSON.stringify(updatedUser));
+      } catch (err) { }
 
-      return response.data;
+      return updatedUser;
     } catch (error: any) {
       console.error(" Preferences API Error:", error.response?.data || error.message);
       throw error;
     }
   };
 
-  const updateUserPreferences = async (preferencesData: any) => {
-    let token = auth?.access_token || auth?.api_token || authHelper.getAuth()?.access_token || authHelper.getAuth()?.api_token || "";
+  const updateUserPreferences = async (preferencesData: any): Promise<UserModel> => {
+    let token =
+      auth?.access_token ||
+      auth?.api_token ||
+      authHelper.getAuth()?.access_token ||
+      authHelper.getAuth()?.api_token ||
+      "";
 
-    if (!token) {
-      throw new Error("No auth token found. Please login first.");
-    }
-
-    console.log("Updating user preferences:", preferencesData);
+    if (!token) throw new Error("No auth token found. Please login first.");
 
     try {
+      await axios.put(`/api/auth/profile`,
+        {
+          first_name: preferencesData?.firstName || currentUser?.first_name,
+          last_name: preferencesData?.lastName || currentUser?.last_name,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       const toBackendEnum = (value: string) =>
-        (value || '')
+        (value || "")
           .trim()
           .toUpperCase()
-          .replace(/[^A-Z0-9]+/g, '_')
-          .replace(/^_|_$/g, '');
+          .replace(/[^A-Z0-9]+/g, "_")
+          .replace(/^_|_$/g, "");
 
       const experienceMap: Record<string, string> = {
-        'FIRST TIME': 'NEW_TO_BIBLE',
-        'OCCASIONAL': 'SOME_KNOWLEDGE',
-        'REGULAR': 'REGULAR_STUDY',
-        'THEOLOGICAL': 'ADVANCED_THEOLOGY',
+        FIRST_TIME: "NEW_TO_BIBLE",
+        OCCASIONAL: "SOME_KNOWLEDGE",
+        REGULAR: "REGULAR_STUDY",
+        THEOLOGICAL: "ADVANCED_THEOLOGY",
       };
 
       const payloadPreferences = {
-        language_code: 'en',
-        bible_version: (preferencesData?.translations?.[0]?.split(' - ')[0] || 'KJV').toUpperCase(),
-        depth_level: preferencesData?.depth?.includes('Short')
-          ? 'short'
-          : preferencesData?.depth?.includes('Medium')
-            ? 'medium'
-            : 'deep',
+        language_code: "en",
+        bible_version:
+          (preferencesData?.translations?.[0]?.split(" - ")[0] || "KJV").toUpperCase(),
+        depth_level: preferencesData?.depth?.includes("Short")
+          ? "short"
+          : preferencesData?.depth?.includes("Medium")
+            ? "medium"
+            : "deep",
         experience_with_bible: [
-          experienceMap[(preferencesData?.experience || '').toString().toUpperCase()] ||
-          toBackendEnum(preferencesData?.experience || 'First Time'),
+          experienceMap[(preferencesData?.experience || "").toUpperCase()] ||
+          toBackendEnum(preferencesData?.experience || "FIRST_TIME"),
         ],
         what_brings_you: Array.isArray(preferencesData?.brings)
-          ? preferencesData.brings.join(', ')
-          : preferencesData?.brings || '',
+          ? preferencesData.brings.join(", ")
+          : preferencesData?.brings || "",
         engagement_preference: Array.isArray(preferencesData?.engage)
           ? preferencesData.engage.map((e: string) => toBackendEnum(e))
           : preferencesData?.engage
             ? [toBackendEnum(preferencesData.engage)]
             : [],
-        explanation_style: (preferencesData?.explain || '').toLowerCase().includes('simple')
-          ? 'simple'
-          : (preferencesData?.explain || '').toLowerCase().includes('deeper')
-            ? 'balanced'
-            : 'balanced',
-        receive_daily: preferencesData?.dailyPref === 'Daily',
+        explanation_style:
+          (preferencesData?.explain || "").toLowerCase().includes("simple")
+            ? "simple"
+            : (preferencesData?.explain || "").toLowerCase().includes("deeper")
+              ? "balanced"
+              : "balanced",
+        receive_daily: preferencesData?.dailyPref === "Daily",
         historical_context: true,
         ground_text_analysis: true,
         special_insights: true,
@@ -375,126 +958,155 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         reflection_prompts: true,
       };
 
-      const response = await axios.put(
-        `${API_URL}/api/auth/preferences`,
+      await axios.put(`/api/auth/preferences`,
         { preferences: payloadPreferences },
         {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          withCredentials: false,
         }
       );
 
-      console.log(" Preferences PUT Response:", response.data);
+      // const refreshedUser = await getUser(token);
+      // setCurrentUser(refreshedUser);
 
-      const updatedUser = await getUser(token);
-      setCurrentUser(updatedUser);
+      let refreshedUser = await getUser(token);
+      refreshedUser = {
+        ...refreshedUser,
+        first_name: preferencesData?.firstName || refreshedUser.first_name,
+        last_name: preferencesData?.lastName || refreshedUser.last_name,
+      };
 
-      return response.data;
+      setCurrentUser(refreshedUser);
+      localStorage.setItem("growondaily_currentUser", JSON.stringify(refreshedUser));
+
+
+
+      setProfileProgress(calculateProfileProgress(refreshedUser));
+      try {
+        localStorage.setItem("growondaily_currentUser", JSON.stringify(refreshedUser));
+      } catch (err) { }
+
+      return refreshedUser;
     } catch (error: any) {
-      console.error(" Preferences PUT Error:", error.response?.data || error.message);
+      console.error("Update preferences error:", error.response?.data || error.message);
       throw error;
     }
   };
 
-  const saveOrUpdateUserPreferences = async (preferencesData: any) => {
+  const saveOrUpdateUserPreferences = async (preferencesData: any): Promise<UserModel | null> => {
     if (currentUser?.is_preference_setup_done) {
-      return updateUserPreferences(preferencesData);
+      return await updateUserPreferences(preferencesData);
     }
-    return saveUserPreferences(preferencesData);
+    return await saveUserPreferences(preferencesData);
+  };
+
+  const loginWithGoogle = async (): Promise<boolean> => {
+    try {
+      const result = await signInWithPopup(firebaseAuth, googleProvider);
+      const user = result.user;
+      const firebaseToken = await user.getIdToken();
+
+      const response = await axios.post(`/api/auth/google-login`,
+        {
+          id_token: firebaseToken,
+          uid: user.uid,
+          email: user.email,
+        },
+        { withCredentials: false }
+      );
+
+      const responseData = response.data?.data;
+      if (!responseData) throw new Error("Invalid response structure from backend");
+
+      const token = responseData.token;
+      if (!token) throw new Error("No token returned from Google login API");
+
+      const authData: AuthModel = {
+        access_token: token,
+        api_token: token,
+        refreshToken: undefined,
+      };
+      saveAuth(authData);
+
+      let userProfile: UserModel;
+      if (responseData.user) {
+        userProfile = responseData.user as UserModel;
+        setCurrentUser(userProfile);
+      } else {
+        userProfile = await getUser(token);
+        setCurrentUser(userProfile);
+      }
+
+      return true;
+    } catch (error: any) {
+      if (error.code === "auth/popup-closed-by-user") return false;
+      console.error("Google Login Error:", error);
+      saveAuth(undefined);
+      setCurrentUser(undefined);
+      throw error;
+    }
   };
 
 
-
-  const loginWithGoogle = async (): Promise<boolean> => {
-  console.log(" [Step 1] Google login started...");
-
+  const updateProfileImage = async (file: File): Promise<UserModel | null> => {
   try {
-    console.log("  Opening Google popup...");
-    const result = await signInWithPopup(firebaseAuth, googleProvider);
-    const user = result.user;
-    console.log(" Firebase Google User:", {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL,
-    });
+    setLoading(true);
 
-    console.log("[Step 4] Getting Firebase ID token...");
-    const firebaseToken = await user.getIdToken();
-    console.log("Firebase ID Token received:", firebaseToken);
+    const token =
+      auth?.access_token ||
+      auth?.api_token ||
+      authHelper.getAuth()?.access_token ||
+      authHelper.getAuth()?.api_token ||
+      "";
 
-    console.log(" Sending token to backend API...");
-    const response = await axios.post(
-      `${API_URL}/api/auth/google-login`,
+    if (!token) throw new Error("No token found");
+
+    const formData = new FormData();
+    formData.append("profile_picture", file);
+
+    const response = await axios.put(
+      "/api/auth/profile-picture",
+      formData,
       {
-        id_token: firebaseToken, 
-        uid: user.uid,
-        email: user.email,
-      },
-      { withCredentials: false }
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        }
+      }
     );
 
-    console.log(" Backend Google Login Response:", response.data);
-
-    const responseData = response.data?.data;
-    if (!responseData) {
-      console.error(" Invalid response structure from backend:", response.data);
-      throw new Error("Invalid response structure from Google login API");
+    if (response.data?.status !== 1) {
+      throw new Error(response.data?.message || "Failed to update profile picture");
     }
 
-    const token = responseData.token;
-    if (!token) {
-      console.error(" Backend returned no token:", response.data);
-      throw new Error("No token returned from Google login API");
-    }
+    const newProfilePic = response.data.data.user.profile_picture;
 
-    console.log("Token received from backend:", token);
+    let updatedUser: UserModel | undefined;
 
-    const authData: AuthModel = {
-      access_token: token,
-      api_token: token,
-      refreshToken: undefined,
-    };
-    console.log("Saving auth data:", authData);
-    saveAuth(authData);
+    setCurrentUser((prev) => {
+      if (!prev) return prev;
 
-    let userProfile: UserModel;
-    if (responseData.user) {
-      console.log(" Using user data from backend...");
-      userProfile = responseData.user as UserModel;
-      setCurrentUser(userProfile);
-    } else {
-      console.log(" Fetching user data from /me API...");
-      userProfile = await getUser(token);
-      setCurrentUser(userProfile);
-    }
+      updatedUser = {
+        ...prev,
+        profile_picture: newProfilePic,
+      };
 
-    console.log(" Google login successful — User Profile:", userProfile);
-    console.log(" Google login process completed successfully ");
-    return true;
-  } catch (error: any) {
-    if (error.code === "auth/popup-closed-by-user") {
-      console.warn(" Popup Closed User closed the Google login popup manually.");
-      return false;
-    }
-
-    console.error("Google Login Error:", {
-      message: error.message,
-      code: error.code,
-      backendError: error.response?.data,
+      localStorage.setItem("growondaily_currentUser", JSON.stringify(updatedUser));
+      return updatedUser;
     });
 
-    saveAuth(undefined);
-    setCurrentUser(undefined);
-    throw error;
+    return updatedUser || null;
+
+  } catch (err) {
+    console.error("updateProfileImage Error:", err);
+    return null;
+  } finally {
+    setLoading(false);
   }
 };
-
-
-
+  
 
 
 
@@ -521,9 +1133,13 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         saveUserPreferences,
         updateUserPreferences,
         saveOrUpdateUserPreferences,
+        updateProfileImage,
         loginWithGoogle,
         logout,
-        verify
+        verify,
+        profileProgress,
+        setProfileProgress,
+        refreshDashboard
       }}
     >
       {children}
@@ -532,3 +1148,4 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 };
 
 export { AuthContext, AuthProvider };
+
