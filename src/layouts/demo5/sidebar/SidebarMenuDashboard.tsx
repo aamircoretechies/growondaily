@@ -145,7 +145,22 @@ const SidebarMenuDashboard = () => {
 
     // Priority 2: If chapter-level deep study is active, share deep study tab content
     // This applies when viewing all verses of a chapter (not a specific verse) and Deep Study is open
-    if (showDeepStudy && isChapterView && !isVerseView && selectedBookId && selectedChapter) {
+    // Check both showDeepStudy flag AND if deep study data exists (to handle BiblePage local state)
+    if (!isVerseView && isChapterView && selectedBookId && selectedChapter) {
+      const currentKey = `${selectedBookId}-${selectedChapter}`;
+      const tabData = deepStudyData?.[currentKey]?.[activeTab];
+      // If deep study data exists for this chapter and tab, share it (regardless of showDeepStudy flag)
+      // This handles the case where BiblePage has its own showDeepStudy state
+      if (tabData?.content) {
+        const content = tabData.content.replace(/\*/g, '').trim();
+        if (content) {
+          return content;
+        }
+      }
+    }
+    
+    // Also check context showDeepStudy flag as additional condition
+    if (showDeepStudy && !isVerseView && selectedBookId && selectedChapter) {
       const currentKey = `${selectedBookId}-${selectedChapter}`;
       const tabData = deepStudyData?.[currentKey]?.[activeTab];
       if (tabData?.content) {
@@ -184,8 +199,13 @@ const SidebarMenuDashboard = () => {
     // Priority 4: If book + chapter are selected (no verse), share all verses of the chapter
     // BUT ONLY if Deep Study is NOT active (to prevent sharing verses when Deep Study should be shared)
     if (selectedBookName && selectedChapter && Array.isArray(verses) && verses.length > 0 && !isVerseView) {
-      // Check if Deep Study is active - if it is, don't share verses (Priority 2 should have handled it)
-      if (!showDeepStudy) {
+      // Check if Deep Study data exists for this chapter - if it does, don't share verses
+      // (Priority 2 should have handled sharing Deep Study content)
+      const currentKey = `${selectedBookId}-${selectedChapter}`;
+      const hasDeepStudyData = deepStudyData?.[currentKey]?.[activeTab]?.content;
+      
+      // Only share verses if Deep Study is not active (no deep study data AND showDeepStudy is false)
+      if (!hasDeepStudyData && !showDeepStudy) {
         // The verses array should already be filtered to the selected chapter, but filter to be safe
         const chapterVerses = verses.filter((v: any) => v.chapter === selectedChapter);
         
