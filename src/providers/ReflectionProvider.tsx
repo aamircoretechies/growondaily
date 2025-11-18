@@ -247,7 +247,37 @@ export const ReflectionProvider = ({ children }: any) => {
     }
   };
 
-  //  Re-fetch data whenever language changes
+
+  // Update a note
+ const updateNote = async (noteId: string, updatedContent: string, updatedTags?: string[]) => {
+  try {
+    const payload: any = { content: updatedContent };
+    if (updatedTags) payload.tags = updatedTags;
+
+    const res = await axios.put(`/api/reflections/notes/${noteId}`, payload, {
+      withCredentials: true,
+    });
+
+    if (res.data?.status === 1) {
+      setAllNotes((prev) =>
+        prev.map((note) =>
+          note.note_id === noteId
+            ? { ...note, content: updatedContent, emotion_tags: updatedTags }
+            : note
+        )
+      );
+
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error("Error updating note:", err);
+    return false;
+  }
+};
+
+
+
   useEffect(() => {
     fetchDailyReflection();
     fetchBookmarks();
@@ -269,6 +299,7 @@ export const ReflectionProvider = ({ children }: any) => {
         notesLoading,
         fetchAllNotes,
         deleteNote,
+        updateNote,
       }}
     >
       {children}

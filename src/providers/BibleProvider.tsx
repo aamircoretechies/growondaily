@@ -1,5 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "sonner";
+
+
 
 interface BibleBook {
   book_id: string;
@@ -59,6 +62,13 @@ interface BibleContextType {
 
   showDeepStudy: boolean;
   setShowDeepStudy: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleVerseStatus: (
+    book_id: string,
+    chapter: number,
+    verse: number,
+    version: string
+  ) => Promise<{ success: boolean; is_read: boolean }>;
+
 
 }
 
@@ -89,6 +99,8 @@ const BibleContext = createContext<BibleContextType>({
 
   showDeepStudy: false,
   setShowDeepStudy: () => { },
+  toggleVerseStatus: async () => ({ success: false, is_read: false }),
+
 
 });
 
@@ -248,7 +260,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  
+
   const fetchDeepStudy = async (
     bookId: string,
     chapter: number,
@@ -379,7 +391,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Instantly update UI (without waiting for refetch)
       setDeepStudyData((prev: any) => {
-        const safePrev = prev || {}; // null guard
+        const safePrev = prev || {};
         const key = verse === 0 ? `${book_id}-${chapter}` : `${book_id}-${chapter}-${verse}`;
         const prevData = safePrev[key] || {};
         const updated = { ...safePrev };
@@ -427,24 +439,54 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
 
   const toggleVerseBookmark = async (book: string, chapter: number, verse: number, version: string) => {
     try {
-      // const res = await axios.post("https://api.growondaily.com/api/bible/toggle-verse-bookmark",
-      //   { book, chapter, verse, version }
-      // );
       const res = await axios.post("/api/bible/toggle-verse-bookmark",
         { book, chapter, verse, version }
       );
-
-
       const data = res.data;
       if (data?.status === 1) {
         console.log(data.message, data.data);
+        toast("Verse bookmarked!", {
+          description: `${book} ${chapter}:${verse}`,
+        });
       } else {
         console.warn("Bookmark toggle failed:", data);
+        toast("Could not bookmark verse.");
       }
     } catch (error) {
       console.error("Bookmark API Error:", error);
+      toast("An error occurred.");
     }
   };
+
+ const toggleVerseStatus = async (book_id: string, chapter: number, verse: number, version: string) => {
+  try {
+    const res = await axios.post("/api/bible/toggle-verse-status", {
+      book: book_id,
+      chapter,
+      verse,
+      version,
+    });
+
+    const apiData = res.data;
+    console.log("API RAW RESPONSE => ", apiData);
+
+    const isRead = apiData?.data?.mark_as_read ?? false;
+
+    return {
+      success: apiData.status === 1,
+      is_read: isRead,
+    };
+  } catch (err) {
+    console.error("Toggle Verse Error:", err);
+    return { success: false, is_read: false };
+  }
+};
+
+
+
+
+
+
 
 
 
@@ -476,7 +518,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         fetchDeepStudyForVerse,
         toggleVerseBookmark,
         showDeepStudy,
-        setShowDeepStudy
+        setShowDeepStudy,
+        toggleVerseStatus,
+
       }}
     >
       {children}

@@ -252,7 +252,7 @@
 //                     </div>
 
 //                     {/* Entry Content */}
-                  
+
 //                     <p className="text-primary text-sm leading-relaxed mb-4 line-clamp-3 overflow-hidden text-ellipsis">
 //                       {entry.content || 'No content'}
 //                     </p>
@@ -301,7 +301,7 @@
 
 //             {/* Main Reflection Card */}
 //             {/* <div className="bg-white/40 dark:bg-gray-200 backdrop-blur-sm rounded-2xl  p-8">
-          
+
 //               <div className="mb-6">
 //                 <h2 className="font-merriweather text-2xl text-primary leading-relaxed mb-2">
 //                   "The Lord is my shepherd; I shall not want."
@@ -525,6 +525,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 // import { useLanguage } from "@/hooks/useLanguage"; 
 import { useLanguage } from "@/providers/TranslationProvider";
+import EditNotePopup from "@/components/makenote/EditNotePopup";
+
 
 
 
@@ -536,11 +538,14 @@ const ReflectionsPage = () => {
   const { dailyReflection, loading, error, bookmarks, bmLoading, fetchBookmarks, setBookmarks, allNotes, fetchAllNotes, notesLoading, deleteNote } = useReflection();
 
 
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<any>(null);
+
 
   // Get current date in the format "Thu, Aug 07, 2025"
- const getCurrentDate = () => {
+  const getCurrentDate = () => {
     const date = new Date();
-    return date.toLocaleDateString(currentLanguage.code === 'nl' ? 'nl-NL' : 'en-US', { 
+    return date.toLocaleDateString(currentLanguage.code === 'nl' ? 'nl-NL' : 'en-US', {
       weekday: 'short',
       month: 'short',
       day: '2-digit',
@@ -548,9 +553,7 @@ const ReflectionsPage = () => {
     });
   };
 
-  // const handleReflectAndJournal = () => {
-  //   console.log('Reflect & Journal clicked');
-  // };
+
 
   const handleReflectAndJournal = async () => {
     try {
@@ -586,26 +589,17 @@ const ReflectionsPage = () => {
 
 
 
-  const handleEditReflection = (id: string) => {
-    console.log('Edit reflection:', id);
+  // const handleEditReflection = (id: string) => {
+  //   console.log('Edit reflection:', id);
+  // };
+
+  const handleEditReflection = (note: any) => {
+    setSelectedNote(note);  // full note data pass Notes ko edit krne k liy 
+    setIsEditPopupOpen(true);
   };
 
-  // const handleDeleteReflection = (id: string) => {
-  //   console.log('Delete reflection:', id);
-  // };
 
-  // const handleDeleteReflection = async (entry: any) => {
-  //   try {
-  //     const noteId = entry.note_id;
-  //     await axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/reflections/notes/${noteId}`);
 
-  //     await fetchAllNotes();
-
-  //     console.log("Note deleted successfully:", noteId);
-  //   } catch (err: any) {
-  //     console.error(" Error deleting note:", err.response?.data || err.message);
-  //   }
-  // };
 
   const handleDeleteReflection = async (entry: any) => {
     const noteId = entry.note_id;
@@ -613,25 +607,6 @@ const ReflectionsPage = () => {
   };
 
 
-
-
-  // Mock data for journal entries
-  // const journalEntries = [
-  //   {
-  //     id: '1',
-  //     date: 'August 6, 2025',
-  //     verse: 'Romans 8:28',
-  //     content: "I've been reminded that even hard moments are being used for something good...",
-  //     tags: ['faith', 'growth']
-  //   },
-  //   {
-  //     id: '2',
-  //     date: 'August 3, 2025',
-  //     verse: 'Psalm 23:1',
-  //     content: "I feel like I'm learning to rest more instead of stressing...",
-  //     tags: ['peace', 'trust']
-  //   }
-  // ];
 
   const latestNotes = allNotes
     ?.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -773,7 +748,7 @@ const ReflectionsPage = () => {
                     </div>
 
                     {/* Entry Content */}
-                  
+
                     <p className="text-primary text-sm leading-relaxed mb-4 line-clamp-3 overflow-hidden text-ellipsis">
                       {entry.content || 'No content'}
                     </p>
@@ -782,7 +757,12 @@ const ReflectionsPage = () => {
                     {/* Action Buttons */}
                     <div className="flex justify-end gap-2">
                       <button
-                        onClick={() => handleEditReflection(entry.note_id)}
+                        // onClick={() => handleEditReflection(entry.note_id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditReflection(entry);
+                        }}
+
                         className="w-8 h-8 bg-sand rounded-full flex items-center justify-center hover:bg-primary transition-colors"
                       >
                         <LucidePencil className="text-white w-4 h-4" />
@@ -801,9 +781,6 @@ const ReflectionsPage = () => {
                 ))
               )}
             </div>
-
-
-
 
 
           </div>
@@ -971,6 +948,14 @@ const ReflectionsPage = () => {
 
         </div>
       </div>
+
+      {isEditPopupOpen && selectedNote && (
+        <EditNotePopup
+          note={selectedNote}
+          onClose={() => setIsEditPopupOpen(false)}
+        />
+      )}
+
     </Container>
   );
 };

@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { KeenIcon } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
+import { toast } from "sonner";
+
 
 interface TabItem {
   id: string;
@@ -21,7 +23,7 @@ const VerseStudy = () => {
   const [savedNote, setSavedNote] = useState("");
 
 
-  const { books, loading, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, } = useBible();
+  const { books, loading, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, } = useBible();
 
   const book = searchParams.get('bible') || 'genesis';
   const chapter = searchParams.get('chapter') || '1';
@@ -34,11 +36,57 @@ const VerseStudy = () => {
     return saved === 'true';
   });
 
-  const toggleReadStatus = () => {
-    const newStatus = !isRead;
-    setIsRead(newStatus);
-    localStorage.setItem(`verse-read-${verseKey}`, newStatus.toString());
-  };
+  const getBookId = () => {
+  if (book.length === 36) return book;
+  if (books.length > 0) {
+    const found = books.find(
+      (b) =>
+        (b.name || "")
+          .toLowerCase()
+          .replace(/\s+/g, "-") === book.toLowerCase()
+    );
+    if (found) return found.book_id;
+  }
+
+  return book; 
+};
+
+
+
+  // const toggleReadStatus = () => {
+  //   const newStatus = !isRead;
+  //   setIsRead(newStatus);
+  //   localStorage.setItem(`verse-read-${verseKey}`, newStatus.toString());
+  // };
+
+  const toggleReadStatus = async () => {
+  const bookId = getBookId();
+
+  const response = await toggleVerseStatus(
+    bookId,
+    Number(chapter),
+    Number(verse),
+    "KJV"
+  );
+
+  console.log("MARK AS READ RESPONSE:", response); 
+
+  if (response.success) {
+    setIsRead(response.is_read);
+    localStorage.setItem(`verse-read-${verseKey}`, response.is_read.toString());
+
+    toast.success(
+      response.is_read ? "Marked as Read" : "Marked as Unread"
+    );
+  } else {
+    toast.error("Something went wrong");
+  }
+};
+
+
+
+
+
 
   useEffect(() => {
     const loadVerse = async () => {
@@ -71,7 +119,7 @@ const VerseStudy = () => {
   }, [book, chapter, verse, books]);
 
 
-  
+
 
   const tabs: TabItem[] = [
     { id: 'original', title: 'Original', icon: 'document' },

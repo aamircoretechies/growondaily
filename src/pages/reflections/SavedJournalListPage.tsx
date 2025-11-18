@@ -2,16 +2,20 @@ import { Container } from '@/components/container';
 import { KeenIcon } from '@/components';
 import { LucideSearch, LucideCalendar, LucidePencil, LucideTrash2, LucideArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useReflection } from '@/providers/ReflectionProvider';
 import { useBible } from "@/providers/BibleProvider";
+import EditNotePopup from "@/components/makenote/EditNotePopup";
+
 
 
 
 const SavedJournalListPage = () => {
   const navigate = useNavigate();
-  const { allNotes, fetchAllNotes, notesLoading,deleteNote } = useReflection();
+  const { allNotes, fetchAllNotes, notesLoading, deleteNote } = useReflection();
   const { selectBook, selectChapter, fetchSingleVerse, books, version, fetchDeepStudy, setShowDeepStudy } = useBible();
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<any>(null);
 
 
   const handleOpenNote = async (entry: any) => {
@@ -42,15 +46,21 @@ const SavedJournalListPage = () => {
   };
 
 
-  const handleEditReflection = (id: string) => {
-    console.log('Edit reflection:', id);
+  // const handleEditReflection = (id: string) => {
+  //   console.log('Edit reflection:', id);
+  // };
+
+  const handleEditReflection = (entry: any) => {
+    setSelectedNote(entry);
+    setIsEditPopupOpen(true);
   };
+
 
   // const handleDeleteReflection = (id: string) => {
   //   console.log('Delete reflection:', id);
   // };
 
-  const handleDeleteReflection = async(id:string) =>{
+  const handleDeleteReflection = async (id: string) => {
     await deleteNote(id);
   }
 
@@ -189,9 +199,8 @@ const SavedJournalListPage = () => {
                   // onClick={() => handleEditReflection(entry.note_id)}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleEditReflection(entry.note_id);
+                    handleEditReflection(entry);
                   }}
-
                   className="w-8 h-8 bg-sand rounded-full flex items-center justify-center hover:bg-primary transition-colors"
                 >
                   <LucidePencil className="text-white w-4 h-4" />
@@ -200,7 +209,7 @@ const SavedJournalListPage = () => {
                   // onClick={() => handleDeleteReflection(entry.note_id)}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDeleteReflection(entry.note_id);
+                    handleEditReflection(entry);
                   }}
                   className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center hover:bg-red-300 transition-colors"
                 >
@@ -220,6 +229,13 @@ const SavedJournalListPage = () => {
           </button>
         </div>
       </div>
+      {isEditPopupOpen && selectedNote && (
+        <EditNotePopup
+          note={selectedNote}
+          onClose={() => setIsEditPopupOpen(false)}
+        />
+      )}
+
     </Container>
   );
 };
