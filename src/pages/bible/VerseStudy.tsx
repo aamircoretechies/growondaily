@@ -15,7 +15,6 @@ interface TabItem {
 const VerseStudy = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('explanations');
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportIssue, setReportIssue] = useState('');
   const [reportCategory, setReportCategory] = useState('');
@@ -23,7 +22,7 @@ const VerseStudy = () => {
   const [savedNote, setSavedNote] = useState("");
 
 
-  const { books, loading, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, } = useBible();
+  const { books, loading, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, verseActiveTab, setVerseActiveTab } = useBible();
 
   const book = searchParams.get('bible') || 'genesis';
   const chapter = searchParams.get('chapter') || '1';
@@ -237,8 +236,8 @@ const VerseStudy = () => {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${activeTab === tab.id
+                onClick={() => setVerseActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${verseActiveTab === tab.id
                   ? 'bg-primary text-white shadow-sm'
                   : 'bg-gray-100 dark:bg-gray-300 text-gray-600 dark:text-gray-800 hover:bg-gray-200 dark:hover:bg-gray-400 hover:text-gray-800'
                   }`}
@@ -254,7 +253,7 @@ const VerseStudy = () => {
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`${activeTab === tab.id ? 'block' : 'hidden'}`}
+              className={`${verseActiveTab === tab.id ? 'block' : 'hidden'}`}
             >
               <div className="mb-6">
                 <p className="font-merriweather text-lg leading-relaxed text-primary whitespace-pre-line">
@@ -380,7 +379,7 @@ const VerseStudy = () => {
 
               <div className="bg-gray-50 dark:bg-gray-300 rounded-lg p-3 border border-gray-200 dark:border-gray-400">
                 <p className="text-sm text-primary">
-                  {deepStudyData?.[activeTab]?.emotion_tags?.join(', ') ||
+                  {deepStudyData?.[verseActiveTab]?.emotion_tags?.join(', ') ||
                     'I feel like I’m learning to rest more instead of stressing...'}
                 </p>
               </div>

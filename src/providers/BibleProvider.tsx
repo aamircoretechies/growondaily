@@ -62,6 +62,10 @@ interface BibleContextType {
 
   showDeepStudy: boolean;
   setShowDeepStudy: React.Dispatch<React.SetStateAction<boolean>>;
+  activeTab: string;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+  verseActiveTab: string;
+  setVerseActiveTab: React.Dispatch<React.SetStateAction<string>>;
   toggleVerseStatus: (
     book_id: string,
     chapter: number,
@@ -99,6 +103,10 @@ const BibleContext = createContext<BibleContextType>({
 
   showDeepStudy: false,
   setShowDeepStudy: () => { },
+  activeTab: 'original',
+  setActiveTab: () => { },
+  verseActiveTab: 'explanations',
+  setVerseActiveTab: () => { },
   toggleVerseStatus: async () => ({ success: false, is_read: false }),
 
 
@@ -120,6 +128,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const [deepStudyData, setDeepStudyData] = useState<Record<string, any> | null>(null);
 
   const [showDeepStudy, setShowDeepStudy] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('original');
+  const [verseActiveTab, setVerseActiveTab] = useState<string>('explanations');
 
 
 
@@ -519,6 +529,10 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         toggleVerseBookmark,
         showDeepStudy,
         setShowDeepStudy,
+        activeTab,
+        setActiveTab,
+        verseActiveTab,
+        setVerseActiveTab,
         toggleVerseStatus,
 
       }}

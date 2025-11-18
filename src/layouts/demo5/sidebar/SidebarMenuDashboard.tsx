@@ -12,8 +12,8 @@ import { useLanguage } from '@/i18n';
 import { useState, useMemo, useEffect } from 'react';
 import { MakeNote } from '@/components';
 import { useBible } from '@/providers/BibleProvider'; // for API data
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import SharePopUp from "@/components/share/SharePopUp";
 
 
 interface IDashboardDropdownItem {
@@ -38,16 +38,23 @@ interface IDashboardMenuItem {
 interface IDashboardMenuItems extends Array<IDashboardMenuItem> { }
 
 const SidebarMenuDashboard = () => {
-  const { books, chapters, verses, loading, error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter, selectedVerse, fetchSingleVerse, version, toggleVerseBookmark, fetchDeepStudy, fetchDeepStudyForVerse } = useBible();
+  const { books, chapters, verses, loading, error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter, selectedVerse, fetchSingleVerse, version, toggleVerseBookmark, fetchDeepStudy, fetchDeepStudyForVerse, showDeepStudy, activeTab, verseActiveTab, deepStudyData } = useBible();
   const { isRTL } = useLanguage();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [chapterSearchTerm, setChapterSearchTerm] = useState('');
   const [verseSearchTerm, setVerseSearchTerm] = useState('');
-  const [deepStudyActive, setDeepStudyActive] = useState(false);
   const [showMakeNote, setShowMakeNote] = useState(false);
   // selectedChapter comes from context now
   const navigate = useNavigate();
   // const [selectedBook, setSelectedBook] = useState<string>('Select Book');
+  const [showSharePopup, setShowSharePopup] = useState(false);
+
+  // Check if we're viewing a specific verse (verse-level deep study)
+  const isVerseView = searchParams.get('bible') && searchParams.get('chapter') && searchParams.get('verse');
+  // Check if we're viewing all verses of a chapter (not a specific verse)
+  const isChapterView = searchParams.get('bible') && searchParams.get('chapter') && !searchParams.get('verse');
+
 
   const filteredDropdownItems = useMemo(() => {
     if (!Array.isArray(books)) return [];
@@ -101,6 +108,112 @@ const SidebarMenuDashboard = () => {
       item.title.toLowerCase().includes(verseSearchTerm.toLowerCase())
     );
   }, [verseItems, verseSearchTerm]);
+
+  // Function to determine what text to share based on selection and deep study state
+  const getShareText = (): string => {
+    // Helper function to get bookId from book name/slug
+    const getBookIdFromSlug = (bookSlug: string): string | null => {
+      if (bookSlug.length === 36) return bookSlug; // Already a UUID
+      if (books.length > 0) {
+        const found = books.find(
+          (b) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === bookSlug.toLowerCase()
+        );
+        if (found) return found.book_id;
+      }
+      return null;
+    };
+
+    // Priority 1: If viewing verse-level deep study (VerseStudy component)
+    if (isVerseView) {
+      const bookSlug = searchParams.get('bible') || '';
+      const chapter = searchParams.get('chapter') || '';
+      const verse = searchParams.get('verse') || '';
+      const bookId = getBookIdFromSlug(bookSlug);
+      
+      if (bookId && chapter && verse) {
+        const verseKey = `${bookId}-${chapter}-${verse}`;
+        const tabData = deepStudyData?.[verseKey]?.[verseActiveTab];
+        if (tabData?.content) {
+          const content = tabData.content.replace(/\*/g, '').trim();
+          if (content) {
+            return content;
+          }
+        }
+      }
+      // If verse-level deep study content not available, fall through to verse text
+    }
+
+    // Priority 2: If chapter-level deep study is active, share deep study tab content
+    // This applies when viewing all verses of a chapter (not a specific verse) and Deep Study is open
+    if (showDeepStudy && isChapterView && !isVerseView && selectedBookId && selectedChapter) {
+      const currentKey = `${selectedBookId}-${selectedChapter}`;
+      const tabData = deepStudyData?.[currentKey]?.[activeTab];
+      if (tabData?.content) {
+        const content = tabData.content.replace(/\*/g, '').trim();
+        if (content) {
+          return content;
+        }
+      }
+      // If deep study is active but content is not available, fall through to verse/chapter sharing
+    }
+
+    // Priority 3: If a specific verse is selected (from URL or context), share only that verse
+    if (isVerseView) {
+      // We're in verse view but deep study content wasn't available, so share the verse text
+      const bookSlug = searchParams.get('bible') || '';
+      const chapter = searchParams.get('chapter') || '';
+      const verse = searchParams.get('verse') || '';
+      
+      if (selectedVerse && selectedBookName) {
+        return `${selectedBookName} ${selectedVerse.chapter}:${selectedVerse.verse}\n${selectedVerse.text}`;
+      }
+      
+      // Try to get verse from verses array
+      if (selectedBookName && chapter && verse && Array.isArray(verses) && verses.length > 0) {
+        const verseNum = Number(verse);
+        const chapterNum = Number(chapter);
+        const foundVerse = verses.find((v: any) => v.verse === verseNum && v.chapter === chapterNum);
+        if (foundVerse) {
+          return `${selectedBookName} ${foundVerse.chapter}:${foundVerse.verse}\n${foundVerse.text}`;
+        }
+      }
+    } else if (selectedVerse && selectedBookName) {
+      return `${selectedBookName} ${selectedVerse.chapter}:${selectedVerse.verse}\n${selectedVerse.text}`;
+    }
+
+    // Priority 4: If book + chapter are selected (no verse), share all verses of the chapter
+    // BUT ONLY if Deep Study is NOT active (to prevent sharing verses when Deep Study should be shared)
+    if (selectedBookName && selectedChapter && Array.isArray(verses) && verses.length > 0 && !isVerseView) {
+      // Check if Deep Study is active - if it is, don't share verses (Priority 2 should have handled it)
+      if (!showDeepStudy) {
+        // The verses array should already be filtered to the selected chapter, but filter to be safe
+        const chapterVerses = verses.filter((v: any) => v.chapter === selectedChapter);
+        
+        if (chapterVerses.length > 0) {
+          // Sort by verse number to ensure correct order
+          const sortedVerses = chapterVerses.sort((a: any, b: any) => a.verse - b.verse);
+          return sortedVerses
+            .map((v: any) => `${v.verse}. ${v.text}`)
+            .join('\n');
+        }
+      }
+    }
+
+    // Priority 5: If only book is selected (defaults to chapter 1), share chapter 1 verses
+    if (selectedBookName && selectedBookId && selectedChapter === 1 && Array.isArray(verses) && verses.length > 0) {
+      const chapter1Verses = verses.filter((v: any) => v.chapter === 1);
+      if (chapter1Verses.length > 0) {
+        // Sort by verse number to ensure correct order
+        const sortedVerses = chapter1Verses.sort((a: any, b: any) => a.verse - b.verse);
+        return sortedVerses
+          .map((v: any) => `${v.verse}. ${v.text}`)
+          .join('\n');
+      }
+    }
+
+    // Fallback: No content available
+    return "No content available to share.";
+  };
 
   const menuItems: IDashboardMenuItems = [
     {
@@ -431,13 +544,14 @@ const SidebarMenuDashboard = () => {
                     );
                   }
 
-
-
-
                   if (item.title === 'Make Note') {
                     setShowMakeNote(true);
                   }
                   console.log(`Toggled: ${item.title}`);
+
+                  if (item.title === "Share") {
+                    setShowSharePopup(true);
+                  }
                 }}
               >
                 <KeenIcon icon={item.icon} />
@@ -453,6 +567,14 @@ const SidebarMenuDashboard = () => {
         isOpen={showMakeNote}
         onClose={() => setShowMakeNote(false)}
       />
+
+      <SharePopUp
+        isOpen={showSharePopup}
+        onClose={() => setShowSharePopup(false)}
+        textToShare={getShareText()}
+      />
+
+
     </div>
   );
 };

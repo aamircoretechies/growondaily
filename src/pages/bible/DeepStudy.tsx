@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { KeenIcon } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
 
@@ -16,8 +16,7 @@ interface DeepStudyProps {
 }
 
 const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, }: DeepStudyProps) => {
-  const [activeTab, setActiveTab] = useState('original');
-  const { selectedBookId, selectedChapter, version, deepStudyData, fetchDeepStudy, selectedBookName, loading, } = useBible();
+  const { selectedBookId, selectedChapter, version, deepStudyData, fetchDeepStudy, selectedBookName, loading, activeTab, setActiveTab } = useBible();
 
   useEffect(() => {
     if (selectedBookId && selectedChapter && version) {
