@@ -248,12 +248,13 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
     await updateProfileImage(file);
   };
 
-  // Build Header (NO UI CHANGE, only integrated upload)
+
   const buildHeader = () => {
     const imageURL =
       currentUser?.profile_picture
         ? `${import.meta.env.VITE_APP_API_URL}/uploads/profile/${currentUser.profile_picture}`
         : toAbsoluteUrl("/media/avatars/300-2.png");
+
 
 
     return (

@@ -74,6 +74,34 @@ const VerseStudy = () => {
     setIsRead(response.is_read);
     localStorage.setItem(`verse-read-${verseKey}`, response.is_read.toString());
 
+    // Store latest read verse for Continue Reading card
+    if (response.is_read) {
+      const foundBook = books.find(
+        (b) =>
+          (b.name || "")
+            .toLowerCase()
+            .replace(/\s+/g, "-") === book.toLowerCase()
+      );
+      const bookName = foundBook?.name || book;
+      
+      const latestReadVerse = {
+        book_id: bookId,
+        book: bookName,
+        book_slug: book,
+        chapter: Number(chapter),
+        verse: Number(verse),
+        version: "KJV",
+        timestamp: new Date().toISOString()
+      };
+      
+      localStorage.setItem('latest-read-verse', JSON.stringify(latestReadVerse));
+      
+      // Dispatch custom event to notify HomePage
+      window.dispatchEvent(new CustomEvent('verse-read-updated', { 
+        detail: latestReadVerse 
+      }));
+    }
+
     toast.success(
       response.is_read ? "Marked as Read" : "Marked as Unread"
     );

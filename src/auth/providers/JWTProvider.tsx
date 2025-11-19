@@ -1002,111 +1002,236 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     return await saveUserPreferences(preferencesData);
   };
 
+  // const loginWithGoogle = async (): Promise<boolean> => {
+  //   try {
+  //     const result = await signInWithPopup(firebaseAuth, googleProvider);
+  //     const user = result.user;
+  //     const firebaseToken = await user.getIdToken();
+
+  //     const response = await axios.post(`/api/auth/google-login`,
+  //       {
+  //         id_token: firebaseToken,
+  //         uid: user.uid,
+  //         email: user.email,
+  //       },
+  //       { withCredentials: false }
+  //     );
+
+  //     const responseData = response.data?.data;
+  //     if (!responseData) throw new Error("Invalid response structure from backend");
+
+  //     const token = responseData.token;
+  //     if (!token) throw new Error("No token returned from Google login API");
+
+  //     const authData: AuthModel = {
+  //       access_token: token,
+  //       api_token: token,
+  //       refreshToken: undefined,
+  //     };
+  //     saveAuth(authData);
+
+  //     let userProfile: UserModel;
+  //     if (responseData.user) {
+  //       userProfile = responseData.user as UserModel;
+  //       setCurrentUser(userProfile);
+  //     } else {
+  //       userProfile = await getUser(token);
+  //       setCurrentUser(userProfile);
+  //     }
+
+  //     return true;
+  //   } catch (error: any) {
+  //     if (error.code === "auth/popup-closed-by-user") return false;
+  //     console.error("Google Login Error:", error);
+  //     saveAuth(undefined);
+  //     setCurrentUser(undefined);
+  //     throw error;
+  //   }
+  // };
+
+
+  //   const updateProfileImage = async (file: File): Promise<UserModel | null> => {
+  //   try {
+  //     setLoading(true);
+
+  //     const token =
+  //       auth?.access_token ||
+  //       auth?.api_token ||
+  //       authHelper.getAuth()?.access_token ||
+  //       authHelper.getAuth()?.api_token ||
+  //       "";
+
+  //     if (!token) throw new Error("No token found");
+
+  //     const formData = new FormData();
+  //     formData.append("profile_picture", file);
+
+  //     const response = await axios.put(
+  //       "/api/auth/profile-picture",
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "multipart/form-data"
+  //         }
+  //       }
+  //     );
+
+  //     if (response.data?.status !== 1) {
+  //       throw new Error(response.data?.message || "Failed to update profile picture");
+  //     }
+
+  //     const newProfilePic = response.data.data.user.profile_picture;
+
+  //     let updatedUser: UserModel | undefined;
+
+  //     setCurrentUser((prev) => {
+  //       if (!prev) return prev;
+
+  //       updatedUser = {
+  //         ...prev,
+  //         profile_picture: newProfilePic,
+  //       };
+
+  //       localStorage.setItem("growondaily_currentUser", JSON.stringify(updatedUser));
+  //       return updatedUser;
+  //     });
+
+  //     return updatedUser || null;
+
+  //   } catch (err) {
+  //     console.error("updateProfileImage Error:", err);
+  //     return null;
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const loginWithGoogle = async (): Promise<boolean> => {
-    try {
-      const result = await signInWithPopup(firebaseAuth, googleProvider);
-      const user = result.user;
-      const firebaseToken = await user.getIdToken();
+  try {
+    console.log(" Starting Google login...");
 
-      const response = await axios.post(`/api/auth/google-login`,
-        {
-          id_token: firebaseToken,
-          uid: user.uid,
-          email: user.email,
-        },
-        { withCredentials: false }
-      );
+    const result = await signInWithPopup(firebaseAuth, googleProvider);
+    console.log(" Firebase popup result:", result);
 
-      const responseData = response.data?.data;
-      if (!responseData) throw new Error("Invalid response structure from backend");
+    const user = result.user;
+    console.log(" Logged in Firebase user:", user);
 
-      const token = responseData.token;
-      if (!token) throw new Error("No token returned from Google login API");
-
-      const authData: AuthModel = {
-        access_token: token,
-        api_token: token,
-        refreshToken: undefined,
-      };
-      saveAuth(authData);
-
-      let userProfile: UserModel;
-      if (responseData.user) {
-        userProfile = responseData.user as UserModel;
-        setCurrentUser(userProfile);
-      } else {
-        userProfile = await getUser(token);
-        setCurrentUser(userProfile);
-      }
-
-      return true;
-    } catch (error: any) {
-      if (error.code === "auth/popup-closed-by-user") return false;
-      console.error("Google Login Error:", error);
-      saveAuth(undefined);
-      setCurrentUser(undefined);
-      throw error;
+    if (!user.uid || !user.email) {
+      throw new Error("Firebase authentication incomplete: missing UID or email");
     }
-  };
+
+    const firebaseToken = await user.getIdToken();
+    console.log(" Firebase ID token:", firebaseToken);
+
+    console.log(" Sending ID token to backend...");
+    const payload = {
+      id_token: firebaseToken,
+      firebase_uid: user.uid,
+      uid: user.uid, 
+      email: user.email,
+    };
+    console.log("Payload being sent:", payload);
+
+    const response = await axios.post(`/api/auth/google-login`,
+      payload,
+      { withCredentials: false }
+    );
+
+    console.log(" Full backend response:", response);
+    console.log(" response.data:", response.data);
+
+    if (response.data?.status === 0) {
+      const errorMessage = response.data?.message || "Backend authentication failed";
+      console.error(" Backend error:", errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const responseData = response.data?.data;
+    console.log("response.data.data (parsed object):", responseData);
+
+    if (!responseData || !responseData.token || !responseData.user) {
+      console.error("Invalid response structure from backend", response.data);
+      throw new Error(response.data?.message || "Invalid response structure from backend");
+    }
+
+    const token = responseData.token;
+    console.log(" Token from backend:", token);
+
+    const authData: AuthModel = {
+      access_token: token,
+      api_token: token,
+      refreshToken: undefined,
+    };
+    saveAuth(authData);
+    console.log("Auth saved:", authData);
+
+    const userProfile: UserModel = responseData.user;
+    setCurrentUser(userProfile);
+    const progress = calculateProfileProgress(userProfile);
+    setProfileProgress(progress);
+    console.log(" User profile set:", userProfile);
+
+    try {
+      const fullUser = await getUser(token);
+      setCurrentUser(fullUser);
+      setProfileProgress(calculateProfileProgress(fullUser));
+    } catch (err) {
+      console.warn("Could not fetch full user profile, using data from login response");
+    }
+
+    console.log(" Google login successful!");
+    return true;
+  } catch (error: any) {
+    // Handle Firebase popup errors specifically
+    if (error.code === "auth/popup-closed-by-user") {
+      console.warn(" Popup closed by user");
+      return false;
+    }
+    if (error.code === "auth/cancelled-popup-request") {
+      console.warn(" Cancelled popup request");
+      return false;
+    }
+
+    console.error(" Google Login Error caught:", error);
+    saveAuth(undefined);
+    setCurrentUser(undefined);
+    throw error;
+  }
+};
+
 
 
   const updateProfileImage = async (file: File): Promise<UserModel | null> => {
-  try {
-    setLoading(true);
+    try {
+      const token = auth?.access_token || auth?.api_token;
+      if (!token) return null;
 
-    const token =
-      auth?.access_token ||
-      auth?.api_token ||
-      authHelper.getAuth()?.access_token ||
-      authHelper.getAuth()?.api_token ||
-      "";
+      const formData = new FormData();
+      formData.append("profile_picture", file);
 
-    if (!token) throw new Error("No token found");
-
-    const formData = new FormData();
-    formData.append("profile_picture", file);
-
-    const response = await axios.put(
-      "/api/auth/profile-picture",
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data"
+      const response = await axios.put(
+        `/api/auth/profile-picture`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
+      );
+
+      const updatedUser = response.data?.data?.user;
+      if (updatedUser) {
+        setCurrentUser((prev) => ({ ...prev, ...updatedUser }));
       }
-    );
 
-    if (response.data?.status !== 1) {
-      throw new Error(response.data?.message || "Failed to update profile picture");
-    }
-
-    const newProfilePic = response.data.data.user.profile_picture;
-
-    let updatedUser: UserModel | undefined;
-
-    setCurrentUser((prev) => {
-      if (!prev) return prev;
-
-      updatedUser = {
-        ...prev,
-        profile_picture: newProfilePic,
-      };
-
-      localStorage.setItem("growondaily_currentUser", JSON.stringify(updatedUser));
       return updatedUser;
-    });
-
-    return updatedUser || null;
-
-  } catch (err) {
-    console.error("updateProfileImage Error:", err);
-    return null;
-  } finally {
-    setLoading(false);
-  }
-};
-  
+    } catch (err) {
+      console.log("Profile Pic Update Error:", err);
+      return null;
+    }
+  };
 
 
 

@@ -402,6 +402,30 @@ const HomePage = () => {
     navigate('/bible');
   };
 
+
+  const handleContinueReadingClick = async () => {
+  const data = dashboardData?.continue_reading;
+  if (!data) return;
+
+  const { book, chapter, verse, version } = data;
+
+  const bookName = book.trim();
+  const bookSlug = bookName.toLowerCase().replace(/\s+/g, "-");
+
+  const bookObj = books?.find((b: any) =>
+    b.name.toLowerCase() === bookName.toLowerCase()
+  );
+
+  if (bookObj) {
+    await selectBook(bookObj.book_id, bookObj.name);
+    await selectChapter(Number(chapter));
+    await fetchSingleVerse(bookObj.book_id, Number(chapter), Number(verse), version || "KJV");
+  }
+
+  navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+};
+
+
   // const profileProgress = 75;
   const progress = profileProgress;
 
@@ -525,7 +549,8 @@ const HomePage = () => {
             </div>
           </div>
           <div className="mb-6 lg:col-span-1">
-            <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
+            <div onClick={dashboardData?.continue_reading ? handleContinueReadingClick : undefined}
+             className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6 cursor-pointer">
               <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-2">
                 Continue Reading
               </h2>
