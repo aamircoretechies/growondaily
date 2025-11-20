@@ -53,7 +53,13 @@ export function setupAxios(axios: any) {
   axios.defaults.headers.Accept = 'application/json';
   axios.defaults.withCredentials = true;
   axios.interceptors.request.use(
-    (config: { headers: { Authorization: string }; params?: any; url?: string; data?: any }) => {
+   (config: {
+    method?: string;
+    headers: { Authorization?: string };
+    params?: any;
+    url?: string;
+    data?: any;
+  }) => {
       const auth = getAuth();
 
       if (auth?.access_token) {
