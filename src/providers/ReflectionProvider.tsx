@@ -146,11 +146,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useLanguage } from "@/providers/TranslationProvider";
+import { toast } from "sonner";
+
 
 const ReflectionContext = createContext<any>(null);
 
 export const ReflectionProvider = ({ children }: any) => {
-  const { currentLanguage } = useLanguage(); // ✅ get selected language
+  const { currentLanguage } = useLanguage();
   const [dailyReflection, setDailyReflection] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -229,52 +231,50 @@ export const ReflectionProvider = ({ children }: any) => {
   // Delete note (no need for language param)
   const deleteNote = async (noteId: string) => {
     try {
-      // const res = await axios.delete(
-      //   `https://api.growondaily.com/api/reflections/notes/${noteId}`,
-      //   { withCredentials: true }
-      // );
       const res = await axios.delete(`/api/reflections/notes/${noteId}`, { withCredentials: true });
-
-
       if (res.data?.status === 1) {
         setAllNotes((prev) => prev.filter((n) => n.note_id !== noteId));
-        console.log("Note deleted successfully:", noteId);
+        // toast.success("Note deleted successfully");
+        return true;
       } else {
-        console.error("Failed to delete note:", res.data?.message);
+        toast.error(res.data?.message || "Failed to delete note");
+        return false;
       }
     } catch (err: any) {
+      toast.error("Error deleting note");
       console.error("Error deleting note:", err.response?.data || err.message);
+      return false;
     }
   };
 
 
   // Update a note
- const updateNote = async (noteId: string, updatedContent: string, updatedTags?: string[]) => {
-  try {
-    const payload: any = { content: updatedContent };
-    if (updatedTags) payload.tags = updatedTags;
+  const updateNote = async (noteId: string, updatedContent: string, updatedTags?: string[]) => {
+    try {
+      const payload: any = { content: updatedContent };
+      if (updatedTags) payload.tags = updatedTags;
 
-    const res = await axios.put(`/api/reflections/notes/${noteId}`, payload, {
-      withCredentials: true,
-    });
+      const res = await axios.put(`/api/reflections/notes/${noteId}`, payload, {
+        withCredentials: true,
+      });
 
-    if (res.data?.status === 1) {
-      setAllNotes((prev) =>
-        prev.map((note) =>
-          note.note_id === noteId
-            ? { ...note, content: updatedContent, emotion_tags: updatedTags }
-            : note
-        )
-      );
+      if (res.data?.status === 1) {
+        setAllNotes((prev) =>
+          prev.map((note) =>
+            note.note_id === noteId
+              ? { ...note, content: updatedContent, emotion_tags: updatedTags }
+              : note
+          )
+        );
 
-      return true;
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Error updating note:", err);
+      return false;
     }
-    return false;
-  } catch (err) {
-    console.error("Error updating note:", err);
-    return false;
-  }
-};
+  };
 
 
 
@@ -282,7 +282,7 @@ export const ReflectionProvider = ({ children }: any) => {
     fetchDailyReflection();
     fetchBookmarks();
     fetchAllNotes();
-  }, [currentLanguage.code]); //  refresh data when user switches language
+  }, [currentLanguage.code]);
 
   return (
     <ReflectionContext.Provider

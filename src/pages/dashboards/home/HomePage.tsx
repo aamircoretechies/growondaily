@@ -49,7 +49,7 @@
 //   if (!reference) return;
 //   const match = reference.match(/([A-Za-z ]+)\s+(\d+):(\d+)/);
 //   if (!match) return;
-  
+
 //   const [, bookName, chapter, verse] = match;
 //   const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
 //   const book = books?.find((b: any) => 
@@ -78,10 +78,10 @@
 //   return (
 //     <Container>
 //       <div className=" mx-auto min-h-screen p-0">
-      
+
 //         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
 //           <div className="flex-1">
-          
+
 //             <h1 className="font-merriweather text-xl sm:text-2xl text-primary">
 //               {dashboardData?.greeting || 'Good Morning'}, {dashboardData?.user?.first_name || 'User'}
 //             </h1>
@@ -164,7 +164,7 @@
 //               </h2>
 //               <div className="bg-white/40 dark:bg-gray-200 rounded-xl p-3 sm:p-4 relative">
 //                 <div className="mb-3 sm:mb-4">
-                
+
 //                   <h3 className="font-merriweather text-base sm:text-lg text-primary leading-relaxed mb-2 sm:mb-3">
 //                     "{dashboardData?.daily_word?.reference || 'The Lord is my shepherd; I shall not want...'}"
 //                   </h3>
@@ -192,7 +192,7 @@
 //             </div>
 //           </div>
 
-         
+
 
 //           <div className="mb-6 lg:col-span-1">
 //             <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
@@ -296,7 +296,7 @@
 //         </div>
 
 
-        
+
 //         <ProfileSetupModal
 //           isOpen={showProfileSetup}
 //           onClose={() => setShowProfileSetup(false)}
@@ -342,7 +342,7 @@ const HomePage = () => {
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const navigate = useNavigate();
   const { selectBook, selectChapter, fetchSingleVerse, books } = useBible();
-  const { profileProgress,currentUser } = useAuthContext();
+  const { profileProgress, currentUser } = useAuthContext();
   const { currentLanguage } = useLanguage();
 
 
@@ -378,13 +378,72 @@ const HomePage = () => {
 
 
   const handleStartReflection = async (reference: string) => {
+    if (!reference) return;
+    const match = reference.match(/([A-Za-z ]+)\s+(\d+):(\d+)/);
+    if (!match) return;
+
+    const [, bookName, chapter, verse] = match;
+    const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
+    const book = books?.find((b: any) =>
+      b.name.toLowerCase() === bookName.trim().toLowerCase()
+    );
+
+    if (book) {
+      await selectBook(book.book_id, book.name);
+      await selectChapter(Number(chapter));
+      await fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
+    }
+
+    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+  };
+
+  const handleReadBible = () => {
+    console.log('Read Bible clicked');
+    navigate('/bible');
+  };
+
+
+  const handleContinueReadingClick = async () => {
+    const data = dashboardData?.continue_reading;
+    if (!data) return;
+
+    const { book, chapter, verse, version } = data;
+
+    const bookName = book.trim();
+    const bookSlug = bookName.toLowerCase().replace(/\s+/g, "-");
+
+    const bookObj = books?.find((b: any) =>
+      b.name.toLowerCase() === bookName.toLowerCase()
+    );
+
+    if (bookObj) {
+      await selectBook(bookObj.book_id, bookObj.name);
+      await selectChapter(Number(chapter));
+      await fetchSingleVerse(bookObj.book_id, Number(chapter), Number(verse), version || "KJV");
+    }
+
+    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+  };
+
+  const getGreeting = () => {
+    const now = new Date();
+    const hour = now.getHours();
+    if (hour >= 5 && hour < 12) return 'Good Morning';
+    if (hour >= 12 && hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
+  const handleReadDailyWord = async () => {
+  const reference = dashboardData?.daily_word?.reference;
   if (!reference) return;
+
   const match = reference.match(/([A-Za-z ]+)\s+(\d+):(\d+)/);
   if (!match) return;
-  
+
   const [, bookName, chapter, verse] = match;
   const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
-  const book = books?.find((b: any) => 
+
+  const book = books?.find((b: any) =>
     b.name.toLowerCase() === bookName.trim().toLowerCase()
   );
 
@@ -397,33 +456,6 @@ const HomePage = () => {
   navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
 };
 
-  const handleReadBible = () => {
-    console.log('Read Bible clicked');
-    navigate('/bible');
-  };
-
-
-  const handleContinueReadingClick = async () => {
-  const data = dashboardData?.continue_reading;
-  if (!data) return;
-
-  const { book, chapter, verse, version } = data;
-
-  const bookName = book.trim();
-  const bookSlug = bookName.toLowerCase().replace(/\s+/g, "-");
-
-  const bookObj = books?.find((b: any) =>
-    b.name.toLowerCase() === bookName.toLowerCase()
-  );
-
-  if (bookObj) {
-    await selectBook(bookObj.book_id, bookObj.name);
-    await selectChapter(Number(chapter));
-    await fetchSingleVerse(bookObj.book_id, Number(chapter), Number(verse), version || "KJV");
-  }
-
-  navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
-};
 
 
   // const profileProgress = 75;
@@ -433,13 +465,13 @@ const HomePage = () => {
   return (
     <Container>
       <div className=" mx-auto min-h-screen p-0">
-      
+
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex-1">
-          
+
             <h1 className="font-merriweather text-xl sm:text-2xl text-primary">
-              {/* {dashboardData?.greeting || 'Good Morning'}, {currentUser?.first_name || dashboardData?.user?.first_name || 'User'} */}
-              {dashboardData?.greeting || 'Good Morning'}, {currentUser?.first_name ?? dashboardData?.user?.first_name ?? 'User'}
+              {/* {dashboardData?.greeting || 'Good Morning'}, {currentUser?.first_name ?? dashboardData?.user?.first_name ?? 'User'} */}
+              {dashboardData?.greeting || getGreeting()}, {currentUser?.first_name ?? dashboardData?.user?.first_name ?? 'User'}
             </h1>
 
             <p className="text-gray-600 text-xs sm:text-sm">
@@ -469,8 +501,8 @@ const HomePage = () => {
                   <FormattedMessage id="HOME.COMPLETE_PROFILE_SETUP" />
                 </h2>
                 <p className="text-gray-600 dark:text-gray-700 text-sm">
-                  <FormattedMessage 
-                    id="HOME.PROFILE_PROGRESS" 
+                  <FormattedMessage
+                    id="HOME.PROFILE_PROGRESS"
                     values={{ progress: profileProgress, remaining: 100 - profileProgress }}
                   />
                 </p>
@@ -524,7 +556,7 @@ const HomePage = () => {
               </h2>
               <div className="bg-white/40 dark:bg-gray-200 rounded-xl p-3 sm:p-4 relative">
                 <div className="mb-3 sm:mb-4">
-                
+
                   <h3 className="font-merriweather text-base sm:text-lg text-primary leading-relaxed mb-2 sm:mb-3">
                     "{dashboardData?.daily_word?.reference || 'The Lord is my shepherd; I shall not want...'}"
                   </h3>
@@ -542,7 +574,7 @@ const HomePage = () => {
                     <LucideVolume2 className='text-white text-sm sm:text-base' />
                   </button>
                   <button
-                    onClick={handleReadMore}
+                    onClick={handleReadDailyWord}
                     className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
                   >
                     <LucideBook className='text-white text-sm sm:text-base' />
@@ -553,7 +585,7 @@ const HomePage = () => {
           </div>
           <div className="mb-6 lg:col-span-1">
             <div onClick={dashboardData?.continue_reading ? handleContinueReadingClick : undefined}
-             className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6 cursor-pointer">
+              className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6 cursor-pointer">
               <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-2">
                 <FormattedMessage id="HOME.CONTINUE_READING" />
               </h2>
@@ -651,7 +683,7 @@ const HomePage = () => {
         </div>
 
 
-        
+
         <ProfileSetupModal
           isOpen={showProfileSetup}
           onClose={() => setShowProfileSetup(false)}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { KeenIcon, LinkVerse } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
+import { toast } from 'sonner';
 
 interface MakeNoteProps {
   isOpen: boolean;
@@ -38,11 +39,13 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
       await saveNote(selectedBookId,chapterToSave,verseToSave,noteText,selectedTags);
       console.log("Note saved for:", 
         {book_id: selectedBookId,chapter: chapterToSave,verse: verseToSave === 0 ? "All Verses" : verseToSave,content: noteText,emotion_tags: selectedTags,});
-      alert("Note saved successfully!");
+      // alert("Note saved successfully!");
+      toast.success("Note saved successfully!");
       onClose();
     } catch (err) {
       console.error("Failed to save note:", err);
-      alert("Failed to save note.");
+      // alert("Failed to save note.");
+      toast.error("Note failed to save")
     }
   };
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useReflection } from "@/providers/ReflectionProvider";
+import { toast } from "sonner";
 
 interface Props {
   note: any;
@@ -22,6 +23,20 @@ export default function EditNotePopup({ note, onClose }: Props) {
     }
   };
 
+  // const handleSave = async () => {
+  //   const payload = {
+  //     content,
+  //     tags: selectedTags,
+  //   };
+
+  //   const success = await updateNote(note.note_id, content);
+
+  //   if (success) {
+  //     onClose();
+  //   }
+  // };
+
+
   const handleSave = async () => {
     const payload = {
       content,
@@ -31,14 +46,16 @@ export default function EditNotePopup({ note, onClose }: Props) {
     const success = await updateNote(note.note_id, content);
 
     if (success) {
+      toast.success("Note updated successfully");
       onClose();
     }
   };
 
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-[#f5efe5] w-full max-w-md rounded-2xl p-6 shadow-xl">
-        
+
         <h2 className="font-merriweather text-2xl text-primary mb-1">
           Edit Note
         </h2>
@@ -62,11 +79,10 @@ export default function EditNotePopup({ note, onClose }: Props) {
               <button
                 key={tag}
                 onClick={() => toggleTag(tag)}
-                className={`px-4 py-2 rounded-full border text-sm ${
-                  selectedTags.includes(tag)
+                className={`px-4 py-2 rounded-full border text-sm ${selectedTags.includes(tag)
                     ? "bg-primary text-white"
                     : "bg-gray-100 text-primary"
-                }`}
+                  }`}
               >
                 {tag}
               </button>

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useReflection } from '@/providers/ReflectionProvider';
 import { useBible } from "@/providers/BibleProvider";
 import EditNotePopup from "@/components/makenote/EditNotePopup";
+import { toast } from "sonner";
 
 
 
@@ -16,6 +17,8 @@ const SavedJournalListPage = () => {
   const { selectBook, selectChapter, fetchSingleVerse, books, version, fetchDeepStudy, setShowDeepStudy } = useBible();
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any>(null);
+  const [visibleCount, setVisibleCount] = useState(6);
+
 
 
   const handleOpenNote = async (entry: any) => {
@@ -61,8 +64,15 @@ const SavedJournalListPage = () => {
   // };
 
   const handleDeleteReflection = async (id: string) => {
-    await deleteNote(id);
-  }
+    const success = await deleteNote(id);
+
+    if (success) {
+      toast.success("Note deleted successfully");
+    } else {
+      toast.error("Failed to delete note");
+    }
+  };
+
 
   // Mock data for journal entries
   // const journalEntries = [
@@ -154,7 +164,7 @@ const SavedJournalListPage = () => {
         {/* Journal Entries Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-          {journalEntries.map((entry: any) => (
+          {journalEntries.slice(0, visibleCount).map((entry: any) => (
             <div key={entry.note_id} onClick={() => handleOpenNote(entry)} className="bg-white/80 dark:bg-transparent rounded-xl p-6 border border-transparent dark:border-gray-400 hover:shadow-lg transition-shadow cursor-pointer">
               {/* Entry Header */}
               <div className="flex items-center gap-2 mb-4">
@@ -209,7 +219,8 @@ const SavedJournalListPage = () => {
                   // onClick={() => handleDeleteReflection(entry.note_id)}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleEditReflection(entry);
+                    // handleEditReflection(entry);
+                    handleDeleteReflection(entry.note_id);
                   }}
                   className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center hover:bg-red-300 transition-colors"
                 >
@@ -223,11 +234,24 @@ const SavedJournalListPage = () => {
         </div>
 
         {/* Load More Button */}
-        <div className="mt-8 text-center">
-          <button className="px-6 py-3 bg-sand text-primary rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
+        {/* <div className="mt-8 text-center">
+          <button 
+          className="px-6 py-3 bg-sand text-primary rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
             Load More Entries
           </button>
-        </div>
+        </div> */}
+
+        {journalEntries.length > visibleCount && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={() => setVisibleCount(journalEntries.length)}
+              className="px-6 py-3 bg-sand text-primary rounded-lg hover:bg-primary hover:text-white transition-colors font-medium"
+            >
+              Load More Entries
+            </button>
+          </div>
+        )}
+
       </div>
       {isEditPopupOpen && selectedNote && (
         <EditNotePopup

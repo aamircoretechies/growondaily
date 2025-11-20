@@ -396,26 +396,47 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // const toggleVerseBookmark = async (book: string, chapter: number, verse: number, version: string) => {
+  //   try {
+  //     const res = await axios.post("/api/bible/toggle-verse-bookmark",
+  //       { book, chapter, verse, version }
+  //     );
+  //     const data = res.data;
+  //     if (data?.status === 1) {
+  //       console.log(data.message, data.data);
+  //       toast("Verse bookmarked!", {
+  //         description: `${book} ${chapter}:${verse}`,
+  //       });
+  //     } else {
+  //       console.warn("Bookmark toggle failed:", data);
+  //       toast("Could not bookmark verse.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Bookmark API Error:", error);
+  //     toast("An error occurred.");
+  //   }
+  // };
+
   const toggleVerseBookmark = async (book: string, chapter: number, verse: number, version: string) => {
-    try {
-      const res = await axios.post("/api/bible/toggle-verse-bookmark",
-        { book, chapter, verse, version }
-      );
-      const data = res.data;
-      if (data?.status === 1) {
-        console.log(data.message, data.data);
-        toast("Verse bookmarked!", {
-          description: `${book} ${chapter}:${verse}`,
-        });
-      } else {
-        console.warn("Bookmark toggle failed:", data);
-        toast("Could not bookmark verse.");
-      }
-    } catch (error) {
-      console.error("Bookmark API Error:", error);
-      toast("An error occurred.");
+  try {
+    const res = await axios.post(`/api/bible/toggle-verse-bookmark`, {
+      book,chapter,verse,version,
+    });
+
+    const msg = res?.data?.message?.toLowerCase() || "";
+
+    if (msg.includes("removed") || msg.includes("unbookmarked")) {
+      toast.success("Bookmark removed successfully");
+    } else if (msg.includes("added") || msg.includes("bookmarked")) {
+      toast.success("Bookmark added successfully");
+    } else {
+      toast.info(res?.data?.message || "Updated");
     }
-  };
+  } catch (err) {
+    console.error("Bookmark toggle error:", err);
+    toast.error("Something went wrong");
+  }
+};
 
  const toggleVerseStatus = async (book_id: string, chapter: number, verse: number, version: string) => {
   try {

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from '@/auth/providers/JWTProvider';
 import { Button } from '@/components/ui/button';
+import { toast } from "sonner";
 
 import {
   Dialog,
@@ -291,10 +292,12 @@ const PersonalizationCard = ({ user }: { user: any }) => {
       }
       const updatedUser = await authContext?.getUser();
       authContext?.setCurrentUser(updatedUser);
-      alert("Preferences saved successfully!");
+      // alert("Preferences saved successfully!");
+      toast.success("Preferences saved successfully!")
     } catch (err) {
       console.error("Save failed:", err);
-      alert("Failed to save preferences. Please try again.");
+      // alert("Failed to save preferences. Please try again.");
+      toast.error("Preferences failed to save! ")
     }
   };
 

@@ -181,6 +181,8 @@ import { useState } from "react";
 import axios from "axios";
 import { Container } from "@/components/container";
 import { LucideMic } from "lucide-react";
+import { useAsk } from "@/providers";
+
 
 interface Message {
   id: string;
@@ -212,89 +214,61 @@ const AskPage = () => {
   // const [isTyping, setIsTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
 
+  const { sendMessage } = useAsk();
+  const { generateAIContent } = useAsk();
+
+  const run = async () => {
+  const data = await generateAIContent("Explain Psalm 23:1 in detail.");
+
+  console.log(data.content);     
+  console.log(data.content_id);   
+};
+
   const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
-    
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      type: "user",
-      content: inputText,
+  if (!inputText.trim()) return;
+
+  const newMessage: Message =  {
+    id: Date.now().toString(),
+    type: "user",
+    content: inputText,
+  };
+
+  setMessages((prev) => [...prev, newMessage]);
+  const userText = inputText;
+  setInputText("");
+  setIsTyping(true);
+
+  try {
+    const ai = await sendMessage(userText);
+
+    const aiMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      type: "ai",
+      content: ai.answer,
+      timestamp: "just now",
+      reference: ai.reference || "—",
     };
 
-    setMessages((prev) => [...prev, newMessage]);
-    setInputText("");
-    setIsTyping(true);
+    setMessages((prev) => [...prev, aiMessage]);
+  } catch (err) {
+    console.error("Error:", err);
 
-    try {
-      const response = await axios.post("https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-4o-mini", 
-          messages: [
-            {
-              role: "system",
-              content: `You are a knowledgeable and spiritually insightful Bible assistant. 
-                When a user asks a question, respond clearly and faithfully based on the Bible. 
-                Include the relevant Bible verse reference if possible.
-
-                Your output should follow this format:
-                {
-                  "answer": "Full, clear answer with spiritual meaning and short reflection.",
-                  "reference": "Book Chapter:Verse (if applicable)"
-                }`,
-            },
-            {
-              role: "user",
-              content: inputText,
-            },
-          ],
-          temperature: 0.7,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-          },
-        }
-      );
-
-      const messageContent = response.data.choices[0].message.content;
-
-      let aiData: { answer: string; reference: string } = {
-        answer: messageContent,
-        reference: "",
-      };
-
-      try {
-        aiData = JSON.parse(messageContent);
-      } catch {
-        // If AI doesn't return JSON, fallback to plain text
-        aiData = { answer: messageContent, reference: "" };
-      }
-
-      const aiResponse: Message = {
+    setMessages((prev) => [
+      ...prev,
+      {
         id: (Date.now() + 1).toString(),
         type: "ai",
-        content: aiData.answer,
-        timestamp: "Answered just now",
-        reference: aiData.reference || "—",
-      };
-
-      setMessages((prev) => [...prev, aiResponse]);
-    } catch (error) {
-      console.error("AI Error:", error);
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        type: "ai",
-        content:
-          "Sorry, I couldn't fetch a response right now. Please try again later.",
-        timestamp: "Error",
+        content: "AI service failed. Please try later.",
+        timestamp: "error",
         reference: "",
-      };
-      setMessages((prev) => [...prev, aiResponse]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
+      },
+    ]);
+  } finally {
+    setIsTyping(false);
+  }
+};
+
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -326,14 +300,14 @@ const AskPage = () => {
               <div
                 key={message.id}
                 className={`flex ${message.type === "user"
-                    ? "justify-end"
-                    : "justify-start"
+                  ? "justify-end"
+                  : "justify-start"
                   }`}
               >
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-3 ${message.type === "user"
-                      ? "bg-sand text-white"
-                      : "bg-white/80 text-gray-800 dark:bg-gray-200"
+                    ? "bg-sand text-white"
+                    : "bg-white/80 text-gray-800 dark:bg-gray-200"
                     }`}
                 >
                   {message.type === "ai" && message.reference && (

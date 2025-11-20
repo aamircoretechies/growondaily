@@ -523,10 +523,9 @@ import { useReflection } from "@/providers/ReflectionProvider";
 import { useBible } from "@/providers/BibleProvider";
 import { useState, useEffect } from "react";
 import axios from "axios";
-// import { useLanguage } from "@/hooks/useLanguage"; 
 import { useLanguage } from "@/providers/TranslationProvider";
 import EditNotePopup from "@/components/makenote/EditNotePopup";
-
+import { toast } from "sonner";
 
 
 
@@ -536,8 +535,6 @@ const ReflectionsPage = () => {
   const { currentLanguage } = useLanguage();
   const { selectBook, selectChapter, fetchSingleVerse, books, toggleVerseBookmark } = useBible();
   const { dailyReflection, loading, error, bookmarks, bmLoading, fetchBookmarks, setBookmarks, allNotes, fetchAllNotes, notesLoading, deleteNote } = useReflection();
-
-
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any>(null);
 
@@ -587,32 +584,37 @@ const ReflectionsPage = () => {
     }
   };
 
-
-
   // const handleEditReflection = (id: string) => {
   //   console.log('Edit reflection:', id);
   // };
 
   const handleEditReflection = (note: any) => {
-    setSelectedNote(note);  // full note data pass Notes ko edit krne k liy 
+    setSelectedNote(note);
     setIsEditPopupOpen(true);
   };
 
 
-
-
+  // const handleDeleteReflection = async (entry: any) => {
+  //   const noteId = entry.note_id;
+  //   await deleteNote(noteId);
+  // };
   const handleDeleteReflection = async (entry: any) => {
+  try {
     const noteId = entry.note_id;
     await deleteNote(noteId);
-  };
+
+    toast.success("Note deleted successfully");
+  } catch (err) {
+    console.error("Error deleting note:", err);
+    toast.error("Failed to delete note");
+  }
+};
 
 
 
   const latestNotes = allNotes
     ?.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     ?.slice(0, 2) || [];
-
-
 
   // open bookmark (same as BookmarksPage)
   const handleOpenBookmark = async (entry: any) => {
@@ -664,11 +666,9 @@ const ReflectionsPage = () => {
         await selectChapter(Number(chapter));
 
         if (verse) {
-          // verse-level note
           await fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), version || "KJV");
           navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
         } else {
-          // chapter-level note
           navigate(`/bible?bible=${bookSlug}&chapter=${chapter}`);
         }
       }
