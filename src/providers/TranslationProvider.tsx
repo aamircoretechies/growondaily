@@ -113,7 +113,7 @@ import { type TLanguage, type ITranslationProviderProps } from '@/i18n';
 import { getData, setData } from '@/utils';
 
 // Get initial language (from URL or localStorage)
-const getInitialLanguage = () => {
+const getInitialLanguage = (): TLanguage => {
   const urlParams = new URLSearchParams(window.location.search);
   const langParam = urlParams.get('lang');
 
@@ -129,16 +129,23 @@ const getInitialLanguage = () => {
   return currentLanguage ?? I18N_DEFAULT_LANGUAGE;
 };
 
-//  Initial context values
-const initialProps: ITranslationProviderProps = {
+//  Initial context values - use lazy initialization to avoid circular dependency
+const getInitialProps = (): ITranslationProviderProps => ({
   currentLanguage: getInitialLanguage(),
   changeLanguage: (_: TLanguage) => {},
   isRTL: () => false,
-};
+});
 
-//  Create context
-const TranslationsContext = createContext<ITranslationProviderProps>(initialProps);
-const useLanguage = () => useContext(TranslationsContext);
+//  Create context - use lazy initialization
+const TranslationsContext = createContext<ITranslationProviderProps | null>(null);
+const useLanguage = () => {
+  const context = useContext(TranslationsContext);
+  if (!context) {
+    // Fallback if context is not available (shouldn't happen in normal flow)
+    return getInitialProps();
+  }
+  return context;
+};
 
 // IntlProvider (re-render on language change)
 const I18NProvider = ({
@@ -158,7 +165,7 @@ const I18NProvider = ({
 };
 
 const TranslationProvider = ({ children }: PropsWithChildren) => {
-  const [currentLanguage, setCurrentLanguage] = useState(initialProps.currentLanguage);
+  const [currentLanguage, setCurrentLanguage] = useState(() => getInitialLanguage());
 
   const changeLanguage = (language: TLanguage) => {
     setData(I18N_CONFIG_KEY, language);

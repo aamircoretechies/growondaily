@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useAuthContext } from "@/auth";
+import { useLanguage } from "@/providers/TranslationProvider";
 
 interface DashboardContextType {
   dashboardData: any;
@@ -17,6 +18,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [error, setError] = useState<string | null>(null);
 
    const { auth,currentUser } = useAuthContext(); 
+   const { currentLanguage } = useLanguage(); // Get current language to refetch on change
 
   const fetchDashboardData = async () => {
     console.log("dashboard");
@@ -72,7 +74,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   if (auth?.access_token && currentUser) {
     fetchDashboardData();
   }
-}, [currentUser]);
+}, [currentUser, currentLanguage.code]); // Refetch when language changes
 
   return (
     <DashboardContext.Provider

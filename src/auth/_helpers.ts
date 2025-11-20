@@ -2,6 +2,8 @@ import { User as Auth0UserModel } from '@auth0/auth0-spa-js';
 
 import { getData, setData } from '@/utils';
 import { type AuthModel } from './_models';
+import { I18N_CONFIG_KEY, I18N_DEFAULT_LANGUAGE } from '@/i18n';
+import { type TLanguage } from '@/i18n';
 
 const AUTH_LOCAL_STORAGE_KEY = `${import.meta.env.VITE_APP_NAME}-auth-v${
   import.meta.env.VITE_APP_VERSION
@@ -37,15 +39,47 @@ const removeAuth = () => {
   }
 };
 
+// Get current language from localStorage
+const getCurrentLanguage = (): TLanguage => {
+  try {
+    const language = getData(I18N_CONFIG_KEY) as TLanguage | undefined;
+    return language ?? I18N_DEFAULT_LANGUAGE;
+  } catch (error) {
+    return I18N_DEFAULT_LANGUAGE;
+  }
+};
+
 export function setupAxios(axios: any) {
   axios.defaults.headers.Accept = 'application/json';
   axios.defaults.withCredentials = true;
   axios.interceptors.request.use(
-    (config: { headers: { Authorization: string } }) => {
+    (config: { headers: { Authorization: string }; params?: any; url?: string; data?: any }) => {
       const auth = getAuth();
 
       if (auth?.access_token) {
         config.headers.Authorization = `Bearer ${auth.access_token}`;
+      }
+
+      // Add language code to all API requests
+      if (config.url && config.url.startsWith('/api')) {
+        const currentLanguage = getCurrentLanguage();
+        const langCode = currentLanguage.code;
+
+        // For GET requests, add to params
+        if (!config.method || config.method.toLowerCase() === 'get') {
+          config.params = config.params || {};
+          // Only add if not already present
+          if (!config.params.lang) {
+            config.params.lang = langCode;
+          }
+        } else {
+          // For POST/PUT/PATCH/DELETE, add to URL as query parameter
+          const separator = config.url.includes('?') ? '&' : '?';
+          // Check if lang is already in URL
+          if (!config.url.includes('lang=')) {
+            config.url = `${config.url}${separator}lang=${langCode}`;
+          }
+        }
       }
 
       return config;

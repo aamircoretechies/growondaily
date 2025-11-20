@@ -332,6 +332,8 @@ import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
 import { useBible } from '@/providers/BibleProvider';
 import { useAuthContext } from "@/auth";
+import { useLanguage } from '@/providers/TranslationProvider';
+import { FormattedMessage } from 'react-intl';
 
 
 
@@ -341,11 +343,12 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { selectBook, selectChapter, fetchSingleVerse, books } = useBible();
   const { profileProgress,currentUser } = useAuthContext();
+  const { currentLanguage } = useLanguage();
 
 
   const { dashboardData, loading } = useDashboard();
   if (loading) {
-    return <div className="text-center mt-10">Loading dashboard...</div>;
+    return <div className="text-center mt-10"><FormattedMessage id="HOME.LOADING_DASHBOARD" /></div>;
   }
 
 
@@ -353,7 +356,7 @@ const HomePage = () => {
 
   const getCurrentDate = () => {
     const date = new Date();
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(currentLanguage.code === 'nl' ? 'nl-NL' : 'en-US', {
       weekday: 'short',
       month: 'short',
       day: '2-digit',
@@ -393,9 +396,6 @@ const HomePage = () => {
 
   navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
 };
-
-
-
 
   const handleReadBible = () => {
     console.log('Read Bible clicked');
@@ -452,7 +452,7 @@ const HomePage = () => {
               className="w-full bg-gray-200 text-primary py-3 sm:py-4 px-4 sm:px-6 rounded-xl font-medium flex items-center justify-center gap-3 sm:gap-4 hover:bg-gray-300 transition-colors text-base sm:text-lg"
             >
               <KeenIcon icon="book" className="text-sand text-lg sm:text-xl" />
-              <span>Read Bible</span>
+              <span><FormattedMessage id="HOME.READ_BIBLE" /></span>
             </button>
           </div>
         </div>
@@ -466,10 +466,13 @@ const HomePage = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h2 className="font-merriweather text-xl text-primary mb-2">
-                  Complete Profile Setup
+                  <FormattedMessage id="HOME.COMPLETE_PROFILE_SETUP" />
                 </h2>
                 <p className="text-gray-600 dark:text-gray-700 text-sm">
-                  {profileProgress}% completed • {100 - profileProgress}% remaining
+                  <FormattedMessage 
+                    id="HOME.PROFILE_PROGRESS" 
+                    values={{ progress: profileProgress, remaining: 100 - profileProgress }}
+                  />
                 </p>
               </div>
               <div className="flex-shrink-0 ml-4">
@@ -517,7 +520,7 @@ const HomePage = () => {
           <div className="mb-6 lg:col-span-2">
             <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
               <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-3 sm:mb-4">
-                Your Daily Word
+                <FormattedMessage id="HOME.YOUR_DAILY_WORD" />
               </h2>
               <div className="bg-white/40 dark:bg-gray-200 rounded-xl p-3 sm:p-4 relative">
                 <div className="mb-3 sm:mb-4">
@@ -552,7 +555,7 @@ const HomePage = () => {
             <div onClick={dashboardData?.continue_reading ? handleContinueReadingClick : undefined}
              className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6 cursor-pointer">
               <h2 className="font-merriweather text-lg sm:text-xl text-primary mb-2">
-                Continue Reading
+                <FormattedMessage id="HOME.CONTINUE_READING" />
               </h2>
 
               {dashboardData?.continue_reading ? (
@@ -571,14 +574,14 @@ const HomePage = () => {
                       onClick={handleResume}
                       className="w-full sm:w-auto bg-sand dark:bg-gray-200 dark:hover:bg-sand-300 text-primary dark:text-primary px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-transparent dark:border-gray-400"
                     >
-                      Resume
+                      <FormattedMessage id="HOME.RESUME" />
                     </button>
                   </div>
                 </>
               ) : (
                 <>
                   <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-3">
-                    You haven’t started reading yet.
+                    <FormattedMessage id="HOME.NO_READING_YET" />
                   </p>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                     <div className="w-full sm:flex-1 bg-white/70 dark:bg-gray-200 rounded-full h-2">
@@ -588,7 +591,7 @@ const HomePage = () => {
                       onClick={handleReadBible}
                       className="w-full sm:w-auto bg-sand dark:bg-gray-200 dark:hover:bg-sand-300 text-primary dark:text-primary px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-transparent dark:border-gray-400"
                     >
-                      Start Reading
+                      <FormattedMessage id="HOME.START_READING" />
                     </button>
                   </div>
                 </>
@@ -603,7 +606,7 @@ const HomePage = () => {
         <div className="mb-6">
           <div className="bg-white/40 dark:bg-gray-100 rounded-2xl shadow-sm p-4 sm:p-6">
             <h2 className="font-merriweather text-xl text-primary mb-4">
-              Suggested Reflections
+              <FormattedMessage id="HOME.SUGGESTED_REFLECTIONS" />
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -635,13 +638,13 @@ const HomePage = () => {
                         onClick={() => handleStartReflection(reflection.reference)}
                         className="bg-primary text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
                       >
-                        Start
+                        <FormattedMessage id="HOME.START" />
                       </button>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-600 text-sm">No reflections available.</p>
+                <p className="text-gray-600 text-sm"><FormattedMessage id="HOME.NO_REFLECTIONS" /></p>
               )}
             </div>
           </div>

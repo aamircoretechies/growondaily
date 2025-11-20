@@ -12,8 +12,18 @@
   "USER.MENU.PAYMENT_&_SUBSCRIPTION_INFO": "Betaling & abonnementsinformatie",
   "USER.MENU.DARK_MODE": "Donkere Modus",
   "USER.MENU.LOGOUT": "Uitloggen",
-  "USER.MENU.LANGUAGE": "Taal"
+  "USER.MENU.LANGUAGE": "Taal",
 
-
-  
+  "HOME.LOADING_DASHBOARD": "Dashboard laden...",
+  "HOME.READ_BIBLE": "Lees Bijbel",
+  "HOME.COMPLETE_PROFILE_SETUP": "Profiel Setup Voltooien",
+  "HOME.PROFILE_PROGRESS": "{progress}% voltooid • {remaining}% resterend",
+  "HOME.YOUR_DAILY_WORD": "Uw Dagelijkse Woord",
+  "HOME.CONTINUE_READING": "Verder Lezen",
+  "HOME.RESUME": "Hervatten",
+  "HOME.START_READING": "Begin met Lezen",
+  "HOME.NO_REFLECTIONS": "Geen reflecties beschikbaar.",
+  "HOME.SUGGESTED_REFLECTIONS": "Voorgestelde Reflecties",
+  "HOME.NO_READING_YET": "U bent nog niet begonnen met lezen.",
+  "HOME.START": "Start"
 }
