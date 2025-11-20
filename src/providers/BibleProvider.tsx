@@ -2,8 +2,6 @@ import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 
-
-
 interface BibleBook {
   book_id: string;
   name: string;
@@ -43,37 +41,15 @@ interface BibleContextType {
   selectChapter: (chapter: number) => Promise<void>;
   fetchDeepStudy: (bookId: string, chapter: number, version: string) => Promise<any>;
   fetchDeepStudyForVerse: (bookId: string, chapter: number, verse: number, version: string) => Promise<any>;
-
-
-  saveNote: (
-    book_id: string,
-    chapter: number,
-    verse: number,
-    content: string,
-    emotion_tags: string[]
-  ) => Promise<void>;
-
-  toggleVerseBookmark: (
-    book: string,
-    chapter: number,
-    verse: number,
-    version: string
-  ) => Promise<void>;
-
+  saveNote: (book_id: string,chapter: number,verse: number,content: string,emotion_tags: string[]) => Promise<void>;
+  toggleVerseBookmark: (book: string,chapter: number,verse: number,version: string) => Promise<void>;
   showDeepStudy: boolean;
   setShowDeepStudy: React.Dispatch<React.SetStateAction<boolean>>;
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
   verseActiveTab: string;
   setVerseActiveTab: React.Dispatch<React.SetStateAction<string>>;
-  toggleVerseStatus: (
-    book_id: string,
-    chapter: number,
-    verse: number,
-    version: string
-  ) => Promise<{ success: boolean; is_read: boolean }>;
-
-
+  toggleVerseStatus: (book_id: string,chapter: number,verse: number,version: string) => Promise<{ success: boolean; is_read: boolean }>;
 }
 
 const BibleContext = createContext<BibleContextType>({
@@ -98,9 +74,7 @@ const BibleContext = createContext<BibleContextType>({
   fetchDeepStudy: async () => { },
   fetchDeepStudyForVerse: async () => { },
   saveNote: async () => { },
-
   toggleVerseBookmark: async () => { },
-
   showDeepStudy: false,
   setShowDeepStudy: () => { },
   activeTab: 'original',
@@ -108,8 +82,6 @@ const BibleContext = createContext<BibleContextType>({
   verseActiveTab: 'explanations',
   setVerseActiveTab: () => { },
   toggleVerseStatus: async () => ({ success: false, is_read: false }),
-
-
 });
 
 export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
@@ -140,14 +112,11 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(true);
         // const res = await axios.get("https://api.growondaily.com/api/bible/books");
         const res = await axios.get("/api/bible/books");
-
         const data = res.data?.data?.books || [];
         setBooks(data);
-
         const savedBookId = localStorage.getItem("bible.selectedBookId");
         const savedBookName = localStorage.getItem("bible.selectedBookName");
         const savedChapter = Number(localStorage.getItem("bible.selectedChapter") || "1");
-
         if (savedBookId && data.some((b: BibleBook) => b.book_id === savedBookId)) {
           setSelectedBookId(savedBookId);
           setSelectedBookName(savedBookName || (data.find((b: BibleBook) => b.book_id === savedBookId)?.name ?? null));
@@ -279,22 +248,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   ) => {
     try {
       setLoading(true);
-
-      const contexts = [
-        "original",
-        "explanations",
-        "historical",
-        "cultural",
-        "theological",
-        "practical",
-        "commentary",
-        "ground_text",
-        "special",
-        "daily_life",
-        "cross_reference",
-        "key_takeaways",
-        "reflection",
-      ];
+      const contexts = ["original","explanations","historical","cultural","theological","practical","commentary","ground_text","special","daily_life","cross_reference","key_takeaways","reflection",];
 
       // Check if verse is passed
       // const baseUrl = verse
@@ -333,7 +287,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-
   const fetchDeepStudyForVerse = async (
     bookId: string,
     chapter: number,
@@ -369,8 +322,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     }
   };
-
-
 
   const saveNote = async (
     book_id: string,
@@ -445,8 +396,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-
-
   const toggleVerseBookmark = async (book: string, chapter: number, verse: number, version: string) => {
     try {
       const res = await axios.post("/api/bible/toggle-verse-bookmark",
@@ -493,29 +442,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 
-
-
-
-
-
-
-
-
-
   return (
     <BibleContext.Provider
-      value={{
-        books,
-        chapters,
-        verses,
-        loading,
-        error,
-        version,
-        saveNote,
-        deepStudyData,
-        selectedBookId,
-        selectedBookName,
-        selectedChapter,
+      value={{ books,chapters,verses,loading,error,version,saveNote,deepStudyData,selectedBookId,selectedBookName,selectedChapter,
         selectedVerse,
         fetchChapters,
         fetchVerses,
