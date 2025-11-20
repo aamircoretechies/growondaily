@@ -914,6 +914,14 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     return Math.round((filled / fields.length) * 100);
   };
 
+  // Update profile progress in real-time as user edits fields
+  useEffect(() => {
+    if (isOpen) {
+      const progress = calculateProgress(profileData);
+      setProfileProgress(progress);
+    }
+  }, [profileData, isOpen]);
+
   const handleNext = async () => {
     if (currentStep === steps.length - 1) {
       // last step -> save
@@ -978,6 +986,21 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
       dailyPref: '',
       depth: ''
     });
+    // Recalculate progress from saved user data when closing without saving
+    if (currentUser && setProfileProgress) {
+      const savedProgress = calculateProgress({
+        firstName: currentUser.first_name || '',
+        lastName: currentUser.last_name || '',
+        experience: currentUser?.preferences?.experience_with_bible?.[0] || '',
+        brings: currentUser?.preferences?.what_brings_you ? (typeof currentUser.preferences.what_brings_you === 'string' ? currentUser.preferences.what_brings_you.split(',').map((s: string) => s.trim()) : currentUser.preferences.what_brings_you) : [],
+        engage: currentUser?.preferences?.engagement_preference || [],
+        explainStyle: currentUser?.preferences?.explanation_style || '',
+        translations: currentUser?.preferences?.bible_version ? [currentUser.preferences.bible_version] : [],
+        dailyPref: currentUser?.preferences?.receive_daily ? 'Daily' : 'Occasionally',
+        depth: currentUser?.preferences?.depth_level || '',
+      });
+      setProfileProgress(savedProgress);
+    }
     onClose();
   };
 

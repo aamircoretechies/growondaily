@@ -334,6 +334,8 @@ import { useBible } from '@/providers/BibleProvider';
 import { useAuthContext } from "@/auth";
 import { useLanguage } from '@/providers/TranslationProvider';
 import { FormattedMessage } from 'react-intl';
+import AudioPlay from "@/components/audio/audioplay";
+
 
 
 
@@ -344,6 +346,8 @@ const HomePage = () => {
   const { selectBook, selectChapter, fetchSingleVerse, books } = useBible();
   const { profileProgress, currentUser } = useAuthContext();
   const { currentLanguage } = useLanguage();
+  const [showAudioPopup, setShowAudioPopup] = useState(false);
+
 
 
   const { dashboardData, loading } = useDashboard();
@@ -366,6 +370,7 @@ const HomePage = () => {
 
   const handleAudioPlay = () => {
     console.log('Audio play clicked');
+    setShowAudioPopup(true);
   };
 
   const handleReadMore = () => {
@@ -434,27 +439,27 @@ const HomePage = () => {
   };
 
   const handleReadDailyWord = async () => {
-  const reference = dashboardData?.daily_word?.reference;
-  if (!reference) return;
+    const reference = dashboardData?.daily_word?.reference;
+    if (!reference) return;
 
-  const match = reference.match(/([A-Za-z ]+)\s+(\d+):(\d+)/);
-  if (!match) return;
+    const match = reference.match(/([A-Za-z ]+)\s+(\d+):(\d+)/);
+    if (!match) return;
 
-  const [, bookName, chapter, verse] = match;
-  const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
+    const [, bookName, chapter, verse] = match;
+    const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
 
-  const book = books?.find((b: any) =>
-    b.name.toLowerCase() === bookName.trim().toLowerCase()
-  );
+    const book = books?.find((b: any) =>
+      b.name.toLowerCase() === bookName.trim().toLowerCase()
+    );
 
-  if (book) {
-    await selectBook(book.book_id, book.name);
-    await selectChapter(Number(chapter));
-    await fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
-  }
+    if (book) {
+      await selectBook(book.book_id, book.name);
+      await selectChapter(Number(chapter));
+      await fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
+    }
 
-  navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
-};
+    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+  };
 
 
 
@@ -688,6 +693,15 @@ const HomePage = () => {
           isOpen={showProfileSetup}
           onClose={() => setShowProfileSetup(false)}
         />
+
+        <AudioPlay
+          isOpen={showAudioPopup}
+          onClose={() => setShowAudioPopup(false)}
+          reference={dashboardData?.daily_word?.reference}
+          text={dashboardData?.daily_word?.context}
+          audioUrl="/audio/sample.mp3"   // later dynamic
+        />
+
       </div>
     </Container>
   );
