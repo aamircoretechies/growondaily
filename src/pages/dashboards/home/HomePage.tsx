@@ -327,7 +327,7 @@
 import { Container } from '@/components/container';
 import { KeenIcon, ProfileSetupModal } from '@/components';
 import { LucideVolume2, LucideBook, LightbulbIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
 import { useBible } from '@/providers/BibleProvider';
@@ -335,6 +335,7 @@ import { useAuthContext } from "@/auth";
 import { useLanguage } from '@/providers/TranslationProvider';
 import { FormattedMessage } from 'react-intl';
 import AudioPlay from "@/components/audio/audioplay";
+import axios from 'axios';
 
 
 
@@ -351,6 +352,57 @@ const HomePage = () => {
 
 
   const { dashboardData, loading } = useDashboard();
+
+  const [readingProgress, setReadingProgress] = useState(0);
+
+  useEffect(() => {
+    const calculateProgress = async () => {
+      if (!dashboardData?.continue_reading || !books.length) return;
+
+      const { book, chapter, version } = dashboardData.continue_reading;
+      const bookName = book.trim();
+      const bookSlug = bookName.toLowerCase().replace(/\s+/g, "-");
+
+      // Find book_id for API call
+      const bookObj = books.find((b: any) =>
+        b.name.toLowerCase() === bookName.toLowerCase()
+      );
+
+      if (!bookObj) return;
+
+      try {
+        // Fetch all verses for the chapter
+        // We use a direct axios call here to avoid affecting the global BibleContext state
+        // which might be displaying a different chapter/book
+        const response = await axios.get(
+          `/api/bible/books/${bookObj.book_id}/chapters/${chapter}/verses/${version || 'KJV'}`
+        );
+
+        const verses = response.data?.data?.verses || [];
+        if (verses.length === 0) {
+          setReadingProgress(0);
+          return;
+        }
+
+        // Calculate how many verses are marked as read in localStorage
+        let readCount = 0;
+        verses.forEach((v: any) => {
+          const verseKey = `verse-read-${bookSlug}-${chapter}-${v.verse}`;
+          if (localStorage.getItem(verseKey) === 'true') {
+            readCount++;
+          }
+        });
+
+        const percentage = Math.round((readCount / verses.length) * 100);
+        setReadingProgress(percentage);
+
+      } catch (error) {
+        console.error("Error calculating reading progress:", error);
+      }
+    };
+
+    calculateProgress();
+  }, [dashboardData?.continue_reading, books]);
   if (loading) {
     return <div className="text-center mt-10"><FormattedMessage id="HOME.LOADING_DASHBOARD" /></div>;
   }
@@ -389,11 +441,9 @@ const HomePage = () => {
 
     const [, bookName, chapter, verse] = match;
     const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
-    
-    // Navigate immediately - let BiblePage handle data fetching
+
     navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
-    
-    // Fetch data in background (non-blocking)
+
     const book = books?.find((b: any) =>
       b.name.toLowerCase() === bookName.trim().toLowerCase()
     );
@@ -409,7 +459,6 @@ const HomePage = () => {
     navigate('/bible');
   };
 
-
   const handleContinueReadingClick = () => {
     const data = dashboardData?.continue_reading;
     if (!data) return;
@@ -419,10 +468,8 @@ const HomePage = () => {
     const bookName = book.trim();
     const bookSlug = bookName.toLowerCase().replace(/\s+/g, "-");
 
-    // Navigate immediately - let BiblePage handle data fetching
     navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
-    
-    // Fetch data in background (non-blocking)
+
     const bookObj = books?.find((b: any) =>
       b.name.toLowerCase() === bookName.toLowerCase()
     );
@@ -453,7 +500,7 @@ const HomePage = () => {
 
     // Navigate immediately - let BiblePage handle data fetching
     navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
-    
+
     // Fetch data in background (non-blocking)
     const book = books?.find((b: any) =>
       b.name.toLowerCase() === bookName.trim().toLowerCase()
@@ -468,6 +515,7 @@ const HomePage = () => {
 
 
   // const profileProgress = 75;
+  // const progress = profileProgress;
   const progress = profileProgress;
 
 
@@ -608,7 +656,7 @@ const HomePage = () => {
                     <div className="w-full sm:flex-1 bg-white/70 dark:bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-sand h-2 rounded-full"
-                        style={{ width: `${dashboardData.continue_reading.progress || 0}%` }}
+                        style={{ width: `${readingProgress}%` }}
                       ></div>
                     </div>
                     <button
@@ -640,8 +688,6 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-
-
 
         {/* Suggested Reflections Section (Dynamic from API) */}
         <div className="mb-6">

@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { KeenIcon } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
 import { toast } from "sonner";
+import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
 
 
 interface TabItem {
@@ -23,6 +24,7 @@ const VerseStudy = () => {
 
 
   const { books, loadingDeepStudy, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, verseActiveTab, setVerseActiveTab } = useBible();
+  const { refetch: refetchDashboard } = useDashboard();
 
   const book = searchParams.get('bible') || 'genesis';
   const chapter = searchParams.get('chapter') || '1';
@@ -106,9 +108,14 @@ const VerseStudy = () => {
 
       // Dispatch custom event to notify DashboardProvider to refresh progress bar
       // This should happen for both read and unread to update the progress bar
-      window.dispatchEvent(new CustomEvent('verse-read-updated', {
-        detail: verseUpdateData
-      }));
+      // window.dispatchEvent(new CustomEvent('verse-read-updated', {
+      //   detail: verseUpdateData
+      // }));
+
+      // Refresh dashboard data to update progress bar immediately
+      setTimeout(() => {
+        refetchDashboard();
+      }, 300);
 
       toast.success(
         response.is_read ? "Marked as Read" : "Marked as Unread"
@@ -307,7 +314,7 @@ const VerseStudy = () => {
                 }
                 const verseKey = `${bookId}-${chapter}-${verse}`;
                 const verseNotes = deepStudyData?.[verseKey]?.original?.notes || [];
-                
+
                 return (
                   <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
                     <h3 className="text-lg font-semibold text-primary mb-3">Your Notes</h3>

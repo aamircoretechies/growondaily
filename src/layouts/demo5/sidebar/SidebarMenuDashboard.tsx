@@ -1,17 +1,8 @@
-import {
-  Menu,
-  MenuItem,
-  MenuLink,
-  MenuTitle,
-  MenuToggle,
-  KeenIcon,
-  MenuSub,
-  MenuIcon
-} from '@/components';
+import {Menu,MenuItem,MenuLink,MenuTitle,MenuToggle,KeenIcon,MenuSub,MenuIcon} from '@/components';
 import { useLanguage } from '@/i18n';
 import { useState, useMemo, useEffect } from 'react';
 import { MakeNote } from '@/components';
-import { useBible } from '@/providers/BibleProvider'; // for API data
+import { useBible } from '@/providers/BibleProvider'; 
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import SharePopUp from "@/components/share/SharePopUp";
 
@@ -49,17 +40,11 @@ const SidebarMenuDashboard = () => {
   const [chapterSearchTerm, setChapterSearchTerm] = useState('');
   const [verseSearchTerm, setVerseSearchTerm] = useState('');
   const [showMakeNote, setShowMakeNote] = useState(false);
-  // selectedChapter comes from context now
   const navigate = useNavigate();
-  // const [selectedBook, setSelectedBook] = useState<string>('Select Book');
   const [showSharePopup, setShowSharePopup] = useState(false);
-
-  // Check if we're viewing a specific verse (verse-level deep study)
   const isVerseView = searchParams.get('bible') && searchParams.get('chapter') && searchParams.get('verse');
-  // Check if we're viewing all verses of a chapter (not a specific verse)
   const isChapterView = searchParams.get('bible') && searchParams.get('chapter') && !searchParams.get('verse');
 
-  // Sync with URL parameters when they change (for page refresh)
   useEffect(() => {
     const bookSlug = searchParams.get('bible');
     const chapterParam = searchParams.get('chapter');

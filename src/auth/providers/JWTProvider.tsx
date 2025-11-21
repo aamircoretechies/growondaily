@@ -773,12 +773,9 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
       const progress = calculateProfileProgress(fullUser);
       setProfileProgress(progress);
-
-      // persist a lightweight currentUser for page reload convenience
       try {
         localStorage.setItem("growondaily_currentUser", JSON.stringify(fullUser));
       } catch (err) {
-        // ignore localStorage errors
       }
 
       return fullUser;
@@ -1098,36 +1095,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   };
 
 
-  // const updateProfileImage = async (file: File): Promise<UserModel | null> => {
-  //   try {
-  //     const token = auth?.access_token || auth?.api_token;
-  //     if (!token) return null;
-
-  //     const formData = new FormData();
-  //     formData.append("profile_picture", file);
-
-  //     const response = await axios.put(`/api/auth/profile-picture`,
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       }
-  //     );
-
-  //     const updatedUser = response.data?.data?.user;
-  //     if (updatedUser) {
-  //       setCurrentUser((prev) => ({ ...prev, ...updatedUser }));
-  //     }
-
-  //     return updatedUser;
-  //   } catch (err) {
-  //     console.log("Profile Pic Update Error:", err);
-  //     return null;
-  //   }
-  // };
-
   const updateProfileImage = async (file: File): Promise<UserModel | null> => {
     try {
       const token =
@@ -1143,8 +1110,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       const formData = new FormData();
       formData.append("profile_picture", file);
 
-      const response = await axios.put(
-        `/api/auth/profile-picture`,   // <-- yahi use karna h
+      const response = await axios.put(`/api/auth/profile-picture`,   
         formData,
         {
           headers: {
@@ -1153,8 +1119,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
           },
         }
       );
-
-      // Updated user fetch
       const updatedUser = await getUser(token);
       setCurrentUser(updatedUser);
 
@@ -1175,28 +1139,9 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <AuthContext.Provider
-      value={{
-        loading,
-        setLoading,
-        auth,
-        saveAuth,
-        currentUser,
-        setCurrentUser,
-        login,
-        register,
-        requestPasswordResetLink,
-        changePassword,
-        getUser,
-        saveUserPreferences,
-        updateUserPreferences,
-        saveOrUpdateUserPreferences,
-        updateProfileImage,
-        loginWithGoogle,
-        logout,
-        verify,
-        profileProgress,
-        setProfileProgress,
-        refreshDashboard
+      value={{loading,setLoading,auth,saveAuth,currentUser,setCurrentUser,login,register,requestPasswordResetLink,changePassword,
+        getUser,saveUserPreferences,updateUserPreferences,saveOrUpdateUserPreferences,updateProfileImage,loginWithGoogle,logout,
+        verify,profileProgress,setProfileProgress,refreshDashboard
       }}
     >
       {children}

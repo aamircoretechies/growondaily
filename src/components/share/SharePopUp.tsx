@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { toast } from "sonner";
 
 type SharePopUpProps = {
   isOpen: boolean;
@@ -61,8 +62,8 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
             rel="noopener noreferrer"
             onClick={!hasContent ? (e) => e.preventDefault() : undefined}
             className={`w-full block text-center py-2 rounded-lg font-medium transition ${hasContent
-                ? 'bg-primary text-white hover:bg-primary/90'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? 'bg-primary text-white hover:bg-primary/90'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
           >
             Share on WhatsApp
@@ -80,8 +81,8 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
             rel="noopener noreferrer"
             onClick={!hasContent ? (e) => e.preventDefault() : undefined}
             className={`w-full block text-center py-2 rounded-lg font-medium transition ${hasContent
-                ? 'bg-sand text-primary hover:bg-sand/80'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              ? 'bg-sand text-primary hover:bg-sand/80'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
           >
             Share on Facebook
@@ -89,20 +90,25 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
 
           {/* Copy */}
           <button
-            onClick={() => {
+            onClick={async () => {
               if (hasContent) {
-                navigator.clipboard.writeText(textToShare);
-                alert("Copied!");
+                try {
+                  await navigator.clipboard.writeText(textToShare);
+                  toast.success("Text copied successfully!");
+                } catch (err) {
+                  toast.error("Failed to copy text!");
+                }
               }
             }}
             disabled={!hasContent}
             className={`w-full py-2 rounded-lg font-medium transition ${hasContent
-                ? 'bg-gray-200 text-primary hover:bg-gray-300'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? "bg-gray-200 text-primary hover:bg-gray-300"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
           >
             Copy Text
           </button>
+
 
         </div>
 

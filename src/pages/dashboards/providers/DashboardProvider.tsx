@@ -76,24 +76,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [currentUser, currentLanguage.code, fetchDashboardData]); // Refetch when language changes
 
-  // Listen for verse read updates to refresh progress bar
-  useEffect(() => {
-    if (!auth?.access_token) return; // Don't set up listener if not authenticated
 
-    const handleVerseUpdate = (event: Event) => {
-      console.log("Verse read update detected, refreshing dashboard...", event);
-      // Only refresh if we have auth token
-      if (auth?.access_token) {
-        fetchDashboardData();
-      }
-    };
-
-    window.addEventListener('verse-read-updated', handleVerseUpdate);
-
-    return () => {
-      window.removeEventListener('verse-read-updated', handleVerseUpdate);
-    };
-  }, [auth?.access_token, fetchDashboardData]); // Re-bind if auth or fetch function changes
 
   return (
     <DashboardContext.Provider

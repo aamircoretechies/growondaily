@@ -259,7 +259,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
       currentUser?.profile_picture
         ? `${import.meta.env.VITE_APP_API_URL}/uploads/profile-pictures/${currentUser.profile_picture}`
         : toAbsoluteUrl("/media/avatars/300-2.png");
-    console.log("Uploaded Image Full URL =>", imageURL);
+    // console.log("Uploaded Image Full URL =>", imageURL);
 
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
