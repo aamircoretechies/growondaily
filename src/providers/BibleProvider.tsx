@@ -491,20 +491,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     emotion_tags: string[] = []
   ) => {
     try {
-
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        console.warn("Skipping note save — User not logged in");
-        toast.error("Please login to save notes.");
-        return;
-      }
       let res;
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
 
       // API call (chapter vs verse note)
       if (verse === 0) {
