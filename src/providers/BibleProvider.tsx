@@ -37,19 +37,19 @@ interface BibleContextType {
   fetchVerses: (bookId: string, chapter: number, version: string) => Promise<void>;
   fetchSingleVerse: (bookId: string, chapter: number, verse: number, version: string) => Promise<void>;
   setSelectedVerse: (v: Verse | null) => void;
-  selectBook: (bookId: string, name: string,chapter?: number) => Promise<void>;
+  selectBook: (bookId: string, name: string, chapter?: number) => Promise<void>;
   selectChapter: (chapter: number) => Promise<void>;
   fetchDeepStudy: (bookId: string, chapter: number, version: string) => Promise<any>;
   fetchDeepStudyForVerse: (bookId: string, chapter: number, verse: number, version: string) => Promise<any>;
-  saveNote: (book_id: string,chapter: number,verse: number,content: string,emotion_tags: string[]) => Promise<void>;
-  toggleVerseBookmark: (book: string,chapter: number,verse: number,version: string) => Promise<void>;
+  saveNote: (book_id: string, chapter: number, verse: number, content: string, emotion_tags: string[]) => Promise<void>;
+  toggleVerseBookmark: (book: string, chapter: number, verse: number, version: string) => Promise<void>;
   showDeepStudy: boolean;
   setShowDeepStudy: React.Dispatch<React.SetStateAction<boolean>>;
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
   verseActiveTab: string;
   setVerseActiveTab: React.Dispatch<React.SetStateAction<string>>;
-  toggleVerseStatus: (book_id: string,chapter: number,verse: number,version: string) => Promise<{ success: boolean; is_read: boolean }>;
+  toggleVerseStatus: (book_id: string, chapter: number, verse: number, version: string) => Promise<{ success: boolean; is_read: boolean }>;
 }
 
 const BibleContext = createContext<BibleContextType>({
@@ -114,18 +114,18 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         const res = await axios.get("/api/bible/books");
         const data = res.data?.data?.books || [];
         setBooks(data);
-        
+
         // Check URL parameters first (they take precedence on page refresh)
         const urlParams = new URLSearchParams(window.location.search);
         const urlBookSlug = urlParams.get('bible');
         const urlChapter = urlParams.get('chapter');
         const urlVerse = urlParams.get('verse');
-        
+
         let targetBookId: string | null = null;
         let targetBookName: string | null = null;
         let targetChapter: number = 1;
         let targetVerse: number | null = null;
-        
+
         // If URL params exist, use them
         if (urlBookSlug && data.length > 0) {
           const getBookIdFromSlug = (slug: string): { id: string | null; name: string | null } => {
@@ -138,7 +138,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
             );
             return { id: found?.book_id || null, name: found?.name || null };
           };
-          
+
           const bookInfo = getBookIdFromSlug(urlBookSlug);
           if (bookInfo.id) {
             targetBookId = bookInfo.id;
@@ -147,19 +147,19 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
             targetVerse = urlVerse ? Number(urlVerse) : null;
           }
         }
-        
+
         // Fall back to localStorage if no URL params
         if (!targetBookId) {
           const savedBookId = localStorage.getItem("bible.selectedBookId");
           const savedBookName = localStorage.getItem("bible.selectedBookName");
           const savedChapter = Number(localStorage.getItem("bible.selectedChapter") || "1");
           const savedVerseStr = localStorage.getItem("bible.selectedVerse");
-          
+
           if (savedBookId && data.some((b: BibleBook) => b.book_id === savedBookId)) {
             targetBookId = savedBookId;
             targetBookName = savedBookName || (data.find((b: BibleBook) => b.book_id === savedBookId)?.name ?? null);
             targetChapter = savedChapter || 1;
-            
+
             if (savedVerseStr) {
               try {
                 const savedVerse = JSON.parse(savedVerseStr);
@@ -170,7 +170,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
             }
           }
         }
-        
+
         // Default to Genesis if nothing found
         if (!targetBookId) {
           const genesis = data.find((b: any) => b.name.toLowerCase() === "genesis");
@@ -181,7 +181,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
             targetVerse = null;
           }
         }
-        
+
         // Set state and fetch data
         if (targetBookId) {
           setSelectedBookId(targetBookId);
@@ -189,7 +189,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
           setSelectedChapter(targetChapter);
           await fetchChapters(targetBookId, "KJV");
           await fetchVerses(targetBookId, targetChapter, "KJV");
-          
+
           // If verse is in URL or localStorage, fetch it
           if (targetVerse && !isNaN(targetVerse)) {
             await fetchSingleVerse(targetBookId, targetChapter, targetVerse, "KJV");
@@ -317,7 +317,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   ) => {
     try {
       setLoading(true);
-      const contexts = ["original","explanations","historical","cultural","theological","practical","commentary","ground_text","special","daily_life","cross_reference","key_takeaways","reflection",];
+      const contexts = ["original", "explanations", "historical", "cultural", "theological", "practical", "commentary", "ground_text", "special", "daily_life", "cross_reference", "key_takeaways", "reflection",];
 
       // Check if verse is passed
       // const baseUrl = verse
@@ -345,17 +345,17 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       setDeepStudyData((prev: any) => {
         const safePrev = prev || {};
         const prevData = safePrev[key] || {};
-        
+
         // Merge notes from previous data with new data, avoiding duplicates
         const merged = { ...allResponses };
         Object.keys(merged).forEach((tabId) => {
           const prevTab = prevData[tabId] || {};
           const newTab = merged[tabId] || {};
-          
+
           // Merge notes by note_id to avoid duplicates
           const prevNotes = prevTab.notes || [];
           const newNotes = newTab.notes || [];
-          
+
           // Create a map of existing notes by note_id
           const notesMap = new Map();
           prevNotes.forEach((note: any) => {
@@ -363,7 +363,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
               notesMap.set(note.note_id, note);
             }
           });
-          
+
           // Add new notes, updating existing ones if they have the same note_id
           newNotes.forEach((note: any) => {
             if (note.note_id) {
@@ -373,15 +373,15 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
               notesMap.set(Date.now().toString() + Math.random(), note);
             }
           });
-          
+
           const mergedNotes = Array.from(notesMap.values());
-          
+
           merged[tabId] = {
             ...newTab,
             notes: mergedNotes.length > 0 ? mergedNotes : undefined,
           };
         });
-        
+
         return {
           ...safePrev,
           [key]: merged,
@@ -418,23 +418,27 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
 
       const results = await Promise.all(requests);
       const allResponses = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-      
+
       const key = `${bookId}-${chapter}-${verse}`;
-      
+
       setDeepStudyData((prev: any) => {
+
         const safePrev = prev || {};
         const prevData = safePrev[key] || {};
-        
+
         // Merge notes from previous data with new data, avoiding duplicates
         const merged = { ...allResponses };
         Object.keys(merged).forEach((tabId) => {
           const prevTab = prevData[tabId] || {};
           const newTab = merged[tabId] || {};
-          
+
+          // const prevNotes = prevTab.notes || [];
+          // const newNotes = newTab.notes || [];
           // Merge notes by note_id to avoid duplicates
-          const prevNotes = prevTab.notes || [];
-          const newNotes = newTab.notes || [];
-          
+          const prevNotes = Array.isArray(prevTab.notes) ? prevTab.notes : [];
+          const newNotes = Array.isArray(newTab.notes) ? newTab.notes : [];
+
+
           // Create a map of existing notes by note_id
           const notesMap = new Map();
           prevNotes.forEach((note: any) => {
@@ -442,7 +446,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
               notesMap.set(note.note_id, note);
             }
           });
-          
+
           // Add new notes, updating existing ones if they have the same note_id
           newNotes.forEach((note: any) => {
             if (note.note_id) {
@@ -452,15 +456,15 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
               notesMap.set(Date.now().toString() + Math.random(), note);
             }
           });
-          
+
           const mergedNotes = Array.from(notesMap.values());
-          
+
           merged[tabId] = {
             ...newTab,
             notes: mergedNotes.length > 0 ? mergedNotes : undefined,
           };
         });
-        
+
         return {
           ...safePrev,
           [key]: merged,
@@ -489,7 +493,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       // API call (chapter vs verse note)
       if (verse === 0) {
         const payload = { book_id, chapter, content, emotion_tags };
-        // res = await axios.post("https://api.growondaily.com/api/bible/chapter-notes", payload);
         res = await axios.post("/api/bible/chapter-notes", payload);
       } else {
         const payload = { book_id, chapter, verse, content, emotion_tags };
@@ -578,54 +581,55 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   // };
 
   const toggleVerseBookmark = async (book: string, chapter: number, verse: number, version: string) => {
-  try {
-    const res = await axios.post(`/api/bible/toggle-verse-bookmark`, {
-      book,chapter,verse,version,
-    });
+    try {
+      const res = await axios.post(`/api/bible/toggle-verse-bookmark`, {
+        book, chapter, verse, version,
+      });
 
-    const msg = res?.data?.message?.toLowerCase() || "";
+      const msg = res?.data?.message?.toLowerCase() || "";
 
-    if (msg.includes("removed") || msg.includes("unbookmarked")) {
-      toast.success("Bookmark removed successfully");
-    } else if (msg.includes("added") || msg.includes("bookmarked")) {
-      toast.success("Bookmark added successfully");
-    } else {
-      toast.info(res?.data?.message || "Updated");
+      if (msg.includes("removed") || msg.includes("unbookmarked")) {
+        toast.success("Bookmark removed successfully");
+      } else if (msg.includes("added") || msg.includes("bookmarked")) {
+        toast.success("Bookmark added successfully");
+      } else {
+        toast.info(res?.data?.message || "Updated");
+      }
+    } catch (err) {
+      console.error("Bookmark toggle error:", err);
+      toast.error("Something went wrong");
     }
-  } catch (err) {
-    console.error("Bookmark toggle error:", err);
-    toast.error("Something went wrong");
-  }
-};
+  };
 
- const toggleVerseStatus = async (book_id: string, chapter: number, verse: number, version: string) => {
-  try {
-    const res = await axios.post("/api/bible/toggle-verse-status", {
-      book: book_id,
-      chapter,
-      verse,
-      version,
-    });
+  const toggleVerseStatus = async (book_id: string, chapter: number, verse: number, version: string) => {
+    try {
+      const res = await axios.post("/api/bible/toggle-verse-status", {
+        book: book_id,
+        chapter,
+        verse,
+        version,
+      });
 
-    const apiData = res.data;
-    console.log("API RAW RESPONSE => ", apiData);
+      const apiData = res.data;
+      console.log("API RAW RESPONSE => ", apiData);
 
-    const isRead = apiData?.data?.mark_as_read ?? false;
+      const isRead = apiData?.data?.mark_as_read ?? false;
 
-    return {
-      success: apiData.status === 1,
-      is_read: isRead,
-    };
-  } catch (err) {
-    console.error("Toggle Verse Error:", err);
-    return { success: false, is_read: false };
-  }
-};
+      return {
+        success: apiData.status === 1,
+        is_read: isRead,
+      };
+    } catch (err) {
+      console.error("Toggle Verse Error:", err);
+      return { success: false, is_read: false };
+    }
+  };
 
 
   return (
     <BibleContext.Provider
-      value={{ books,chapters,verses,loading,error,version,saveNote,deepStudyData,selectedBookId,selectedBookName,selectedChapter,
+      value={{
+        books, chapters, verses, loading, error, version, saveNote, deepStudyData, selectedBookId, selectedBookName, selectedChapter,
         selectedVerse,
         fetchChapters,
         fetchVerses,
