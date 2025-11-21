@@ -37,7 +37,7 @@ interface BibleContextType {
   fetchVerses: (bookId: string, chapter: number, version: string) => Promise<void>;
   fetchSingleVerse: (bookId: string, chapter: number, verse: number, version: string) => Promise<void>;
   setSelectedVerse: (v: Verse | null) => void;
-  selectBook: (bookId: string, name: string) => Promise<void>;
+  selectBook: (bookId: string, name: string,chapter?: number) => Promise<void>;
   selectChapter: (chapter: number) => Promise<void>;
   fetchDeepStudy: (bookId: string, chapter: number, version: string) => Promise<any>;
   fetchDeepStudyForVerse: (bookId: string, chapter: number, verse: number, version: string) => Promise<any>;
