@@ -76,6 +76,8 @@
 // export { GeneralSettings };
 
 
+
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -88,7 +90,7 @@ import { I18N_LANGUAGES, I18N_CONFIG_KEY } from '@/i18n';
 import { setData } from '@/utils';                         
 
 const GeneralSettings = ({ user }: { user: any }) => {
-  const { selectLanguage, loading } = useSettingEdit();
+  const { selectLanguage, languageLoading } = useSettingEdit();
   const { changeLanguage } = useLanguage();
   const [language, setLanguage] = useState(user?.language_code || "en");
 
@@ -144,10 +146,10 @@ const GeneralSettings = ({ user }: { user: any }) => {
           <Button
             className="flex items-center justify-center gap-2 w-full sm:w-auto"
             onClick={handleSave}
-            disabled={loading}
+            disabled={languageLoading}
           >
             <Save className="w-4 h-4" />
-            {loading ? "Saving..." : "Save Settings"}
+            {languageLoading ? "Saving..." : "Save Settings"}
           </Button>
 
           <Button

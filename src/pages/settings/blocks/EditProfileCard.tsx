@@ -64,7 +64,7 @@ import { useAuthContext } from "@/auth";
 
 
 const EditProfileCard = () => {
-  const { user, updateProfile, loading } = useSettingEdit();
+  const { user, updateProfile, profileLoading } = useSettingEdit();
   const { currentUser } = useAuthContext();
 
   // const [firstName, setFirstName] = useState(user?.first_name || '');
@@ -155,8 +155,8 @@ const EditProfileCard = () => {
         )}
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-          <Button onClick={handleUpdate} disabled={loading} className="w-full sm:w-auto">
-            {loading ? "Updating..." : "Update Profile"}
+          <Button onClick={handleUpdate} disabled={profileLoading} className="w-full sm:w-auto">
+            {profileLoading ? "Updating..." : "Update Profile"}
           </Button>
 
           <Button variant="ghost" className="text-red-500 hover:text-red-600 w-full sm:w-auto text-sm">

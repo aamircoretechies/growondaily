@@ -60,7 +60,7 @@ import { LockKeyhole } from 'lucide-react';
 import { useSettingEdit } from '../Provider/SettingeEditProvider';
 
 const ChangePasswordCard = () => {
-  const { changePassword, loading } = useSettingEdit();
+  const { changePassword, passwordLoading } = useSettingEdit();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -138,8 +138,8 @@ const ChangePasswordCard = () => {
         )}
 
         <div className="pt-2">
-          <Button onClick={handlePasswordChange} disabled={loading}>
-            {loading ? "Updating..." : "Update"}
+          <Button onClick={handlePasswordChange} disabled={passwordLoading}>
+            {passwordLoading ? "Updating..." : "Update"}
           </Button>
         </div>
       </CardContent>

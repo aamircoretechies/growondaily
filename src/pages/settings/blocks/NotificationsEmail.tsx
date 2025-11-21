@@ -92,7 +92,7 @@ import { Bell, Save, RefreshCw } from "lucide-react";
 import { useSettingEdit } from "../Provider/SettingeEditProvider";
 
 const NotificationsEmail = () => {
-  const { getNotificationPreferences, updateNotificationPreferences, loading } = useSettingEdit();
+  const { getNotificationPreferences, updateNotificationPreferences,notificationLoading } = useSettingEdit();
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true); // main switch
   const [emailNotification, setEmailNotification] = useState(false);
@@ -246,16 +246,16 @@ const NotificationsEmail = () => {
 
 
         <div className="flex items-center gap-3 pt-4">
-          <Button className="flex items-center gap-2" onClick={handleSave} disabled={loading}>
+          <Button className="flex items-center gap-2" onClick={handleSave} disabled={notificationLoading}>
             <Save className="w-4 h-4" />
-            {loading ? "Saving..." : "Save Settings"}
+            {notificationLoading ? "Saving..." : "Save Settings"}
           </Button>
 
           <Button
             variant="outline"
             className="flex items-center gap-2"
             onClick={handleReset}
-            disabled={loading}
+            disabled={notificationLoading}
           >
             <RefreshCw className="w-4 h-4" />
             Reset to Default

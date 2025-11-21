@@ -133,13 +133,14 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                     </span>
                   </div>
 
-                  {/* User Notes Section */}
-                  {deepStudyData?.[`${selectedBookId}-${selectedChapter}`]?.[tab.id]
-                    ?.notes?.length > 0 && (
+                  {/* User Notes Section - Only show in original tab */}
+                  {tab.id === "original" && (() => {
+                    const currentKey = `${selectedBookId}-${selectedChapter}`;
+                    const notes = deepStudyData?.[currentKey]?.original?.notes || [];
+                    
+                    return notes.length > 0 ? (
                       <div className="mt-3 space-y-2">
-                        {deepStudyData[`${selectedBookId}-${selectedChapter}`][
-                          tab.id
-                        ].notes.map((note: any, idx: number) => (
+                        {notes.map((note: any, idx: number) => (
                           <div
                             key={note.note_id || idx}
                             className="border border-gray-200 bg-white/80 dark:bg-gray-100 rounded-lg p-2 sm:p-3"
@@ -148,14 +149,25 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                               {note.content}
                             </p>
                             {note.emotion_tags?.length > 0 && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {note.emotion_tags.join(', ')}
-                              </p>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {note.emotion_tags.map((tag: string, i: number) => (
+                                  <span
+                                    key={i}
+                                    className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                                  >
+                                    #{tag}
+                                  </span>
+                                ))}
+                              </div>
                             )}
+                            <p className="text-xs text-gray-500 mt-2">
+                              {note.created_at ? new Date(note.created_at).toLocaleDateString() : ''}
+                            </p>
                           </div>
                         ))}
                       </div>
-                    )}
+                    ) : null;
+                  })()}
                 </div>
               </div>
             ))}

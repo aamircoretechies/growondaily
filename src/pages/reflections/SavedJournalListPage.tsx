@@ -14,7 +14,7 @@ import { toast } from "sonner";
 const SavedJournalListPage = () => {
   const navigate = useNavigate();
   const { allNotes, fetchAllNotes, notesLoading, deleteNote } = useReflection();
-  const { selectBook, selectChapter, fetchSingleVerse, books, version, fetchDeepStudy, setShowDeepStudy } = useBible();
+  const { selectBook, selectChapter, fetchSingleVerse, books, version, fetchDeepStudy, fetchDeepStudyForVerse, setShowDeepStudy, setActiveTab, setVerseActiveTab } = useBible();
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any>(null);
   const [visibleCount, setVisibleCount] = useState(6);
@@ -36,15 +36,17 @@ const SavedJournalListPage = () => {
     await selectChapter(Number(chapter));
 
     if (verse) {
+      // For verse-level notes, fetch deep study data and set active tab to original
       await fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
+      await fetchDeepStudyForVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
+      setVerseActiveTab('original'); // Ensure original tab is active to show notes
       navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
     } else {
-      // await fetchDeepStudy(foundBook.book_id, Number(chapter), noteVersion || version || "KJV");
-      // navigate(`/bible?bible=${bookSlug}&chapter=${chapter}`);
+      // For chapter-level notes, fetch deep study data and set active tab to original
       setShowDeepStudy(true);
       await fetchDeepStudy(foundBook.book_id, Number(chapter), noteVersion || version || "KJV");
+      setActiveTab('original'); // Ensure original tab is active to show notes
       navigate(`/bible?bible=${bookSlug}&chapter=${chapter}`);
-
     }
   };
 

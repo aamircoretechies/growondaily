@@ -342,10 +342,51 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         ? `${bookId}-${chapter}-${verse}`
         : `${bookId}-${chapter}`;
 
-      setDeepStudyData((prev: any) => ({
-        ...prev,
-        [key]: allResponses,
-      }));
+      setDeepStudyData((prev: any) => {
+        const safePrev = prev || {};
+        const prevData = safePrev[key] || {};
+        
+        // Merge notes from previous data with new data, avoiding duplicates
+        const merged = { ...allResponses };
+        Object.keys(merged).forEach((tabId) => {
+          const prevTab = prevData[tabId] || {};
+          const newTab = merged[tabId] || {};
+          
+          // Merge notes by note_id to avoid duplicates
+          const prevNotes = prevTab.notes || [];
+          const newNotes = newTab.notes || [];
+          
+          // Create a map of existing notes by note_id
+          const notesMap = new Map();
+          prevNotes.forEach((note: any) => {
+            if (note.note_id) {
+              notesMap.set(note.note_id, note);
+            }
+          });
+          
+          // Add new notes, updating existing ones if they have the same note_id
+          newNotes.forEach((note: any) => {
+            if (note.note_id) {
+              notesMap.set(note.note_id, note);
+            } else {
+              // If no note_id, add it (might be a new note from API)
+              notesMap.set(Date.now().toString() + Math.random(), note);
+            }
+          });
+          
+          const mergedNotes = Array.from(notesMap.values());
+          
+          merged[tabId] = {
+            ...newTab,
+            notes: mergedNotes.length > 0 ? mergedNotes : undefined,
+          };
+        });
+        
+        return {
+          ...safePrev,
+          [key]: merged,
+        };
+      });
 
       return allResponses;
     } catch (error) {
@@ -377,11 +418,54 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
 
       const results = await Promise.all(requests);
       const allResponses = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-      setDeepStudyData((prev: any) => ({
-        ...prev,
-        // [`${bookId}-${chapter}`]: allResponses,
-        [`${bookId}-${chapter}-${verse}`]: allResponses,
-      }));
+      
+      const key = `${bookId}-${chapter}-${verse}`;
+      
+      setDeepStudyData((prev: any) => {
+        const safePrev = prev || {};
+        const prevData = safePrev[key] || {};
+        
+        // Merge notes from previous data with new data, avoiding duplicates
+        const merged = { ...allResponses };
+        Object.keys(merged).forEach((tabId) => {
+          const prevTab = prevData[tabId] || {};
+          const newTab = merged[tabId] || {};
+          
+          // Merge notes by note_id to avoid duplicates
+          const prevNotes = prevTab.notes || [];
+          const newNotes = newTab.notes || [];
+          
+          // Create a map of existing notes by note_id
+          const notesMap = new Map();
+          prevNotes.forEach((note: any) => {
+            if (note.note_id) {
+              notesMap.set(note.note_id, note);
+            }
+          });
+          
+          // Add new notes, updating existing ones if they have the same note_id
+          newNotes.forEach((note: any) => {
+            if (note.note_id) {
+              notesMap.set(note.note_id, note);
+            } else {
+              // If no note_id, add it (might be a new note from API)
+              notesMap.set(Date.now().toString() + Math.random(), note);
+            }
+          });
+          
+          const mergedNotes = Array.from(notesMap.values());
+          
+          merged[tabId] = {
+            ...newTab,
+            notes: mergedNotes.length > 0 ? mergedNotes : undefined,
+          };
+        });
+        
+        return {
+          ...safePrev,
+          [key]: merged,
+        };
+      });
 
       return allResponses;
     } catch (error) {
@@ -445,6 +529,13 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         updated[key] = updatedData;
         return updated;
       });
+
+      // Switch to original tab to show the note immediately
+      if (verse === 0) {
+        setActiveTab('original'); // Chapter-level note
+      } else {
+        setVerseActiveTab('original'); // Verse-level note
+      }
 
       // Background refresh (non-blocking)
       if (verse === 0) {
