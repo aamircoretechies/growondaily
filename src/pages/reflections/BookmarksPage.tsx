@@ -17,22 +17,24 @@ const BookmarksPage = () => {
   const { dailyReflection, loading, error, bookmarks, bmLoading, fetchBookmarks, setBookmarks } = useReflection();
 
 
-  const handleOpenBookmark = async (entry: any) => {
+  const handleOpenBookmark = (entry: any) => {
     const { book, chapter, verse, version } = entry;
     if (!book || !chapter || !verse) return;
 
     const bookSlug = book.trim().toLowerCase().replace(/\s+/g, "-");
+    
+    // Navigate immediately - let BiblePage handle data fetching
+    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+    
+    // Fetch data in background (non-blocking)
     const foundBook = books?.find(
       (b: any) => b.name.toLowerCase() === book.trim().toLowerCase()
     );
-
     if (foundBook) {
-      await selectBook(foundBook.book_id, foundBook.name);
-      await selectChapter(Number(chapter));
-      await fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), version || "KJV");
+      selectBook(foundBook.book_id, foundBook.name);
+      selectChapter(Number(chapter));
+      fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), version || "KJV");
     }
-
-    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
   };
 
   const handleDeleteBookmark = async (entry: any) => {

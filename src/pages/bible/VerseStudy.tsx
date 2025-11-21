@@ -80,33 +80,35 @@ const VerseStudy = () => {
       setIsRead(response.is_read);
       localStorage.setItem(`verse-read-${verseKey}`, response.is_read.toString());
 
-      // Store latest read verse for Continue Reading card
+      const foundBook = books.find(
+        (b) =>
+          (b.name || "")
+            .toLowerCase()
+            .replace(/\s+/g, "-") === book.toLowerCase()
+      );
+      const bookName = foundBook?.name || book;
+
+      const verseUpdateData = {
+        book_id: bookId,
+        book: bookName,
+        book_slug: book,
+        chapter: Number(chapter),
+        verse: Number(verse),
+        version: "KJV",
+        is_read: response.is_read,
+        timestamp: new Date().toISOString()
+      };
+
+      // Store latest read verse for Continue Reading card (only when marked as read)
       if (response.is_read) {
-        const foundBook = books.find(
-          (b) =>
-            (b.name || "")
-              .toLowerCase()
-              .replace(/\s+/g, "-") === book.toLowerCase()
-        );
-        const bookName = foundBook?.name || book;
-
-        const latestReadVerse = {
-          book_id: bookId,
-          book: bookName,
-          book_slug: book,
-          chapter: Number(chapter),
-          verse: Number(verse),
-          version: "KJV",
-          timestamp: new Date().toISOString()
-        };
-
-        localStorage.setItem('latest-read-verse', JSON.stringify(latestReadVerse));
-
-        // Dispatch custom event to notify HomePage
-        window.dispatchEvent(new CustomEvent('verse-read-updated', {
-          detail: latestReadVerse
-        }));
+        localStorage.setItem('latest-read-verse', JSON.stringify(verseUpdateData));
       }
+
+      // Dispatch custom event to notify DashboardProvider to refresh progress bar
+      // This should happen for both read and unread to update the progress bar
+      window.dispatchEvent(new CustomEvent('verse-read-updated', {
+        detail: verseUpdateData
+      }));
 
       toast.success(
         response.is_read ? "Marked as Read" : "Marked as Unread"

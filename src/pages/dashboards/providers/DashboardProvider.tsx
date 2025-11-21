@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useAuthContext } from "@/auth";
 import { useLanguage } from "@/providers/TranslationProvider";
@@ -17,11 +17,11 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-   const { auth,currentUser } = useAuthContext(); 
-   const { currentLanguage } = useLanguage(); // Get current language to refetch on change
+  const { auth, currentUser } = useAuthContext();
+  const { currentLanguage } = useLanguage(); // Get current language to refetch on change
 
-  const fetchDashboardData = async () => {
-    console.log("dashboard");
+  const fetchDashboardData = useCallback(async () => {
+    console.log("Fetching dashboard data...");
     if (!auth?.access_token) return;
     try {
       setLoading(true);
@@ -41,7 +41,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         {
           headers: {
             // Authorization: `Bearer ${token}`,
-            Authorization: `Bearer ${auth.access_token}`, 
+            Authorization: `Bearer ${auth.access_token}`,
           },
         }
       );
@@ -58,7 +58,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setLoading(false);
     }
-  };
+  }, [auth?.access_token]);
 
   // useEffect(() => {
   //   fetchDashboardData();
@@ -71,10 +71,29 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // }, []);
 
   useEffect(() => {
-  if (auth?.access_token && currentUser) {
-    fetchDashboardData();
-  }
-}, [currentUser, currentLanguage.code]); // Refetch when language changes
+    if (auth?.access_token && currentUser) {
+      fetchDashboardData();
+    }
+  }, [currentUser, currentLanguage.code, fetchDashboardData]); // Refetch when language changes
+
+  // Listen for verse read updates to refresh progress bar
+  useEffect(() => {
+    if (!auth?.access_token) return; // Don't set up listener if not authenticated
+
+    const handleVerseUpdate = (event: Event) => {
+      console.log("Verse read update detected, refreshing dashboard...", event);
+      // Only refresh if we have auth token
+      if (auth?.access_token) {
+        fetchDashboardData();
+      }
+    };
+
+    window.addEventListener('verse-read-updated', handleVerseUpdate);
+
+    return () => {
+      window.removeEventListener('verse-read-updated', handleVerseUpdate);
+    };
+  }, [auth?.access_token, fetchDashboardData]); // Re-bind if auth or fetch function changes
 
   return (
     <DashboardContext.Provider

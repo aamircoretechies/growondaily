@@ -552,7 +552,7 @@ const ReflectionsPage = () => {
 
 
 
-  const handleReflectAndJournal = async () => {
+  const handleReflectAndJournal = () => {
     try {
       console.log("Reflection data:", dailyReflection);
 
@@ -569,16 +569,18 @@ const ReflectionsPage = () => {
       const [, bookName, chapter, verse] = match;
       const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
 
+      // Navigate immediately - let BiblePage handle data fetching
+      navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+      
+      // Fetch data in background (non-blocking)
       const book = books?.find(
         (b: any) => b.name.toLowerCase() === bookName.trim().toLowerCase()
       );
-
       if (book) {
-        await selectBook(book.book_id, book.name);
-        await selectChapter(Number(chapter));
-        await fetchSingleVerse(book.book_id, Number(chapter), Number(verse), dailyReflection.version || "KJV");
+        selectBook(book.book_id, book.name);
+        selectChapter(Number(chapter));
+        fetchSingleVerse(book.book_id, Number(chapter), Number(verse), dailyReflection.version || "KJV");
       }
-      navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
     } catch (error) {
       console.error("Error in handleReflectAndJournal:", error);
     }
@@ -617,22 +619,24 @@ const ReflectionsPage = () => {
     ?.slice(0, 2) || [];
 
   // open bookmark (same as BookmarksPage)
-  const handleOpenBookmark = async (entry: any) => {
+  const handleOpenBookmark = (entry: any) => {
     const { book, chapter, verse, version } = entry;
     if (!book || !chapter || !verse) return;
 
     const bookSlug = book.trim().toLowerCase().replace(/\s+/g, "-");
+    
+    // Navigate immediately - let BiblePage handle data fetching
+    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+    
+    // Fetch data in background (non-blocking)
     const foundBook = books?.find(
       (b: any) => b.name.toLowerCase() === book.trim().toLowerCase()
     );
-
     if (foundBook) {
-      await selectBook(foundBook.book_id, foundBook.name);
-      await selectChapter(Number(chapter));
-      await fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), version || "KJV");
+      selectBook(foundBook.book_id, foundBook.name);
+      selectChapter(Number(chapter));
+      fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), version || "KJV");
     }
-
-    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
   };
 
   // delete bookmark using provider toggle API and remove from UI
@@ -651,7 +655,7 @@ const ReflectionsPage = () => {
   }, [currentLanguage.code]);
 
   // open notes (similar to bookmarks)
-  const handleOpenNote = async (entry: any) => {
+  const handleOpenNote = (entry: any) => {
     try {
       const { book, chapter, verse, version: noteVersion } = entry;
       if (!book || !chapter) return;
@@ -661,23 +665,29 @@ const ReflectionsPage = () => {
         (b: any) => b.name.toLowerCase() === book.trim().toLowerCase()
       );
 
-      if (foundBook) {
-        await selectBook(foundBook.book_id, foundBook.name);
-        await selectChapter(Number(chapter));
+      if (!foundBook) return;
 
-        if (verse) {
-          // For verse-level notes, fetch deep study data and set active tab to original
-          await fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
-          await fetchDeepStudyForVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
-          setVerseActiveTab('original'); // Ensure original tab is active to show notes
-          navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
-        } else {
-          // For chapter-level notes, fetch deep study data and set active tab to original
-          setShowDeepStudy(true);
-          await fetchDeepStudy(foundBook.book_id, Number(chapter), noteVersion || version || "KJV");
-          setActiveTab('original'); // Ensure original tab is active to show notes
-          navigate(`/bible?bible=${bookSlug}&chapter=${chapter}`);
-        }
+      // Set tab state synchronously before navigation
+      if (verse) {
+        setVerseActiveTab('original'); // Ensure original tab is active to show notes
+        // Navigate immediately - let VerseStudy component handle data fetching
+        navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+      } else {
+        setShowDeepStudy(true);
+        setActiveTab('original'); // Ensure original tab is active to show notes
+        // Navigate immediately - let DeepStudy component handle data fetching
+        navigate(`/bible?bible=${bookSlug}&chapter=${chapter}`);
+      }
+
+      // Fetch data in background (non-blocking)
+      selectBook(foundBook.book_id, foundBook.name);
+      selectChapter(Number(chapter));
+      
+      if (verse) {
+        fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
+        fetchDeepStudyForVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
+      } else {
+        fetchDeepStudy(foundBook.book_id, Number(chapter), noteVersion || version || "KJV");
       }
     } catch (err) {
       console.error("Error opening note:", err);

@@ -21,7 +21,7 @@ const SavedJournalListPage = () => {
 
 
 
-  const handleOpenNote = async (entry: any) => {
+  const handleOpenNote = (entry: any) => {
     const { book, chapter, verse, version: noteVersion } = entry;
     if (!book || !chapter) return;
 
@@ -32,21 +32,27 @@ const SavedJournalListPage = () => {
 
     if (!foundBook) return;
 
-    await selectBook(foundBook.book_id, foundBook.name);
-    await selectChapter(Number(chapter));
-
+    // Set tab state synchronously before navigation
     if (verse) {
-      // For verse-level notes, fetch deep study data and set active tab to original
-      await fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
-      await fetchDeepStudyForVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
       setVerseActiveTab('original'); // Ensure original tab is active to show notes
+      // Navigate immediately - let VerseStudy component handle data fetching
       navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
     } else {
-      // For chapter-level notes, fetch deep study data and set active tab to original
       setShowDeepStudy(true);
-      await fetchDeepStudy(foundBook.book_id, Number(chapter), noteVersion || version || "KJV");
       setActiveTab('original'); // Ensure original tab is active to show notes
+      // Navigate immediately - let DeepStudy component handle data fetching
       navigate(`/bible?bible=${bookSlug}&chapter=${chapter}`);
+    }
+
+    // Fetch data in background (non-blocking)
+    selectBook(foundBook.book_id, foundBook.name);
+    selectChapter(Number(chapter));
+    
+    if (verse) {
+      fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
+      fetchDeepStudyForVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
+    } else {
+      fetchDeepStudy(foundBook.book_id, Number(chapter), noteVersion || version || "KJV");
     }
   };
 

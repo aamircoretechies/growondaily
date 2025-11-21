@@ -382,24 +382,26 @@ const HomePage = () => {
   };
 
 
-  const handleStartReflection = async (reference: string) => {
+  const handleStartReflection = (reference: string) => {
     if (!reference) return;
     const match = reference.match(/([A-Za-z ]+)\s+(\d+):(\d+)/);
     if (!match) return;
 
     const [, bookName, chapter, verse] = match;
     const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
+    
+    // Navigate immediately - let BiblePage handle data fetching
+    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+    
+    // Fetch data in background (non-blocking)
     const book = books?.find((b: any) =>
       b.name.toLowerCase() === bookName.trim().toLowerCase()
     );
-
     if (book) {
-      await selectBook(book.book_id, book.name);
-      await selectChapter(Number(chapter));
-      await fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
+      selectBook(book.book_id, book.name);
+      selectChapter(Number(chapter));
+      fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
     }
-
-    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
   };
 
   const handleReadBible = () => {
@@ -408,7 +410,7 @@ const HomePage = () => {
   };
 
 
-  const handleContinueReadingClick = async () => {
+  const handleContinueReadingClick = () => {
     const data = dashboardData?.continue_reading;
     if (!data) return;
 
@@ -417,17 +419,18 @@ const HomePage = () => {
     const bookName = book.trim();
     const bookSlug = bookName.toLowerCase().replace(/\s+/g, "-");
 
+    // Navigate immediately - let BiblePage handle data fetching
+    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+    
+    // Fetch data in background (non-blocking)
     const bookObj = books?.find((b: any) =>
       b.name.toLowerCase() === bookName.toLowerCase()
     );
-
     if (bookObj) {
-      await selectBook(bookObj.book_id, bookObj.name);
-      await selectChapter(Number(chapter));
-      await fetchSingleVerse(bookObj.book_id, Number(chapter), Number(verse), version || "KJV");
+      selectBook(bookObj.book_id, bookObj.name);
+      selectChapter(Number(chapter));
+      fetchSingleVerse(bookObj.book_id, Number(chapter), Number(verse), version || "KJV");
     }
-
-    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
   };
 
   const getGreeting = () => {
@@ -438,7 +441,7 @@ const HomePage = () => {
     return 'Good Evening';
   };
 
-  const handleReadDailyWord = async () => {
+  const handleReadDailyWord = () => {
     const reference = dashboardData?.daily_word?.reference;
     if (!reference) return;
 
@@ -448,17 +451,18 @@ const HomePage = () => {
     const [, bookName, chapter, verse] = match;
     const bookSlug = bookName.trim().toLowerCase().replace(/\s+/g, "-");
 
+    // Navigate immediately - let BiblePage handle data fetching
+    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
+    
+    // Fetch data in background (non-blocking)
     const book = books?.find((b: any) =>
       b.name.toLowerCase() === bookName.trim().toLowerCase()
     );
-
     if (book) {
-      await selectBook(book.book_id, book.name);
-      await selectChapter(Number(chapter));
-      await fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
+      selectBook(book.book_id, book.name);
+      selectChapter(Number(chapter));
+      fetchSingleVerse(book.book_id, Number(chapter), Number(verse), 'KJV');
     }
-
-    navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
   };
 
 
