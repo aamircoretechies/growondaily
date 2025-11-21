@@ -15,17 +15,14 @@ const AudioPlay: React.FC<AudioPlayProps> = ({
   reference,
   text,
 }) => {
-  // ------------------ SAFETY FIX -------------------
   const safeText = text || "";
   const safeReference = reference || "";
   const totalWords = safeText.split(" ").length || 1;
-  // -------------------------------------------------
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // Extract Book Chapter Verse
   const extractReference = () => {
     if (!safeReference || typeof safeReference !== "string") {
       return { book: "", chapter: "", verse: "" };
@@ -45,7 +42,6 @@ const AudioPlay: React.FC<AudioPlayProps> = ({
 
   const { book, chapter, verse } = extractReference();
 
-  // Start TTS
   const startSpeech = () => {
     window.speechSynthesis.cancel();
 
@@ -60,7 +56,6 @@ const AudioPlay: React.FC<AudioPlayProps> = ({
       setProgress(100);
     };
 
-    // Word progress tracking
     let spokenWords = 0;
     utterance.onboundary = (event) => {
       if (event.name === "word") {

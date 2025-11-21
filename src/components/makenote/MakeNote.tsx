@@ -121,22 +121,25 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
               Save Note
             </button>
 
-            <button
+
+            {/* hide link verse for now  */}
+            {/* <button
               onClick={handleLinkVerse}
               className="w-full bg-white/60 dark:bg-gray-300 text-gray-700 dark:text-gray-800 py-3 px-4 rounded-lg font-medium hover:bg-white/80 dark:hover:bg-gray-400 transition-colors duration-200 flex items-center justify-center gap-2"
             >
               <KeenIcon icon="link" className="text-base" />
               Link Another Verse
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
 
       {/* Link Verse Modal */}
-      <LinkVerse
+      {/* hide link verse for now */}
+      {/* <LinkVerse
         isOpen={showLinkVerse}
         onClose={() => setShowLinkVerse(false)}
-      />
+      /> */}
     </div>
   );
 };

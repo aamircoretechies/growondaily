@@ -55,6 +55,61 @@ const SidebarMenuDashboard = () => {
   // Check if we're viewing all verses of a chapter (not a specific verse)
   const isChapterView = searchParams.get('bible') && searchParams.get('chapter') && !searchParams.get('verse');
 
+  // Sync with URL parameters when they change (for page refresh)
+  useEffect(() => {
+    const bookSlug = searchParams.get('bible');
+    const chapterParam = searchParams.get('chapter');
+    const verseParam = searchParams.get('verse');
+
+    if (!bookSlug || books.length === 0) return;
+
+    const getBookIdFromSlug = (slug: string): string | null => {
+      if (slug.length === 36) return slug;
+      const found = books.find(
+        (b) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase()
+      );
+      return found ? found.book_id : null;
+    };
+
+    const bookId = getBookIdFromSlug(bookSlug);
+    if (!bookId) return;
+
+    const chapterNum = chapterParam ? Number(chapterParam) : null;
+    const verseNum = verseParam ? Number(verseParam) : null;
+
+    // Sync book if different
+    if (bookId !== selectedBookId) {
+      const foundBook = books.find((b) => b.book_id === bookId);
+      if (foundBook) {
+        const targetChapter = chapterNum || 1;
+        selectBook(bookId, foundBook.name, targetChapter).then(() => {
+          if (verseNum && !isNaN(verseNum)) {
+            fetchSingleVerse(bookId, targetChapter, verseNum, version || 'KJV');
+          }
+        });
+      }
+    } else {
+      // Book is already selected, sync chapter and verse
+      if (chapterNum && !isNaN(chapterNum) && chapterNum !== selectedChapter) {
+        selectChapter(chapterNum).then(() => {
+          if (verseNum && !isNaN(verseNum)) {
+            fetchSingleVerse(bookId, chapterNum, verseNum, version || 'KJV');
+          } else {
+            // If no verse in URL, ensure verse is cleared
+            setSelectedVerse(null);
+          }
+        });
+      } else if (verseNum && !isNaN(verseNum) && selectedChapter && (!selectedVerse || selectedVerse.verse !== verseNum)) {
+        // Chapter is same but verse might be different
+        fetchSingleVerse(bookId, selectedChapter, verseNum, version || 'KJV');
+      } else if (!verseParam && selectedVerse) {
+        // URL has no verse but we have one selected - clear it
+        setSelectedVerse(null);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.get('bible'), searchParams.get('chapter'), searchParams.get('verse'), books.length]);
+
 
   const filteredDropdownItems = useMemo(() => {
     if (!Array.isArray(books)) return [];
@@ -255,11 +310,10 @@ const SidebarMenuDashboard = () => {
 
   const handleBookClick = async (bookId: string, bookTitle: string) => {
     console.log("User clicked Book:", bookTitle, "=> ID:", bookId);
-
-    await selectBook(bookId, bookTitle,);
-
+    // Case 1: Only Book selected - default to Chapter 1, Verse All
+    await selectBook(bookId, bookTitle, 1);
     const bookSlug = bookTitle.toLowerCase().replace(/\s+/g, '-');
-    navigate(`/bible?bible=${bookSlug}&chapter=1&verses`);
+    navigate(`/bible?bible=${bookSlug}&chapter=1`);
   };
 
 
@@ -272,7 +326,14 @@ const SidebarMenuDashboard = () => {
 
   const handleChapterClick = async (chapterNumber: number, bookId: string) => {
     console.log("Fetching verses for chapter:", chapterNumber);
+    // Case 2: Book + Chapter selected - reset verse to All (edge case)
     await selectChapter(chapterNumber);
+    
+    // Update URL to remove verse parameter (reset to "All")
+    const bookSlug = selectedBookName?.toLowerCase().replace(/\s+/g, '-') || '';
+    if (bookSlug) {
+      navigate(`/bible?bible=${bookSlug}&chapter=${chapterNumber}`);
+    }
 
     if (bookId && chapterNumber && version && selectedVerse) {
       await fetchDeepStudy(bookId, chapterNumber, version);

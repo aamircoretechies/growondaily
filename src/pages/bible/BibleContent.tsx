@@ -19,10 +19,10 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
     selectedBookId,
     selectedBookName,
     selectedChapter,
+    selectedVerse,
     fetchSingleVerse,
   } = useBible();
 
-  const [selectedVerse, setSelectedVerse] = useState<any>(null);
   const [totalVerses, setTotalVerses] = useState<number>(0);
 
   const query = new URLSearchParams(location.search);
@@ -38,15 +38,14 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
     if (Array.isArray(verses)) {
       setTotalVerses(verses.length);
     }
+    // Fetch single verse if verse parameter is in URL
     if (verseNum !== "all" && selectedBookId && selectedChapter) {
       const num = Number(verseNum);
       if (!Number.isNaN(num)) {
         fetchSingleVerse(selectedBookId, selectedChapter, num, 'KJV');
       }
-    } else if (verseNum === "all") {
-      setSelectedVerse(null);
     }
-  }, [verses, verseNum, selectedBookId, selectedChapter]);
+  }, [verses, verseNum, selectedBookId, selectedChapter, fetchSingleVerse]);
 
   const version = selectedVerse?.version || "KJV";
 

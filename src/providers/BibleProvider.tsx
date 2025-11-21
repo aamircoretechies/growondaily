@@ -114,23 +114,85 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         const res = await axios.get("/api/bible/books");
         const data = res.data?.data?.books || [];
         setBooks(data);
-        const savedBookId = localStorage.getItem("bible.selectedBookId");
-        const savedBookName = localStorage.getItem("bible.selectedBookName");
-        const savedChapter = Number(localStorage.getItem("bible.selectedChapter") || "1");
-        if (savedBookId && data.some((b: BibleBook) => b.book_id === savedBookId)) {
-          setSelectedBookId(savedBookId);
-          setSelectedBookName(savedBookName || (data.find((b: BibleBook) => b.book_id === savedBookId)?.name ?? null));
-          setSelectedChapter(savedChapter || 1);
-          await fetchChapters(savedBookId, "KJV");
-          await fetchVerses(savedBookId, savedChapter || 1, "KJV");
-        } else {
+        
+        // Check URL parameters first (they take precedence on page refresh)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlBookSlug = urlParams.get('bible');
+        const urlChapter = urlParams.get('chapter');
+        const urlVerse = urlParams.get('verse');
+        
+        let targetBookId: string | null = null;
+        let targetBookName: string | null = null;
+        let targetChapter: number = 1;
+        let targetVerse: number | null = null;
+        
+        // If URL params exist, use them
+        if (urlBookSlug && data.length > 0) {
+          const getBookIdFromSlug = (slug: string): { id: string | null; name: string | null } => {
+            if (slug.length === 36) {
+              const found = data.find((b: BibleBook) => b.book_id === slug);
+              return { id: slug, name: found?.name || null };
+            }
+            const found = data.find(
+              (b: BibleBook) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase()
+            );
+            return { id: found?.book_id || null, name: found?.name || null };
+          };
+          
+          const bookInfo = getBookIdFromSlug(urlBookSlug);
+          if (bookInfo.id) {
+            targetBookId = bookInfo.id;
+            targetBookName = bookInfo.name;
+            targetChapter = urlChapter ? Number(urlChapter) : 1;
+            targetVerse = urlVerse ? Number(urlVerse) : null;
+          }
+        }
+        
+        // Fall back to localStorage if no URL params
+        if (!targetBookId) {
+          const savedBookId = localStorage.getItem("bible.selectedBookId");
+          const savedBookName = localStorage.getItem("bible.selectedBookName");
+          const savedChapter = Number(localStorage.getItem("bible.selectedChapter") || "1");
+          const savedVerseStr = localStorage.getItem("bible.selectedVerse");
+          
+          if (savedBookId && data.some((b: BibleBook) => b.book_id === savedBookId)) {
+            targetBookId = savedBookId;
+            targetBookName = savedBookName || (data.find((b: BibleBook) => b.book_id === savedBookId)?.name ?? null);
+            targetChapter = savedChapter || 1;
+            
+            if (savedVerseStr) {
+              try {
+                const savedVerse = JSON.parse(savedVerseStr);
+                targetVerse = savedVerse.verse || null;
+              } catch (e) {
+                console.error("Error parsing saved verse:", e);
+              }
+            }
+          }
+        }
+        
+        // Default to Genesis if nothing found
+        if (!targetBookId) {
           const genesis = data.find((b: any) => b.name.toLowerCase() === "genesis");
           if (genesis) {
-            setSelectedBookId(genesis.book_id);
-            setSelectedBookName(genesis.name);
-            setSelectedChapter(1);
-            await fetchChapters(genesis.book_id, "KJV");
-            await fetchVerses(genesis.book_id, 1, "KJV");
+            targetBookId = genesis.book_id;
+            targetBookName = genesis.name;
+            targetChapter = 1;
+            targetVerse = null;
+          }
+        }
+        
+        // Set state and fetch data
+        if (targetBookId) {
+          setSelectedBookId(targetBookId);
+          setSelectedBookName(targetBookName);
+          setSelectedChapter(targetChapter);
+          await fetchChapters(targetBookId, "KJV");
+          await fetchVerses(targetBookId, targetChapter, "KJV");
+          
+          // If verse is in URL or localStorage, fetch it
+          if (targetVerse && !isNaN(targetVerse)) {
+            await fetchSingleVerse(targetBookId, targetChapter, targetVerse, "KJV");
           }
         }
       } catch (err) {
@@ -187,7 +249,12 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     if (selectedBookId) localStorage.setItem("bible.selectedBookId", selectedBookId);
     if (selectedBookName) localStorage.setItem("bible.selectedBookName", selectedBookName);
     localStorage.setItem("bible.selectedChapter", String(selectedChapter || 1));
-  }, [selectedBookId, selectedBookName, selectedChapter]);
+    if (selectedVerse) {
+      localStorage.setItem("bible.selectedVerse", JSON.stringify(selectedVerse));
+    } else {
+      localStorage.removeItem("bible.selectedVerse");
+    }
+  }, [selectedBookId, selectedBookName, selectedChapter, selectedVerse]);
 
 
   const selectBook = async (bookId: string, name: string, chapter: number = 1) => {
@@ -215,6 +282,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const selectChapter = async (chapter: number) => {
     if (!selectedBookId) return;
     setSelectedChapter(chapter);
+    // Reset verse to null when chapter changes (edge case)
+    setSelectedVerse(null);
     await fetchVerses(selectedBookId, chapter, "KJV");
   };
 
