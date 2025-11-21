@@ -35,6 +35,49 @@
 
 
 
+// import { fileURLToPath, URL } from 'node:url';
+// import react from '@vitejs/plugin-react';
+// import { defineConfig } from 'vite';
+// import tailwindcss from 'tailwindcss';
+
+// export default defineConfig({
+//   plugins: [react()],
+//   css: {
+//     postcss: {
+//       plugins: [tailwindcss()]
+//     }
+//   },
+
+//   base: '/',
+
+//   resolve: {
+//     alias: {
+//       '@': fileURLToPath(new URL('./src', import.meta.url))
+//     }
+//   },
+
+//   build: {
+//     chunkSizeWarningLimit: 3000
+//   },
+
+//   server: {
+//     port: 3000,
+//     proxy: {
+//       '/api': {
+//         target: 'https://api.growondaily.com',
+//         changeOrigin: true,
+//       }
+//     }
+//   }
+// });
+
+
+
+
+
+
+
+
 import { fileURLToPath, URL } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
@@ -64,8 +107,10 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://api.growondaily.com',
+        target: 'https://api.growondaily.com', 
         changeOrigin: true,
+        secure: false, // added for https backend
+        rewrite: (path) => path.replace(/^\/api/, '/api') // keep path same
       }
     }
   }
