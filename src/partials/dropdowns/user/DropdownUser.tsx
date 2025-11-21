@@ -212,15 +212,8 @@ import { toAbsoluteUrl } from '@/utils';
 import { DropdownUserLanguages } from './DropdownUserLanguages';
 import { useSettings } from '@/providers/SettingsProvider';
 import { KeenIcon } from '@/components';
-import {
-  MenuItem,
-  MenuLink,
-  MenuSub,
-  MenuTitle,
-  MenuSeparator,
-  MenuArrow,
-  MenuIcon
-} from '@/components/menu';
+import { MenuItem, MenuLink, MenuSub, MenuTitle, MenuSeparator, MenuArrow, MenuIcon } from '@/components/menu';
+import { toast } from "sonner";
 
 interface IDropdownUserProps {
   menuItemRef: any;
@@ -231,31 +224,42 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
   const { logout, currentUser, updateProfileImage } = useAuthContext();
   const { isRTL } = useLanguage();
 
-  // Hidden file input reference
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Handle theme switch
   const handleThemeMode = (event: ChangeEvent<HTMLInputElement>) => {
     const newThemeMode = event.target.checked ? "dark" : "light";
     storeSettings({ themeMode: newThemeMode });
   };
 
-  // Handle Image Upload
-  const handleProfilePicChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  // const handleProfilePicChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (!file) return;
+
+  //   await updateProfileImage(file);
+  // };
+
+  const handleProfilePicChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    await updateProfileImage(file);
+    const updatedUser = await updateProfileImage(file);
+
+    if (updatedUser) {
+      toast.success("Profile picture updated!");
+    } else {
+      toast.error("Failed to update profile picture");
+    }
   };
+
 
 
   const buildHeader = () => {
     const imageURL =
       currentUser?.profile_picture
-        ? `${import.meta.env.VITE_APP_API_URL}/uploads/profile/${currentUser.profile_picture}`
+        ? `${import.meta.env.VITE_APP_API_URL}/uploads/profile-pictures/${currentUser.profile_picture}`
         : toAbsoluteUrl("/media/avatars/300-2.png");
-
-
+    console.log("Uploaded Image Full URL =>", imageURL);
 
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
