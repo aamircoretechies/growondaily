@@ -146,6 +146,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useLanguage } from "@/providers/TranslationProvider";
+import { useAuthContext } from "@/auth";
 import { toast } from "sonner";
 
 
@@ -153,6 +154,7 @@ const ReflectionContext = createContext<any>(null);
 
 export const ReflectionProvider = ({ children }: any) => {
   const { currentLanguage } = useLanguage();
+  const { auth } = useAuthContext();
   const [dailyReflection, setDailyReflection] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -163,6 +165,12 @@ export const ReflectionProvider = ({ children }: any) => {
 
   //  Fetch today's reflection (with language param)
   const fetchDailyReflection = async (timezone = "UTC", personalize = true) => {
+    // Don't fetch if user is not authenticated
+    if (!auth?.access_token) {
+      setDailyReflection(null);
+      return;
+    }
+
     try {
       setLoading(true);
       // const res = await axios.get(
@@ -174,7 +182,11 @@ export const ReflectionProvider = ({ children }: any) => {
       setDailyReflection(res.data?.data?.reflection || null);
       setError(null);
     } catch (err: any) {
-      console.error("Error fetching daily reflection:", err.response?.data || err.message);
+      // Suppress console errors for unauthorized requests (401/403)
+      const status = err.response?.status;
+      if (status !== 401 && status !== 403) {
+        console.error("Error fetching daily reflection:", err.response?.data || err.message);
+      }
       setError("Failed to fetch reflection");
     } finally {
       setLoading(false);
@@ -183,6 +195,12 @@ export const ReflectionProvider = ({ children }: any) => {
 
   //  Fetch bookmarks (with language param)
   const fetchBookmarks = async () => {
+    // Don't fetch if user is not authenticated
+    if (!auth?.access_token) {
+      setBookmarks([]);
+      return;
+    }
+
     try {
       setBmLoading(true);
       // const res = await axios.get(
@@ -195,8 +213,12 @@ export const ReflectionProvider = ({ children }: any) => {
         const list = res.data.data.bookmarks || [];
         setBookmarks(list);
       }
-    } catch (err) {
-      console.error("Error fetching bookmarks:", err);
+    } catch (err: any) {
+      // Suppress console errors for unauthorized requests (401/403)
+      const status = err.response?.status;
+      if (status !== 401 && status !== 403) {
+        console.error("Error fetching bookmarks:", err);
+      }
     } finally {
       setBmLoading(false);
     }
@@ -204,6 +226,12 @@ export const ReflectionProvider = ({ children }: any) => {
 
   // Fetch all notes (with language param)
   const fetchAllNotes = async () => {
+    // Don't fetch if user is not authenticated
+    if (!auth?.access_token) {
+      setAllNotes([]);
+      return;
+    }
+
     try {
       setNotesLoading(true);
       // const res = await axios.get(
@@ -217,11 +245,18 @@ export const ReflectionProvider = ({ children }: any) => {
         const notes = res.data.data?.notes || [];
         setAllNotes(notes);
       } else {
-        console.error("Failed to fetch notes:", res.data?.message);
+        // Only log error if it's not an authentication issue (status 0 usually means auth failure)
+        if (res.data?.status !== 0) {
+          console.error("Failed to fetch notes:", res.data?.message);
+        }
         setAllNotes([]);
       }
     } catch (err: any) {
-      console.error("Error fetching notes:", err.response?.data || err.message);
+      // Suppress console errors for unauthorized requests (401/403)
+      const status = err.response?.status;
+      if (status !== 401 && status !== 403) {
+        console.error("Error fetching notes:", err.response?.data || err.message);
+      }
       setAllNotes([]);
     } finally {
       setNotesLoading(false);
@@ -279,10 +314,13 @@ export const ReflectionProvider = ({ children }: any) => {
 
 
   useEffect(() => {
-    fetchDailyReflection();
-    fetchBookmarks();
-    fetchAllNotes();
-  }, [currentLanguage.code]);
+    // Only fetch data if user is authenticated
+    if (auth?.access_token) {
+      fetchDailyReflection();
+      fetchBookmarks();
+      fetchAllNotes();
+    }
+  }, [currentLanguage.code, auth?.access_token]);
 
   return (
     <ReflectionContext.Provider
