@@ -353,8 +353,11 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
           const newTab = merged[tabId] || {};
 
           // Merge notes by note_id to avoid duplicates
-          const prevNotes = prevTab.notes || [];
-          const newNotes = newTab.notes || [];
+          // const prevNotes = prevTab.notes || [];
+          // const newNotes = newTab.notes || [];
+          const prevNotes = Array.isArray(prevTab.notes) ? prevTab.notes : [];
+          const newNotes = Array.isArray(newTab.notes) ? newTab.notes : [];
+
 
           // Create a map of existing notes by note_id
           const notesMap = new Map();
