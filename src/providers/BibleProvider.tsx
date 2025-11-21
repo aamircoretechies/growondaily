@@ -512,6 +512,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         res = await axios.post("/api/bible/chapter-notes", payload);
       } else {
         const payload = { book_id, chapter, verse, content, emotion_tags };
+        // res = await axios.post("https://api.growondaily.com/api/bible/notes", payload);
         res = await axios.post("/api/bible/notes", payload);
       }
 

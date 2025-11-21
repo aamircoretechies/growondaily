@@ -290,25 +290,13 @@ const VerseStudy = () => {
               </div>
 
               {/* Nested Card */}
-              {tab.id === "original" && (() => {
-                // Find the correct bookId
-                let bookId = book;
-                if (books.length > 0 && book.length !== 36) {
-                  const found = books.find(
-                    (b) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === book.toLowerCase()
-                  );
-                  if (found) bookId = found.book_id;
-                }
-                const verseKey = `${bookId}-${chapter}-${verse}`;
-                const notes = deepStudyData?.[verseKey]?.original?.notes || [];
-                
-                return (
-                  <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
-                    <h3 className="text-lg font-semibold text-primary mb-3">Your Notes</h3>
+              {tab.id === "original" && (
+                <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
+                  <h3 className="text-lg font-semibold text-primary mb-3">Your Notes</h3>
 
-                    {notes.length > 0 ? (
-                      <div className="space-y-3">
-                        {notes.map((note: any, index: number) => (
+                  {deepStudyData?.[`${book}-${chapter}-${verse}`]?.original?.notes?.length > 0 ? (
+                    <div className="space-y-3">
+                      {deepStudyData[`${book}-${chapter}-${verse}`].original.notes.map((note: any, index: number) => (
                         <div
                           key={note.note_id || index}
                           className="p-3 bg-white/80 dark:bg-gray-100 rounded-lg border border-gray-200 dark:border-gray-400 shadow-sm"
@@ -335,13 +323,61 @@ const VerseStudy = () => {
                           </p>
                         </div>
                       ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 italic">No saved notes yet.</p>
-                    )}
-                  </div>
-                );
-              })()}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 italic">No saved notes yet.</p>
+                  )}
+
+
+
+                  {/* 
+        {deepStudyData?.original?.notes &&
+ deepStudyData.original.notes.filter(
+   (n: any) =>
+     n.chapter === Number(chapter) &&
+     n.book_id === book &&
+     (n.verse === 0 || n.verse === Number(verse))
+ ).length > 0 ? (
+  <div className="space-y-3">
+    {deepStudyData.original.notes
+      .filter(
+        (n: any) =>
+          n.chapter === Number(chapter) &&
+          n.book_id === book &&
+          (n.verse === 0 || n.verse === Number(verse))
+      )
+      .map((note: any, index: number) => (
+        <div
+          key={note.note_id || index}
+          className="p-3 bg-white/80 dark:bg-gray-100 rounded-lg border border-gray-200 dark:border-gray-400 shadow-sm"
+        >
+          <p className="text-gray-700 dark:text-gray-800 mb-2 whitespace-pre-line font-merriweather">
+            {note.content}
+          </p>
+          {note.emotion_tags?.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {note.emotion_tags.map((tag: string, i: number) => (
+                <span
+                  key={i}
+                  className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-gray-500 mt-2">
+            {new Date(note.created_at).toLocaleDateString()}
+          </p>
+        </div>
+      ))}
+  </div>
+) : (
+  <p className="text-gray-500 italic">No saved notes yet.</p>
+)} */}
+
+                </div>
+              )}
             </div>
           ))}
         </div>
