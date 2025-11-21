@@ -60,26 +60,29 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
             target="_blank"
             rel="noopener noreferrer"
             onClick={!hasContent ? (e) => e.preventDefault() : undefined}
-            className={`w-full block text-center py-2 rounded-lg font-medium transition ${
-              hasContent
+            className={`w-full block text-center py-2 rounded-lg font-medium transition ${hasContent
                 ? 'bg-primary text-white hover:bg-primary/90'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+              }`}
           >
             Share on WhatsApp
           </a>
 
           {/* Facebook */}
           <a
-            href={hasContent ? `https://www.facebook.com/sharer/sharer.php?u=${encoded}` : '#'}
+            href={
+              hasContent
+                ? `https://www.facebook.com/sharer/sharer.php?u=https://www.facebook.com&quote=${encoded}`
+                : '#'
+            }
+
             target="_blank"
             rel="noopener noreferrer"
             onClick={!hasContent ? (e) => e.preventDefault() : undefined}
-            className={`w-full block text-center py-2 rounded-lg font-medium transition ${
-              hasContent
+            className={`w-full block text-center py-2 rounded-lg font-medium transition ${hasContent
                 ? 'bg-sand text-primary hover:bg-sand/80'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+              }`}
           >
             Share on Facebook
           </a>
@@ -93,11 +96,10 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
               }
             }}
             disabled={!hasContent}
-            className={`w-full py-2 rounded-lg font-medium transition ${
-              hasContent
+            className={`w-full py-2 rounded-lg font-medium transition ${hasContent
                 ? 'bg-gray-200 text-primary hover:bg-gray-300'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+              }`}
           >
             Copy Text
           </button>
