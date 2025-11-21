@@ -491,7 +491,20 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     emotion_tags: string[] = []
   ) => {
     try {
+
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        console.warn("Skipping note save — User not logged in");
+        toast.error("Please login to save notes.");
+        return;
+      }
       let res;
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
 
       // API call (chapter vs verse note)
       if (verse === 0) {
@@ -499,7 +512,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         res = await axios.post("/api/bible/chapter-notes", payload);
       } else {
         const payload = { book_id, chapter, verse, content, emotion_tags };
-        // res = await axios.post("https://api.growondaily.com/api/bible/notes", payload);
         res = await axios.post("/api/bible/notes", payload);
       }
 
