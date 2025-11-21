@@ -35,6 +35,12 @@ const VerseStudy = () => {
     return saved === 'true';
   });
 
+  // Update isRead state when verse changes
+  useEffect(() => {
+    const saved = localStorage.getItem(`verse-read-${verseKey}`);
+    setIsRead(saved === 'true');
+  }, [verseKey]);
+
   const getBookId = () => {
   if (book.length === 36) return book;
   if (books.length > 0) {
