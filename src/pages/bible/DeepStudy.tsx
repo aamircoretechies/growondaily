@@ -16,7 +16,7 @@ interface DeepStudyProps {
 }
 
 const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, }: DeepStudyProps) => {
-  const { selectedBookId, selectedChapter, version, deepStudyData, fetchDeepStudy, selectedBookName, loading, activeTab, setActiveTab } = useBible();
+  const { selectedBookId, selectedChapter, version, deepStudyData, fetchDeepStudy, selectedBookName, loadingDeepStudy, activeTab, setActiveTab } = useBible();
 
   useEffect(() => {
     if (selectedBookId && selectedChapter && version) {
@@ -41,7 +41,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
   ];
 
   const getTabContent = (tabId: string) => {
-    if (loading) return 'Loading...';
+    if (loadingDeepStudy) return 'Loading deep study content...';
     if (!deepStudyData) return 'No data available.';
     const currentKey = `${selectedBookId}-${selectedChapter}`;
     const ctx = deepStudyData?.[currentKey]?.[tabId];
@@ -67,8 +67,8 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
               <button
                 onClick={onDeepStudyToggle}
                 className={`flex items-center justify-center gap-2 px-4 py-2 w-full lg:w-auto rounded-lg font-medium transition-colors text-sm ${isDeepStudyActive
-                    ? 'bg-primary text-white hover:bg-primary/90'
-                    : 'bg-sand text-primary hover:bg-sand/80'
+                  ? 'bg-primary text-white hover:bg-primary/90'
+                  : 'bg-sand text-primary hover:bg-sand/80'
                   }`}
               >
                 <KeenIcon icon="book" className="w-4 h-4" />
@@ -86,8 +86,8 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`grid grid-flow-col auto-cols-max items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'bg-gray-100 dark:bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-gray-100 dark:bg-gray-200 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
                   }`}
               >
                 <KeenIcon icon={tab.icon} className="text-base" />
@@ -133,13 +133,12 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                     </span>
                   </div>
 
-                  {/* User Notes Section */}
-                  {deepStudyData?.[`${selectedBookId}-${selectedChapter}`]?.[tab.id]
+                  {/* User Notes Section - Only show in original tab */}
+                  {tab.id === "original" && deepStudyData?.[`${selectedBookId}-${selectedChapter}`]?.original
                     ?.notes?.length > 0 && (
                       <div className="mt-3 space-y-2">
-                        {deepStudyData[`${selectedBookId}-${selectedChapter}`][
-                          tab.id
-                        ].notes.map((note: any, idx: number) => (
+                        <h3 className="text-sm font-semibold text-primary mb-2">Your Notes</h3>
+                        {deepStudyData[`${selectedBookId}-${selectedChapter}`].original.notes.map((note: any, idx: number) => (
                           <div
                             key={note.note_id || idx}
                             className="border border-gray-200 bg-white/80 dark:bg-gray-100 rounded-lg p-2 sm:p-3"
@@ -148,10 +147,20 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                               {note.content}
                             </p>
                             {note.emotion_tags?.length > 0 && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {note.emotion_tags.join(', ')}
-                              </p>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {note.emotion_tags.map((tag: string, i: number) => (
+                                  <span
+                                    key={i}
+                                    className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                                  >
+                                    #{tag}
+                                  </span>
+                                ))}
+                              </div>
                             )}
+                            <p className="text-xs text-gray-500 mt-2">
+                              {new Date(note.created_at).toLocaleDateString()}
+                            </p>
                           </div>
                         ))}
                       </div>

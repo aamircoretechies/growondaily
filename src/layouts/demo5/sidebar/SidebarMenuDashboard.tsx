@@ -38,7 +38,11 @@ interface IDashboardMenuItem {
 interface IDashboardMenuItems extends Array<IDashboardMenuItem> { }
 
 const SidebarMenuDashboard = () => {
-  const { books, chapters, verses, loading, error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter, selectedVerse, fetchSingleVerse, version, toggleVerseBookmark, fetchDeepStudy, fetchDeepStudyForVerse, showDeepStudy, activeTab, verseActiveTab, deepStudyData } = useBible();
+  const {
+    books, chapters, verses,
+    loadingBooks, loadingChapters, loadingVerses, // Granular loading states
+    error, setSelectedVerse, selectedBookName, selectedBookId, selectedChapter, selectBook, selectChapter, selectedVerse, fetchSingleVerse, version, toggleVerseBookmark, fetchDeepStudy, fetchDeepStudyForVerse, showDeepStudy, activeTab, verseActiveTab, deepStudyData
+  } = useBible();
   const { isRTL } = useLanguage();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
@@ -184,7 +188,7 @@ const SidebarMenuDashboard = () => {
       const chapter = searchParams.get('chapter') || '';
       const verse = searchParams.get('verse') || '';
       const bookId = getBookIdFromSlug(bookSlug);
-      
+
       if (bookId && chapter && verse) {
         const verseKey = `${bookId}-${chapter}-${verse}`;
         const tabData = deepStudyData?.[verseKey]?.[verseActiveTab];
@@ -218,11 +222,11 @@ const SidebarMenuDashboard = () => {
       const bookSlug = searchParams.get('bible') || '';
       const chapter = searchParams.get('chapter') || '';
       const verse = searchParams.get('verse') || '';
-      
+
       if (selectedVerse && selectedBookName) {
         return `${selectedBookName} ${selectedVerse.chapter}:${selectedVerse.verse}\n${selectedVerse.text}`;
       }
-      
+
       // Try to get verse from verses array
       if (selectedBookName && chapter && verse && Array.isArray(verses) && verses.length > 0) {
         const verseNum = Number(verse);
@@ -243,7 +247,7 @@ const SidebarMenuDashboard = () => {
       if (!showDeepStudy) {
         // The verses array should already be filtered to the selected chapter, but filter to be safe
         const chapterVerses = verses.filter((v: any) => v.chapter === selectedChapter);
-        
+
         if (chapterVerses.length > 0) {
           // Sort by verse number to ensure correct order
           const sortedVerses = chapterVerses.sort((a: any, b: any) => a.verse - b.verse);
@@ -328,7 +332,7 @@ const SidebarMenuDashboard = () => {
     console.log("Fetching verses for chapter:", chapterNumber);
     // Case 2: Book + Chapter selected - reset verse to All (edge case)
     await selectChapter(chapterNumber);
-    
+
     // Update URL to remove verse parameter (reset to "All")
     const bookSlug = selectedBookName?.toLowerCase().replace(/\s+/g, '-') || '';
     if (bookSlug) {
@@ -351,7 +355,7 @@ const SidebarMenuDashboard = () => {
         <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Bible Books</h3>
       </div>
 
-      {loading ? (
+      {loadingBooks ? (
         <div className="px-3 py-2 text-sm text-gray-500">Loading books...</div>
       ) : error ? (
         <div className="px-3 py-2 text-sm text-red-500">{error}</div>
@@ -458,7 +462,9 @@ const SidebarMenuDashboard = () => {
             {/* Filtered Results */}
 
             <div className="max-h-60 overflow-y-auto">
-              {Array.isArray(chapters) && chapters.length > 0 ? (
+              {loadingChapters ? (
+                <div className="px-3 py-2 text-sm text-gray-500">Loading chapters...</div>
+              ) : Array.isArray(chapters) && chapters.length > 0 ? (
                 chapters.map((c, index) => (
                   <div
                     key={index}
@@ -522,7 +528,9 @@ const SidebarMenuDashboard = () => {
             {/* Filtered Verse List */}
             <div className="max-h-60 overflow-y-auto">
 
-              {Array.isArray(verses) && verses.length > 0 ? (
+              {loadingVerses ? (
+                <div className="px-3 py-2 text-sm text-gray-500">Loading verses...</div>
+              ) : Array.isArray(verses) && verses.length > 0 ? (
                 verses
                   .filter((v) =>
                     verseSearchTerm

@@ -22,7 +22,7 @@ const VerseStudy = () => {
   const [savedNote, setSavedNote] = useState("");
 
 
-  const { books, loading, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, verseActiveTab, setVerseActiveTab } = useBible();
+  const { books, loadingDeepStudy, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, verseActiveTab, setVerseActiveTab } = useBible();
 
   const book = searchParams.get('bible') || 'genesis';
   const chapter = searchParams.get('chapter') || '1';
@@ -42,19 +42,19 @@ const VerseStudy = () => {
   }, [verseKey]);
 
   const getBookId = () => {
-  if (book.length === 36) return book;
-  if (books.length > 0) {
-    const found = books.find(
-      (b) =>
-        (b.name || "")
-          .toLowerCase()
-          .replace(/\s+/g, "-") === book.toLowerCase()
-    );
-    if (found) return found.book_id;
-  }
+    if (book.length === 36) return book;
+    if (books.length > 0) {
+      const found = books.find(
+        (b) =>
+          (b.name || "")
+            .toLowerCase()
+            .replace(/\s+/g, "-") === book.toLowerCase()
+      );
+      if (found) return found.book_id;
+    }
 
-  return book; 
-};
+    return book;
+  };
 
 
 
@@ -65,57 +65,56 @@ const VerseStudy = () => {
   // };
 
   const toggleReadStatus = async () => {
-  const bookId = getBookId();
+    const bookId = getBookId();
 
-  const response = await toggleVerseStatus(
-    bookId,
-    Number(chapter),
-    Number(verse),
-    "KJV"
-  );
-
-  console.log("MARK AS READ RESPONSE:", response); 
-
-  if (response.success) {
-    setIsRead(response.is_read);
-    localStorage.setItem(`verse-read-${verseKey}`, response.is_read.toString());
-
-    // Store latest read verse for Continue Reading card
-    if (response.is_read) {
-      const foundBook = books.find(
-        (b) =>
-          (b.name || "")
-            .toLowerCase()
-            .replace(/\s+/g, "-") === book.toLowerCase()
-      );
-      const bookName = foundBook?.name || book;
-      
-      const latestReadVerse = {
-        book_id: bookId,
-        book: bookName,
-        book_slug: book,
-        chapter: Number(chapter),
-        verse: Number(verse),
-        version: "KJV",
-        timestamp: new Date().toISOString()
-      };
-      
-      localStorage.setItem('latest-read-verse', JSON.stringify(latestReadVerse));
-      
-      // Dispatch custom event to notify HomePage
-      window.dispatchEvent(new CustomEvent('verse-read-updated', { 
-        detail: latestReadVerse 
-      }));
-    }
-
-    toast.success(
-      response.is_read ? "Marked as Read" : "Marked as Unread"
+    const response = await toggleVerseStatus(
+      bookId,
+      Number(chapter),
+      Number(verse),
+      "KJV"
     );
-  } else {
-    toast.error("Something went wrong");
-  }
-};
 
+    console.log("MARK AS READ RESPONSE:", response);
+
+    if (response.success) {
+      setIsRead(response.is_read);
+      localStorage.setItem(`verse-read-${verseKey}`, response.is_read.toString());
+
+      // Store latest read verse for Continue Reading card
+      if (response.is_read) {
+        const foundBook = books.find(
+          (b) =>
+            (b.name || "")
+              .toLowerCase()
+              .replace(/\s+/g, "-") === book.toLowerCase()
+        );
+        const bookName = foundBook?.name || book;
+
+        const latestReadVerse = {
+          book_id: bookId,
+          book: bookName,
+          book_slug: book,
+          chapter: Number(chapter),
+          verse: Number(verse),
+          version: "KJV",
+          timestamp: new Date().toISOString()
+        };
+
+        localStorage.setItem('latest-read-verse', JSON.stringify(latestReadVerse));
+
+        // Dispatch custom event to notify HomePage
+        window.dispatchEvent(new CustomEvent('verse-read-updated', {
+          detail: latestReadVerse
+        }));
+      }
+
+      toast.success(
+        response.is_read ? "Marked as Read" : "Marked as Unread"
+      );
+    } else {
+      toast.error("Something went wrong");
+    }
+  };
 
 
 
@@ -173,7 +172,7 @@ const VerseStudy = () => {
 
 
   const getTabContent = (tabId: string) => {
-    if (loading) return 'Loading...';
+    if (loadingDeepStudy) return 'Loading deep study content...';
     if (!deepStudyData) return 'No data available.';
 
     // Find the correct bookId
@@ -264,7 +263,6 @@ const VerseStudy = () => {
       </div>
 
       <div className="bg-white/40 dark:bg-gray-200 backdrop-blur-sm rounded-xl shadow-sm border border-gray-200 dark:border-gray-400">
-
         <div className="p-6 pb-0">
           <div className="flex flex-wrap gap-2">
             {tabs.map((tab) => (
@@ -296,94 +294,58 @@ const VerseStudy = () => {
               </div>
 
               {/* Nested Card */}
-              {tab.id === "original" && (
-                <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
-                  <h3 className="text-lg font-semibold text-primary mb-3">Your Notes</h3>
+              {tab.id === "original" && (() => {
+                // Find the correct bookId
+                let bookId = book;
+                if (books.length > 0 && book.length !== 36) {
+                  const found = books.find(
+                    (b) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === book.toLowerCase()
+                  );
+                  if (found) bookId = found.book_id;
+                }
+                const verseKey = `${bookId}-${chapter}-${verse}`;
+                const verseNotes = deepStudyData?.[verseKey]?.original?.notes || [];
+                
+                return (
+                  <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
+                    <h3 className="text-lg font-semibold text-primary mb-3">Your Notes</h3>
 
-                  {deepStudyData?.[`${book}-${chapter}-${verse}`]?.original?.notes?.length > 0 ? (
-                    <div className="space-y-3">
-                      {deepStudyData[`${book}-${chapter}-${verse}`].original.notes.map((note: any, index: number) => (
-                        <div
-                          key={note.note_id || index}
-                          className="p-3 bg-white/80 dark:bg-gray-100 rounded-lg border border-gray-200 dark:border-gray-400 shadow-sm"
-                        >
-                          <p className="text-gray-700 dark:text-gray-800 mb-2 whitespace-pre-line font-merriweather">
-                            {note.content}
-                          </p>
+                    {verseNotes.length > 0 ? (
+                      <div className="space-y-3">
+                        {verseNotes.map((note: any, index: number) => (
+                          <div
+                            key={note.note_id || index}
+                            className="p-3 bg-white/80 dark:bg-gray-100 rounded-lg border border-gray-200 dark:border-gray-400 shadow-sm"
+                          >
+                            <p className="text-gray-700 dark:text-gray-800 mb-2 whitespace-pre-line font-merriweather">
+                              {note.content}
+                            </p>
 
-                          {note.emotion_tags?.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
-                              {note.emotion_tags.map((tag: string, i: number) => (
-                                <span
-                                  key={i}
-                                  className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
-                                >
-                                  #{tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                            {note.emotion_tags?.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {note.emotion_tags.map((tag: string, i: number) => (
+                                  <span
+                                    key={i}
+                                    className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                                  >
+                                    #{tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
 
-                          <p className="text-xs text-gray-500 mt-2">
-                            {new Date(note.created_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 italic">No saved notes yet.</p>
-                  )}
-
-
-
-                  {/* 
-        {deepStudyData?.original?.notes &&
- deepStudyData.original.notes.filter(
-   (n: any) =>
-     n.chapter === Number(chapter) &&
-     n.book_id === book &&
-     (n.verse === 0 || n.verse === Number(verse))
- ).length > 0 ? (
-  <div className="space-y-3">
-    {deepStudyData.original.notes
-      .filter(
-        (n: any) =>
-          n.chapter === Number(chapter) &&
-          n.book_id === book &&
-          (n.verse === 0 || n.verse === Number(verse))
-      )
-      .map((note: any, index: number) => (
-        <div
-          key={note.note_id || index}
-          className="p-3 bg-white/80 dark:bg-gray-100 rounded-lg border border-gray-200 dark:border-gray-400 shadow-sm"
-        >
-          <p className="text-gray-700 dark:text-gray-800 mb-2 whitespace-pre-line font-merriweather">
-            {note.content}
-          </p>
-          {note.emotion_tags?.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {note.emotion_tags.map((tag: string, i: number) => (
-                <span
-                  key={i}
-                  className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
-          <p className="text-xs text-gray-500 mt-2">
-            {new Date(note.created_at).toLocaleDateString()}
-          </p>
-        </div>
-      ))}
-  </div>
-) : (
-  <p className="text-gray-500 italic">No saved notes yet.</p>
-)} */}
-
-                </div>
-              )}
+                            <p className="text-xs text-gray-500 mt-2">
+                              {new Date(note.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">No saved notes yet.</p>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           ))}
         </div>
@@ -414,7 +376,7 @@ const VerseStudy = () => {
               <div className="bg-gray-50 dark:bg-gray-300 rounded-lg p-3 border border-gray-200 dark:border-gray-400">
                 <p className="text-sm text-primary">
                   {deepStudyData?.[verseActiveTab]?.emotion_tags?.join(', ') ||
-                    'I feel like I’m learning to rest more instead of stressing...'}
+                    "I feel like I'm learning to rest more instead of stressing..."}
                 </p>
               </div>
 

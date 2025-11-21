@@ -24,7 +24,12 @@ interface BibleContextType {
   books: BibleBook[];
   chapters: any[];
   verses: Verse[];
-  loading: boolean;
+  loading: boolean; // General loading state (kept for backward compatibility)
+  loadingBooks: boolean;
+  loadingChapters: boolean;
+  loadingVerses: boolean;
+  loadingDeepStudy: boolean;
+  isInitialized: boolean;
   error: string | null;
   selectedBookId: string | null;
   selectedBookName: string | null;
@@ -57,6 +62,11 @@ const BibleContext = createContext<BibleContextType>({
   chapters: [],
   verses: [],
   loading: false,
+  loadingBooks: false,
+  loadingChapters: false,
+  loadingVerses: false,
+  loadingDeepStudy: false,
+  isInitialized: false,
   error: null,
   selectedBookId: null,
   selectedBookName: null,
@@ -93,24 +103,28 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
   const [selectedVerse, setSelectedVerse] = useState<Verse | null>(null);
   const [version, setVersion] = useState<string>("KJV");
-  const [loading, setLoading] = useState(true);
+  
+  // Granular loading states
+  const [loadingBooks, setLoadingBooks] = useState(true);
+  const [loadingChapters, setLoadingChapters] = useState(false);
+  const [loadingVerses, setLoadingVerses] = useState(false);
+  const [loadingDeepStudy, setLoadingDeepStudy] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
   const [error, setError] = useState<string | null>(null);
-  // const [deepStudyData, setDeepStudyData] = useState<any | null>(null);
-  // const [deepStudyData, setDeepStudyData] = useState<Record<string, any>>({});
   const [deepStudyData, setDeepStudyData] = useState<Record<string, any> | null>(null);
 
   const [showDeepStudy, setShowDeepStudy] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('original');
   const [verseActiveTab, setVerseActiveTab] = useState<string>('explanations');
 
-
-
+  // Derived general loading state
+  const loading = loadingBooks || loadingChapters || loadingVerses;
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        setLoading(true);
-        // const res = await axios.get("https://api.growondaily.com/api/bible/books");
+        setLoadingBooks(true);
         const res = await axios.get("/api/bible/books");
         const data = res.data?.data?.books || [];
         setBooks(data);
@@ -187,8 +201,12 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
           setSelectedBookId(targetBookId);
           setSelectedBookName(targetBookName);
           setSelectedChapter(targetChapter);
-          await fetchChapters(targetBookId, "KJV");
-          await fetchVerses(targetBookId, targetChapter, "KJV");
+          
+          // Fetch chapters and verses in parallel
+          await Promise.all([
+            fetchChapters(targetBookId, "KJV"),
+            fetchVerses(targetBookId, targetChapter, "KJV")
+          ]);
 
           // If verse is in URL or localStorage, fetch it
           if (targetVerse && !isNaN(targetVerse)) {
@@ -199,41 +217,31 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         console.error("Bible Books Error:", err);
         setError("Failed to load books");
       } finally {
-        setLoading(false);
+        setLoadingBooks(false);
+        setIsInitialized(true);
       }
     };
     fetchBooks();
   }, []);
 
-  const getLocalNote = (bookId: string, chapter: number, verse: number) => {
-    const localNotes = JSON.parse(localStorage.getItem("localNotes") || "{}");
-    const verseKey = `${bookId}-${chapter}-${verse}`;
-    const chapterKey = `${bookId}-${chapter}-all`;
-    return localNotes[verseKey] || localNotes[chapterKey] || "";
-  };
-
   const fetchChapters = async (bookId: string, version: string) => {
     try {
-      setLoading(true);
-      // const url = `https://api.growondaily.com/api/bible/books/${bookId}/chapters/${version}`;
+      setLoadingChapters(true);
       const url = `/api/bible/books/${bookId}/chapters/${version}`;
-
       const res = await axios.get(url);
       setChapters(res.data?.data?.chapters || []);
     } catch (err) {
       console.error("Chapters Fetch Error:", err);
       setError("Failed to load chapters");
     } finally {
-      setLoading(false);
+      setLoadingChapters(false);
     }
   };
 
   const fetchVerses = async (bookId: string, chapter: number, version: string) => {
     try {
-      setLoading(true);
-      // const url = `https://api.growondaily.com/api/bible/books/${bookId}/chapters/${chapter}/verses/${version}`;
+      setLoadingVerses(true);
       const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${version}`;
-
       const res = await axios.get(url);
       setVerses(res.data?.data?.verses || []);
       setSelectedVerse(null);
@@ -241,7 +249,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Verse Fetch Error:", err);
       setError("Failed to load verses");
     } finally {
-      setLoading(false);
+      setLoadingVerses(false);
     }
   };
 
@@ -259,23 +267,21 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
 
   const selectBook = async (bookId: string, name: string, chapter: number = 1) => {
     try {
-      setLoading(true);
       setSelectedBookId(bookId);
       setSelectedBookName(name);
       setSelectedChapter(chapter);
 
+      // Parallel fetch for chapters and verses
       await Promise.all([
         fetchChapters(bookId, "KJV"),
         fetchVerses(bookId, chapter, "KJV"),
       ]);
 
-      setTimeout(() => {
-        fetchDeepStudyForVerse(bookId, chapter, 1, "KJV");
-      }, 2000);
+      // Fetch deep study in background without blocking
+      fetchDeepStudyForVerse(bookId, chapter, 1, "KJV");
+      
     } catch (err) {
       console.error("Error selecting book:", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -294,8 +300,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     version: string
   ) => {
     try {
-      setLoading(true);
-      // const url = `https://api.growondaily.com/api/bible/books/${bookId}/chapters/${chapter}/verses/${verse}/${version}`;
+      // Don't set global loading for single verse fetch to avoid full screen flicker
       const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${verse}/${version}`
       const res = await axios.get(url);
       const verseData = res.data?.data?.verse as Verse | undefined;
@@ -303,8 +308,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error("Error fetching single verse:", error);
       setSelectedVerse(null);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -316,13 +319,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     verse?: string | number // optional verse param
   ) => {
     try {
-      setLoading(true);
+      setLoadingDeepStudy(true);
       const contexts = ["original", "explanations", "historical", "cultural", "theological", "practical", "commentary", "ground_text", "special", "daily_life", "cross_reference", "key_takeaways", "reflection",];
 
-      // Check if verse is passed
-      // const baseUrl = verse
-      //   ? `https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}`
-      //   : `https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${version}`;
       const baseUrl = verse
         ? `/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}`
         : `/api/bible/deep-study/${bookId}/${chapter}/${version}`;
@@ -353,8 +352,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
           const newTab = merged[tabId] || {};
 
           // Merge notes by note_id to avoid duplicates
-          // const prevNotes = prevTab.notes || [];
-          // const newNotes = newTab.notes || [];
           const prevNotes = Array.isArray(prevTab.notes) ? prevTab.notes : [];
           const newNotes = Array.isArray(newTab.notes) ? newTab.notes : [];
 
@@ -394,9 +391,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       return allResponses;
     } catch (error) {
       console.error("Deep Study Fetch Error:", error);
-      setDeepStudyData(null);
+      // Don't clear deep study data on error, just keep old data
     } finally {
-      setLoading(false);
+      setLoadingDeepStudy(false);
     }
   };
 
@@ -407,13 +404,12 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     version: string
   ) => {
     try {
-      setLoading(true);
+      setLoadingDeepStudy(true);
 
       const contexts = ["original", "explanations", "historical", "cultural", "theological", "practical", "commentary", "ground_text", "special", "daily_life", "cross_reference", "key_takeaways", "reflection",];
 
       const requests = contexts.map(ctx =>
         axios
-          // .get(`https://api.growondaily.com/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}?deep-study-context=${ctx}`)
           .get(`/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}?deep-study-context=${ctx}`)
           .then(res => ({ [ctx]: res.data?.data || null }))
           .catch(() => ({ [ctx]: null }))
@@ -435,9 +431,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
           const prevTab = prevData[tabId] || {};
           const newTab = merged[tabId] || {};
 
-          // const prevNotes = prevTab.notes || [];
-          // const newNotes = newTab.notes || [];
-          // Merge notes by note_id to avoid duplicates
           const prevNotes = Array.isArray(prevTab.notes) ? prevTab.notes : [];
           const newNotes = Array.isArray(newTab.notes) ? newTab.notes : [];
 
@@ -477,9 +470,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       return allResponses;
     } catch (error) {
       console.error("Deep Study Verse Fetch Error:", error);
-      setDeepStudyData(null);
+      // Don't clear data on error
     } finally {
-      setLoading(false);
+      setLoadingDeepStudy(false);
     }
   };
 
@@ -499,7 +492,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         res = await axios.post("/api/bible/chapter-notes", payload);
       } else {
         const payload = { book_id, chapter, verse, content, emotion_tags };
-        // res = await axios.post("https://api.growondaily.com/api/bible/notes", payload);
         res = await axios.post("/api/bible/notes", payload);
       }
 
@@ -556,32 +548,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Error saving note:", err.response?.data || err.message);
       setError("Failed to save note");
       throw err;
-    } finally {
-      //  Don’t trigger loading spinner here (keeps UI instant)
-      setLoading(false);
     }
   };
-
-  // const toggleVerseBookmark = async (book: string, chapter: number, verse: number, version: string) => {
-  //   try {
-  //     const res = await axios.post("/api/bible/toggle-verse-bookmark",
-  //       { book, chapter, verse, version }
-  //     );
-  //     const data = res.data;
-  //     if (data?.status === 1) {
-  //       console.log(data.message, data.data);
-  //       toast("Verse bookmarked!", {
-  //         description: `${book} ${chapter}:${verse}`,
-  //       });
-  //     } else {
-  //       console.warn("Bookmark toggle failed:", data);
-  //       toast("Could not bookmark verse.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Bookmark API Error:", error);
-  //     toast("An error occurred.");
-  //   }
-  // };
 
   const toggleVerseBookmark = async (book: string, chapter: number, verse: number, version: string) => {
     try {
@@ -632,8 +600,10 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <BibleContext.Provider
       value={{
-        books, chapters, verses, loading, error, version, saveNote, deepStudyData, selectedBookId, selectedBookName, selectedChapter,
-        selectedVerse,
+        books, chapters, verses, 
+        loading, loadingBooks, loadingChapters, loadingVerses, loadingDeepStudy, isInitialized,
+        error, version, saveNote, deepStudyData, selectedBookId, selectedBookName, selectedChapter,
+          selectedVerse,
         fetchChapters,
         fetchVerses,
         fetchSingleVerse,

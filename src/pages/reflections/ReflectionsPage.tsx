@@ -533,7 +533,7 @@ import { toast } from "sonner";
 const ReflectionsPage = () => {
   const navigate = useNavigate();
   const { currentLanguage } = useLanguage();
-  const { selectBook, selectChapter, fetchSingleVerse, books, toggleVerseBookmark } = useBible();
+  const { selectBook, selectChapter, fetchSingleVerse, books, toggleVerseBookmark, version, fetchDeepStudy, fetchDeepStudyForVerse, setShowDeepStudy, setActiveTab, setVerseActiveTab } = useBible();
   const { dailyReflection, loading, error, bookmarks, bmLoading, fetchBookmarks, setBookmarks, allNotes, fetchAllNotes, notesLoading, deleteNote } = useReflection();
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any>(null);
@@ -653,7 +653,7 @@ const ReflectionsPage = () => {
   // open notes (similar to bookmarks)
   const handleOpenNote = async (entry: any) => {
     try {
-      const { book, chapter, verse, version } = entry;
+      const { book, chapter, verse, version: noteVersion } = entry;
       if (!book || !chapter) return;
 
       const bookSlug = book.trim().toLowerCase().replace(/\s+/g, "-");
@@ -666,9 +666,16 @@ const ReflectionsPage = () => {
         await selectChapter(Number(chapter));
 
         if (verse) {
-          await fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), version || "KJV");
+          // For verse-level notes, fetch deep study data and set active tab to original
+          await fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
+          await fetchDeepStudyForVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
+          setVerseActiveTab('original'); // Ensure original tab is active to show notes
           navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
         } else {
+          // For chapter-level notes, fetch deep study data and set active tab to original
+          setShowDeepStudy(true);
+          await fetchDeepStudy(foundBook.book_id, Number(chapter), noteVersion || version || "KJV");
+          setActiveTab('original'); // Ensure original tab is active to show notes
           navigate(`/bible?bible=${bookSlug}&chapter=${chapter}`);
         }
       }
