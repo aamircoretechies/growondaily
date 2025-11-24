@@ -10,7 +10,11 @@ import { AxiosError } from 'axios';
 
 const passwordSchema = Yup.object().shape({
   newPassword: Yup.string()
-    .min(6, 'Password must be at least 6 characters')
+    .min(8, 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/,
+      'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.'
+    )
     .required('New password is required'),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('newPassword')], 'Passwords must match')
@@ -52,8 +56,8 @@ const ResetPasswordChange = () => {
         setHasErrors(false);
         navigate(
           currentLayout?.name === 'auth-branded'
-            ? '/auth/reset-password/changed'
-            : '/auth/classic/reset-password/changed'
+            ? '/auth/login'
+            : '/auth/classic/login'
         );
       } catch (error) {
         if (error instanceof AxiosError && error.response) {

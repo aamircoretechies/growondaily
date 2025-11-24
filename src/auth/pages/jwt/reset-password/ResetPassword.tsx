@@ -16,9 +16,10 @@ const initialValues = {
 
 const forgotPasswordSchema = Yup.object().shape({
   email: Yup.string()
-    .email('Wrong email format')
-    .min(3, 'Minimum 3 symbols')
-    .max(50, 'Maximum 50 symbols')
+    .matches(
+      /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+      'Please enter a valid email address.'
+    )
     .required('Email is required')
 });
 
@@ -39,23 +40,30 @@ const ResetPassword = () => {
         if (!requestPasswordResetLink) {
           throw new Error('JWTProvider is required for this form.');
         }
-        await requestPasswordResetLink(values.email);
-        setHasErrors(false);
-        setLoading(false);
-        const params = new URLSearchParams();
-        params.append('email', values.email);
-        navigate({
-          pathname:
-            currentLayout?.name === 'auth-branded'
-              ? '/auth/reset-password/check-email'
-              : '/auth/classic/reset-password/check-email',
-          search: params.toString()
-        });
+        const response = await requestPasswordResetLink(values.email);
+
+        if (response?.success) {
+          setHasErrors(false);
+          setLoading(false);
+          const params = new URLSearchParams();
+          params.append('email', values.email);
+          navigate({
+            pathname:
+              currentLayout?.name === 'auth-branded'
+                ? '/auth/reset-password/check-email'
+                : '/auth/classic/reset-password/check-email',
+            search: params.toString()
+          });
+        } else {
+          setStatus(response?.message || 'Invalid email. No account found with this email address.');
+          setHasErrors(true);
+          setLoading(false);
+        }
       } catch (error) {
         if (error instanceof AxiosError && error.response) {
-          setStatus(error.response.data.message);
+          setStatus(error.response.data.message || 'Invalid email address');
         } else {
-          setStatus('Password reset failed. Please try again.');
+          setStatus('Invalid email address');
         }
         setHasErrors(true);
         setLoading(false);

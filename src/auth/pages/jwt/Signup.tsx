@@ -18,17 +18,17 @@ const initialValues = {
 
 const signupSchema = Yup.object().shape({
   email: Yup.string()
-    .email('Wrong email format')
-    .min(3, 'Minimum 3 symbols')
-    .max(50, 'Maximum 50 symbols')
+    // .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Please enter a valid email address.')
+    .matches(/^[A-Za-z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.')
     .required('Email is required'),
   password: Yup.string()
-    .min(3, 'Minimum 3 symbols')
-    .max(50, 'Maximum 50 symbols')
+    .min(8, 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/,
+      'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.'
+    )
     .required('Password is required'),
   changepassword: Yup.string()
-    .min(3, 'Minimum 3 symbols')
-    .max(50, 'Maximum 50 symbols')
     .required('Password confirmation is required')
     .oneOf([Yup.ref('password')], "Password and Confirm Password didn't match"),
   acceptTerms: Yup.bool().required('You must accept the terms and conditions')
@@ -43,7 +43,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { currentLayout } = useLayout();
-  
+
 
   // const formik = useFormik({
   //   initialValues,
@@ -277,7 +277,7 @@ const Signup = () => {
         <button
           type="submit"
           className="btn btn-primary flex justify-center grow"
-          disabled={loading || formik.isSubmitting}
+          disabled={loading || formik.isSubmitting || !formik.isValid}
         >
           {loading ? 'Please wait...' : 'Sign UP'}
         </button>

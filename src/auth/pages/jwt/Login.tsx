@@ -13,11 +13,14 @@ import axios from "axios";
 
 
 const loginSchema = Yup.object().shape({
+  // email: Yup.string()
+  //   .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Please enter a valid email address.')
+  //   .required('Email is required'),
   email: Yup.string()
-    .email('Wrong email format')
-    .min(3, 'Minimum 3 symbols')
-    .max(50, 'Maximum 50 symbols')
+    // .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{3,}$/i, 'Please enter a valid email address.')
+    .matches(/^[A-Za-z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.')
     .required('Email is required'),
+
   password: Yup.string()
     .min(3, 'Minimum 3 symbols')
     .max(50, 'Maximum 50 symbols')
@@ -33,7 +36,7 @@ const initialValues = {
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
-  const { login,loginWithGoogle } = useAuthContext();
+  const { login, loginWithGoogle } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/home';
@@ -238,7 +241,7 @@ const Login = () => {
         <button
           type="submit"
           className="btn btn-primary flex justify-center grow"
-          disabled={loading || formik.isSubmitting}
+          disabled={loading || formik.isSubmitting || !formik.isValid}
         >
           {loading ? 'Please wait...' : 'Sign In'}
         </button>

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { KeenIcon } from '@/components/keenicons';
+// import { KeenIcon } from '@/components/keenicons';
 import { toAbsoluteUrl } from '@/utils';
 import { Menu, MenuItem, MenuToggle } from '@/components';
 import { DropdownUser } from '@/partials/dropdowns/user';
@@ -105,13 +105,13 @@ const HeaderTopbar = () => {
           }}
         >
           <MenuToggle className="btn btn-icon btn-icon-lg relative cursor-pointer size-9 rounded-full hover:bg-primary-light hover:text-primary dropdown-open:bg-primary-light dropdown-open:text-primary text-gray-500">
-            <KeenIcon icon="notification-status" />
+            {/* <KeenIcon icon="notification-status" /> */}
           </MenuToggle>
-          {DropdownNotifications({ menuTtemRef: itemNotificationsRef })}
+          {/* {DropdownNotifications({ menuTtemRef: itemNotificationsRef })} */}
         </MenuItem>
       </Menu>
 
-      <Menu>
+      {/* <Menu>
         <MenuItem
           ref={itemUserRef}
           toggle="dropdown"
@@ -137,7 +137,7 @@ const HeaderTopbar = () => {
           </MenuToggle>
           {DropdownUser({ menuItemRef: itemUserRef })}
         </MenuItem>
-      </Menu>
+      </Menu> */}
     </div>
   );
 };

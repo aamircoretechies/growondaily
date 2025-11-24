@@ -315,7 +315,7 @@ const AskPage = () => {
                       {message.reference} - {message.timestamp}
                     </div>
                   )}
-                  <p className="text-sm leading-relaxed">{message.content}</p>
+                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{message.content}</p>
                 </div>
               </div>
             ))}

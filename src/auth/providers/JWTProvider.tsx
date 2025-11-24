@@ -27,7 +27,7 @@ interface AuthContextProps {
   loginWithFacebook?: () => Promise<void>;
   loginWithGithub?: () => Promise<void>;
   register: (email: string, password: string, password_confirmation: string) => Promise<{ success: boolean; data?: any }>;
-  requestPasswordResetLink: (email: string) => Promise<void>;
+  requestPasswordResetLink: (email: string) => Promise<any>;
   changePassword: (
     email: string,
     token: string,
@@ -561,7 +561,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       const formData = new FormData();
       formData.append("profile_picture", file);
 
-      const response = await axios.put(`/api/auth/profile-picture`,   
+      const response = await axios.put(`/api/auth/profile-picture`,
         formData,
         {
           headers: {
@@ -590,9 +590,10 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <AuthContext.Provider
-      value={{loading,setLoading,auth,saveAuth,currentUser,setCurrentUser,login,register,requestPasswordResetLink,changePassword,
-        getUser,saveUserPreferences,updateUserPreferences,saveOrUpdateUserPreferences,updateProfileImage,loginWithGoogle,logout,
-        verify,profileProgress,setProfileProgress,refreshDashboard
+      value={{
+        loading, setLoading, auth, saveAuth, currentUser, setCurrentUser, login, register, requestPasswordResetLink, changePassword,
+        getUser, saveUserPreferences, updateUserPreferences, saveOrUpdateUserPreferences, updateProfileImage, loginWithGoogle, logout,
+        verify, profileProgress, setProfileProgress, refreshDashboard
       }}
     >
       {children}
