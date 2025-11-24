@@ -72,26 +72,53 @@ const ChangePasswordCard = () => {
   const [showConfirm, setShowConfirm] = useState(false);
 
 
+  // const handlePasswordChange = async () => {
+  //   if (newPassword !== confirmPassword) {
+  //     setMessage("New passwords do not match");
+  //     return;
+  //   }
+
+  //   const res = await changePassword({
+  //     current_password: currentPassword,
+  //     new_password: newPassword,
+  //     confirm_password: confirmPassword,
+  //   });
+
+  //   setMessage(res.message);
+  //   if (res.success) {
+  //     setCurrentPassword('');
+  //     setNewPassword('');
+  //     setConfirmPassword('');
+  //     setTimeout(() => setMessage(''), 3000);
+  //   }
+  // };
+
   const handlePasswordChange = async () => {
-    if (newPassword !== confirmPassword) {
-      setMessage("New passwords do not match");
-      return;
-    }
+  if (!currentPassword.trim()) {
+    setMessage("Current password is required");
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    setMessage("New passwords do not match");
+    return;
+  }
 
-    const res = await changePassword({
-      current_password: currentPassword,
-      new_password: newPassword,
-      confirm_password: confirmPassword,
-    });
+  const res = await changePassword({
+    current_password: currentPassword,
+    new_password: newPassword,
+    confirm_password: confirmPassword,
+  });
 
-    setMessage(res.message);
-    if (res.success) {
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setTimeout(() => setMessage(''), 3000);
-    }
-  };
+  setMessage(res.message);
+
+  if (res.success) {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+
+    setTimeout(() => setMessage(""), 3000);
+  }
+};
 
   return (
     <Card id="change_password" className='bg-white/40 dark:bg-gray-100'>
