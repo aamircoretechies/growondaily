@@ -58,6 +58,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { LockKeyhole } from 'lucide-react';
 import { useSettingEdit } from '../Provider/SettingeEditProvider';
+import { Alert, KeenIcon } from '@/components';
 
 const ChangePasswordCard = () => {
   const { changePassword, passwordLoading } = useSettingEdit();
@@ -66,6 +67,10 @@ const ChangePasswordCard = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
@@ -101,35 +106,101 @@ const ChangePasswordCard = () => {
         <div className="w-full max-w-lg space-y-4">
           <div className="space-y-2">
             <Label htmlFor="current_password">Current Password</Label>
-            <Input
+            {/* <Input
               id="current_password"
               type="password"
               placeholder="Current Password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-            />
+            /> */}
+            <div className="relative">
+              <Input
+                id="current_password"
+                type={showCurrent ? "text" : "password"}
+                placeholder="Current Password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+
+              <button
+                type="button"
+                className="absolute right-3 top-3"
+                onClick={() => setShowCurrent(!showCurrent)}
+              >
+                {showCurrent ? (
+                  <KeenIcon icon="eye-slash" className="text-gray-500" />
+                ) : (
+                  <KeenIcon icon="eye" className="text-gray-500" />
+                )}
+              </button>
+            </div>
+
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="new_password">New Password</Label>
-            <Input
+            {/* <Input
               id="new_password"
               type="password"
               placeholder="New Password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-            />
+            /> */}
+            <div className="relative">
+              <Input
+                id="new_password"
+                type={showNew ? "text" : "password"}
+                placeholder="New Password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+
+              <button
+                type="button"
+                className="absolute right-3 top-3"
+                onClick={() => setShowNew(!showNew)}
+              >
+                {showNew ? (
+                  <KeenIcon icon="eye-slash" className="text-gray-500" />
+                ) : (
+                  <KeenIcon icon="eye" className="text-gray-500" />
+                )}
+              </button>
+            </div>
+
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="confirm_password">Retype New Password</Label>
-            <Input
+            {/* <Input
               id="confirm_password"
               type="password"
               placeholder="Retype New Password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-            />
+            /> */}
+            <div className="relative">
+              <Input
+                id="confirm_password"
+                type={showConfirm ? "text" : "password"}
+                placeholder="Retype New Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+
+              <button
+                type="button"
+                className="absolute right-3 top-3"
+                onClick={() => setShowConfirm(!showConfirm)}
+              >
+                {showConfirm ? (
+                  <KeenIcon icon="eye-slash" className="text-gray-500" />
+                ) : (
+                  <KeenIcon icon="eye" className="text-gray-500" />
+                )}
+              </button>
+            </div>
+
           </div>
         </div>
 
