@@ -571,6 +571,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
               <input
                 type="text"
                 id="firstName"
+                maxLength={20}
                 value={profileData.firstName}
                 onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
                 placeholder="Enter your first name"
@@ -585,6 +586,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
               <input
                 type="text"
                 id="lastName"
+                maxLength={20}
                 value={profileData.lastName}
                 onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
                 placeholder="Enter your last name"

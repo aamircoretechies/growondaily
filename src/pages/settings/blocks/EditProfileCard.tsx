@@ -122,6 +122,7 @@ const EditProfileCard = () => {
             <Input
               id="first_name"
               value={firstName}
+              maxLength={40}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="First name"
             />
@@ -132,6 +133,7 @@ const EditProfileCard = () => {
             <Input
               id="last_name"
               value={lastName}
+              maxLength={40}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Last name"
             />

@@ -18,6 +18,8 @@ const SavedJournalListPage = () => {
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
   const [selectedNote, setSelectedNote] = useState<any>(null);
   const [visibleCount, setVisibleCount] = useState(6);
+  const [searchQuery, setSearchQuery] = useState("");
+
 
 
 
@@ -47,7 +49,7 @@ const SavedJournalListPage = () => {
     // Fetch data in background (non-blocking)
     selectBook(foundBook.book_id, foundBook.name);
     selectChapter(Number(chapter));
-    
+
     if (verse) {
       fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
       fetchDeepStudyForVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
@@ -81,40 +83,16 @@ const SavedJournalListPage = () => {
     }
   };
 
+ const journalEntries = allNotes || [];
 
-  // Mock data for journal entries
-  // const journalEntries = [
-  //   {
-  //     id: '1',
-  //     date: 'August 6, 2025',
-  //     verse: 'Romans 8:28',
-  //     content: "I've been reminded that even hard moments are being used for something good...",
-  //     tags: ['faith', 'growth']
-  //   },
-  //   {
-  //     id: '2',
-  //     date: 'August 3, 2025',
-  //     verse: 'Psalm 23:1',
-  //     content: "I feel like I'm learning to rest more instead of stressing...",
-  //     tags: ['peace', 'trust']
-  //   },
-  //   {
-  //     id: '3',
-  //     date: 'August 1, 2025',
-  //     verse: 'John 3:16',
-  //     content: "God's love is so overwhelming that He gave His only Son for us...",
-  //     tags: ['love', 'sacrifice']
-  //   },
-  //   {
-  //     id: '4',
-  //     date: 'July 30, 2025',
-  //     verse: 'Philippians 4:13',
-  //     content: "I can do all things through Christ who strengthens me...",
-  //     tags: ['strength', 'perseverance']
-  //   }
-  // ];
+const filteredEntries = journalEntries.filter((entry: any) =>
+  entry.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  entry.book?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  (entry.emotion_tags?.join(' ') || '').toLowerCase().includes(searchQuery.toLowerCase())
+);
 
-  const journalEntries = allNotes || [];
+const visibleEntries = filteredEntries.slice(0, visibleCount);
+
 
 
   useEffect(() => {
@@ -155,6 +133,8 @@ const SavedJournalListPage = () => {
                 <input
                   type="text"
                   placeholder="Search by keywords, verses, or tags..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-xl border-0 text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sand/50"
                 />
               </div>
@@ -165,14 +145,16 @@ const SavedJournalListPage = () => {
         {/* Results Count */}
         <div className="mb-6">
           <h2 className="font-merriweather text-lg text-gray-600">
-            Showing {journalEntries.length} Journal Entries
+            {/* Showing {journalEntries.length} Journal Entries */}
+            Showing {filteredEntries.length} Journal Entries
           </h2>
         </div>
 
         {/* Journal Entries Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-          {journalEntries.slice(0, visibleCount).map((entry: any) => (
+          {/* {journalEntries.slice(0, visibleCount).map((entry: any) => ( */}
+            {visibleEntries.map((entry: any) => (
             <div key={entry.note_id} onClick={() => handleOpenNote(entry)} className="bg-white/80 dark:bg-transparent rounded-xl p-6 border border-transparent dark:border-gray-400 hover:shadow-lg transition-shadow cursor-pointer">
               {/* Entry Header */}
               <div className="flex items-center gap-2 mb-4">
@@ -252,7 +234,8 @@ const SavedJournalListPage = () => {
         {journalEntries.length > visibleCount && (
           <div className="mt-8 text-center">
             <button
-              onClick={() => setVisibleCount(journalEntries.length)}
+              // onClick={() => setVisibleCount(journalEntries.length)}
+              onClick={() => setVisibleCount(filteredEntries.length)}
               className="px-6 py-3 bg-sand text-primary rounded-lg hover:bg-primary hover:text-white transition-colors font-medium"
             >
               Load More Entries
