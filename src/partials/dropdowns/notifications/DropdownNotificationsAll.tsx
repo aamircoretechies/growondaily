@@ -27,7 +27,7 @@ const DropdownNotificationsAll = () => {
   const buildList = () => {
     return (
       <div className="flex flex-col gap-5 pt-3 pb-4 divider-y divider-gray-200">
-       
+
 
 
         <DropdownNotificationsItem5
@@ -54,19 +54,19 @@ const DropdownNotificationsAll = () => {
           info="Roadmap"
         />
 
-<div className="border-b border-b-gray-200"></div>
+        <div className="border-b border-b-gray-200"></div>
 
-<DropdownNotificationsItem5
-  userName="Raymond Pawell"
-  avatar="300-11.png"
-  badgeColor="badge-success"
-  description="posted a new article"
-  link="2024 Roadmap"
-  day=""
-  date="1 hour ago"
-  info="Roadmap"
-/>
-      
+        <DropdownNotificationsItem5
+          userName="Raymond Pawell"
+          avatar="300-11.png"
+          badgeColor="badge-success"
+          description="posted a new article"
+          link="2024 Roadmap"
+          day=""
+          date="1 hour ago"
+          info="Roadmap"
+        />
+
       </div>
     );
   };

@@ -137,13 +137,13 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                   {tab.id === "original" && deepStudyData?.[`${selectedBookId}-${selectedChapter}`]?.original
                     ?.notes?.length > 0 && (
                       <div className="mt-3 space-y-2">
-                        <h3 className="text-sm font-semibold text-primary mb-2">Your Notes</h3>
+                        <h3 className="text-sm font-semibold text-primary mb-2 ">Your Notes</h3>
                         {deepStudyData[`${selectedBookId}-${selectedChapter}`].original.notes.map((note: any, idx: number) => (
                           <div
                             key={note.note_id || idx}
                             className="border border-gray-200 bg-white/80 dark:bg-gray-100 rounded-lg p-2 sm:p-3"
                           >
-                            <p className="text-sm text-gray-800 font-merriweather whitespace-pre-wrap">
+                            <p className="text-sm text-gray-800 font-merriweather whitespace-pre-wrap break-words break-all">
                               {note.content}
                             </p>
                             {note.emotion_tags?.length > 0 && (

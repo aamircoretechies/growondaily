@@ -326,7 +326,7 @@ const VerseStudy = () => {
                             key={note.note_id || index}
                             className="p-3 bg-white/80 dark:bg-gray-100 rounded-lg border border-gray-200 dark:border-gray-400 shadow-sm"
                           >
-                            <p className="text-gray-700 dark:text-gray-800 mb-2 whitespace-pre-line font-merriweather">
+                            <p className="text-gray-700 dark:text-gray-800 mb-2 whitespace-pre-line font-merriweather break-words break-all">
                               {note.content}
                             </p>
 
