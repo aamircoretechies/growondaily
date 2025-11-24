@@ -343,8 +343,8 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     try {
       await axios.put(`/api/auth/profile`,
         {
-          first_name: preferencesData?.firstName || currentUser?.first_name,
-          last_name: preferencesData?.lastName || currentUser?.last_name,
+          first_name: preferencesData?.firstName !== undefined ? preferencesData.firstName : currentUser?.first_name,
+          last_name: preferencesData?.lastName !== undefined ? preferencesData.lastName : currentUser?.last_name,
         },
         {
           headers: {
@@ -368,19 +368,23 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         THEOLOGICAL: "ADVANCED_THEOLOGY",
       };
 
+      const explanationStyle = preferencesData?.explainStyle || preferencesData?.explain || "";
+
       const payloadPreferences = {
         language_code: "en",
         bible_version:
-          (preferencesData?.translations?.[0]?.split(" - ")[0] || "KJV").toUpperCase(),
+          (preferencesData?.translations?.[0]?.split(" - ")[0] || "").toUpperCase(),
         depth_level: preferencesData?.depth?.includes("Short")
           ? "short"
           : preferencesData?.depth?.includes("Medium")
             ? "medium"
-            : "deep",
-        experience_with_bible: [
+            : preferencesData?.depth
+              ? "deep"
+              : "",
+        experience_with_bible: preferencesData?.experience ? [
           experienceMap[(preferencesData?.experience || "").toUpperCase()] ||
-          toBackendEnum(preferencesData?.experience || "FIRST_TIME"),
-        ],
+          toBackendEnum(preferencesData?.experience)
+        ] : [],
         what_brings_you: Array.isArray(preferencesData?.brings)
           ? preferencesData.brings.join(", ")
           : preferencesData?.brings || "",
@@ -390,11 +394,13 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
             ? [toBackendEnum(preferencesData.engage)]
             : [],
         explanation_style:
-          (preferencesData?.explain || "").toLowerCase().includes("simple")
+          explanationStyle.toLowerCase().includes("simple")
             ? "simple"
-            : (preferencesData?.explain || "").toLowerCase().includes("deeper")
+            : explanationStyle.toLowerCase().includes("deeper")
               ? "balanced"
-              : "balanced",
+              : explanationStyle
+                ? "balanced"
+                : "",
         receive_daily: preferencesData?.dailyPref === "Daily",
         historical_context: true,
         ground_text_analysis: true,
@@ -422,8 +428,8 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       let refreshedUser = await getUser(token);
       refreshedUser = {
         ...refreshedUser,
-        first_name: preferencesData?.firstName || refreshedUser.first_name,
-        last_name: preferencesData?.lastName || refreshedUser.last_name,
+        first_name: preferencesData?.firstName !== undefined ? preferencesData.firstName : refreshedUser.first_name,
+        last_name: preferencesData?.lastName !== undefined ? preferencesData.lastName : refreshedUser.last_name,
       };
 
       setCurrentUser(refreshedUser);
