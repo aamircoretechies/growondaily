@@ -879,8 +879,11 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
   const hydrateFromUser = (u: any) => {
     if (!u) return;
 
+    // Default dailyPref to 'Daily' if not set, or use the saved value
+    const savedDailyPref = u?.preferences?.receive_daily ? 'Daily' : (u?.preferences?.receive_daily === false ? 'Occasionally' : 'Daily');
+
     // If preference setup is already done (100%), we want to RESET fields for editing
-    // except for Name.
+    // except for Name and Daily Preference.
     if (u.is_preference_setup_done) {
       setProfileData(prev => ({
         ...prev,
@@ -892,7 +895,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
         engage: [],
         explainStyle: '',
         translations: [],
-        dailyPref: '',
+        dailyPref: savedDailyPref, // Persist daily preference
         depth: ''
       }));
     } else {
@@ -906,7 +909,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
         engage: u?.preferences?.engagement_preference || [],
         explainStyle: u?.preferences?.explanation_style || '',
         translations: u?.preferences?.bible_version ? [u.preferences.bible_version] : [],
-        dailyPref: u?.preferences?.receive_daily ? 'Daily' : 'Occasionally',
+        dailyPref: savedDailyPref,
         depth: u?.preferences?.depth_level || '',
       }));
     }
@@ -919,16 +922,11 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
   }, [isOpen, currentUser]);
 
   const calculateProgress = (data: any) => {
+    // Progress is ONLY based on First Name, Last Name, and Daily Preference
     let fields = [
       data.firstName,
       data.lastName,
-      data.experience,
-      data.brings?.length,
-      data.engage?.length,
-      data.explainStyle,
-      data.translations?.length,
       data.dailyPref,
-      data.depth,
     ];
 
     const filled = fields.filter(f => f && f !== "" && f !== 0).length;
@@ -1014,16 +1012,12 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
 
         if (setProfileProgress && authoritativeUser) {
           // compute locally if you want to force it
+          const savedDailyPref = authoritativeUser?.preferences?.receive_daily ? 'Daily' : (authoritativeUser?.preferences?.receive_daily === false ? 'Occasionally' : 'Daily');
+
           const localProgress = calculateProgress({
             firstName: authoritativeUser.first_name,
             lastName: authoritativeUser.last_name,
-            experience: authoritativeUser?.preferences?.experience_with_bible?.[0] || '',
-            brings: authoritativeUser?.preferences?.what_brings_you ? (typeof authoritativeUser.preferences.what_brings_you === 'string' ? authoritativeUser.preferences.what_brings_you.split(',').map((s: string) => s.trim()) : authoritativeUser.preferences.what_brings_you) : [],
-            engage: authoritativeUser?.preferences?.engagement_preference || [],
-            explainStyle: authoritativeUser?.preferences?.explanation_style || '',
-            translations: authoritativeUser?.preferences?.bible_version ? [authoritativeUser.preferences.bible_version] : [],
-            dailyPref: authoritativeUser?.preferences?.receive_daily ? 'Daily' : 'Occasionally',
-            depth: authoritativeUser?.preferences?.depth_level || '',
+            dailyPref: savedDailyPref,
           });
           setProfileProgress(localProgress);
         }

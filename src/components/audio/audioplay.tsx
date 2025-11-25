@@ -252,10 +252,14 @@ const AudioPlay: React.FC<AudioPlayProps> = ({
   };
 
   useEffect(() => {
+    if (!isOpen) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+    }
     return () => {
       window.speechSynthesis.cancel();
     };
-  }, []);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -299,7 +303,10 @@ const AudioPlay: React.FC<AudioPlayProps> = ({
 
         {/* Controls */}
         <div className="flex justify-center items-center gap-8">
-          <button className="p-3 rounded-full bg-[#EFE6D9] hover:bg-[#D6C6B1] transition">
+          <button
+            onClick={startSpeech}
+            className="p-3 rounded-full bg-[#EFE6D9] hover:bg-[#D6C6B1] transition"
+          >
             <SkipBack className="text-[#856747]" />
           </button>
 
@@ -310,7 +317,10 @@ const AudioPlay: React.FC<AudioPlayProps> = ({
             {isPlaying ? <Pause /> : <Play />}
           </button>
 
-          <button className="p-3 rounded-full bg-[#EFE6D9] hover:bg-[#D6C6B1] transition">
+          <button
+            onClick={startSpeech}
+            className="p-3 rounded-full bg-[#EFE6D9] hover:bg-[#D6C6B1] transition"
+          >
             <SkipForward className="text-[#856747]" />
           </button>
         </div>

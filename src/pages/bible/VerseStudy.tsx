@@ -36,16 +36,28 @@ const VerseStudy = () => {
 
   const verseKey = `${book}-${chapter}-${verse}`;
 
-  const [isRead, setIsRead] = useState(() => {
-    const saved = localStorage.getItem(`verse-read-${verseKey}`);
-    return saved === 'true';
-  });
+  // Always initialize to false - will be updated by useEffect when verse loads
+  const [isRead, setIsRead] = useState(false);
 
-  // Update isRead state when verse changes
+  // Update isRead state when verse changes - reset to false first, then check localStorage
+  // Depend on book, chapter, and verse directly to ensure effect runs on any change
   useEffect(() => {
-    const saved = localStorage.getItem(`verse-read-${verseKey}`);
-    setIsRead(saved === 'true');
-  }, [verseKey]);
+    // Compute verseKey inside effect to ensure we're checking the current verse
+    const currentVerseKey = `${book}-${chapter}-${verse}`;
+    
+    // Always reset to false first to ensure new verses start inactive
+    setIsRead(false);
+    
+    // Then check localStorage for the current verse
+    const saved = localStorage.getItem(`verse-read-${currentVerseKey}`);
+    // Only set to true if localStorage explicitly has 'true' for THIS specific verse
+    if (saved === 'true') {
+      setIsRead(true);
+    } else {
+      // Explicitly set to false if not found or not 'true'
+      setIsRead(false);
+    }
+  }, [book, chapter, verse]);
 
   const getBookId = () => {
     if (book.length === 36) return book;
