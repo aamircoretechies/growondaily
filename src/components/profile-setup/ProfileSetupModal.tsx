@@ -510,6 +510,7 @@
 import { useState, useEffect } from 'react';
 import { KeenIcon } from '@/components';
 import { useAuthContext } from "@/auth";
+import { toast } from "sonner";
 
 interface ProfileSetupModalProps {
   isOpen: boolean;
@@ -878,19 +879,37 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
   const hydrateFromUser = (u: any) => {
     if (!u) return;
 
-    setProfileData(prev => ({
-      ...prev,
-      firstName: u.first_name || '',
-      lastName: u.last_name || '',
-
-      experience: u?.preferences?.experience_with_bible?.[0] || '',
-      brings: u?.preferences?.what_brings_you ? (typeof u.preferences.what_brings_you === 'string' ? u.preferences.what_brings_you.split(',').map((s: string) => s.trim()) : u.preferences.what_brings_you) : [],
-      engage: u?.preferences?.engagement_preference || [],
-      explainStyle: u?.preferences?.explanation_style || '',
-      translations: u?.preferences?.bible_version ? [u.preferences.bible_version] : [],
-      dailyPref: u?.preferences?.receive_daily ? 'Daily' : 'Occasionally',
-      depth: u?.preferences?.depth_level || '',
-    }));
+    // If preference setup is already done (100%), we want to RESET fields for editing
+    // except for Name.
+    if (u.is_preference_setup_done) {
+      setProfileData(prev => ({
+        ...prev,
+        firstName: u.first_name || '',
+        lastName: u.last_name || '',
+        // Reset other fields to force re-entry
+        experience: '',
+        brings: [],
+        engage: [],
+        explainStyle: '',
+        translations: [],
+        dailyPref: '',
+        depth: ''
+      }));
+    } else {
+      // Resume from where they left off
+      setProfileData(prev => ({
+        ...prev,
+        firstName: u.first_name || '',
+        lastName: u.last_name || '',
+        experience: u?.preferences?.experience_with_bible?.[0] || '',
+        brings: u?.preferences?.what_brings_you ? (typeof u.preferences.what_brings_you === 'string' ? u.preferences.what_brings_you.split(',').map((s: string) => s.trim()) : u.preferences.what_brings_you) : [],
+        engage: u?.preferences?.engagement_preference || [],
+        explainStyle: u?.preferences?.explanation_style || '',
+        translations: u?.preferences?.bible_version ? [u.preferences.bible_version] : [],
+        dailyPref: u?.preferences?.receive_daily ? 'Daily' : 'Occasionally',
+        depth: u?.preferences?.depth_level || '',
+      }));
+    }
   };
 
   useEffect(() => {
@@ -925,6 +944,58 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
   }, [profileData, isOpen]);
 
   const handleNext = async () => {
+    // Validation Logic
+    const currentStepId = steps[currentStep].id;
+    let isValid = true;
+
+    switch (currentStepId) {
+      case 'name':
+        if (!profileData.firstName.trim() || !profileData.lastName.trim()) {
+          isValid = false;
+        }
+        break;
+      case 'experience':
+        if (!profileData.experience) {
+          isValid = false;
+        }
+        break;
+      case 'brings':
+        if (profileData.brings.length === 0) {
+          isValid = false;
+        }
+        break;
+      case 'engage':
+        if (profileData.engage.length === 0) {
+          isValid = false;
+        }
+        break;
+      case 'explainStyle':
+        if (!profileData.explainStyle) {
+          isValid = false;
+        }
+        break;
+      case 'translations':
+        if (profileData.translations.length === 0) {
+          isValid = false;
+        }
+        break;
+      case 'dailyPref':
+        if (!profileData.dailyPref) {
+          isValid = false;
+        }
+        break;
+      case 'depth':
+        if (!profileData.depth) {
+          isValid = false;
+        }
+        break;
+    }
+
+    if (!isValid) {
+      toast.error("Please fill this preference first.");
+      return;
+    }
+
     if (currentStep === steps.length - 1) {
       // last step -> save
       const progress = calculateProgress(profileData);
@@ -975,7 +1046,22 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
+    // Save partial progress before closing
+    try {
+      const progress = calculateProgress(profileData);
+      setProfileProgress(progress);
+
+      // We save the current state of profileData to the backend
+      // This ensures that if they drop off at 50%, it is saved as 50%
+      await saveOrUpdateUserPreferences(profileData);
+
+      // Refresh user context to reflect changes
+      await refreshDashboard();
+    } catch (err) {
+      console.error("Failed to save partial progress on close", err);
+    }
+
     setCurrentStep(0);
     setProfileData({
       firstName: '',
@@ -988,21 +1074,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
       dailyPref: '',
       depth: ''
     });
-    // Recalculate progress from saved user data when closing without saving
-    if (currentUser && setProfileProgress) {
-      const savedProgress = calculateProgress({
-        firstName: currentUser.first_name || '',
-        lastName: currentUser.last_name || '',
-        experience: currentUser?.preferences?.experience_with_bible?.[0] || '',
-        brings: currentUser?.preferences?.what_brings_you ? (typeof currentUser.preferences.what_brings_you === 'string' ? currentUser.preferences.what_brings_you.split(',').map((s: string) => s.trim()) : currentUser.preferences.what_brings_you) : [],
-        engage: currentUser?.preferences?.engagement_preference || [],
-        explainStyle: currentUser?.preferences?.explanation_style || '',
-        translations: currentUser?.preferences?.bible_version ? [currentUser.preferences.bible_version] : [],
-        dailyPref: currentUser?.preferences?.receive_daily ? 'Daily' : 'Occasionally',
-        depth: currentUser?.preferences?.depth_level || '',
-      });
-      setProfileProgress(savedProgress);
-    }
+
     onClose();
   };
 
