@@ -18,14 +18,55 @@ const initialValues = {
 };
 
 const signupSchema = Yup.object().shape({
-  email: Yup.string()
-    // .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Please enter a valid email address.')
-    // .matches(/^[A-Za-z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.')
-    .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,'Please enter a valid email address.')
-    .required('Email is required'),
+  // email: Yup.string()
+  // .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,'Please enter a valid email address.')
+  // .email('Please enter a valid email address.')
+  // .required('Email is required'),
+
+ email: Yup.string()
+  .email('Please enter a valid email address.')
+  .test("valid-domain", "Please enter a valid email address", (value) => {
+    if (!value) return false;
+
+    const allowedDomains = [
+      "gmail.com",
+      "yahoo.com",
+      "yahoo.in",
+      "yahoo.co.in",
+      "outlook.com",
+      "hotmail.com",
+      "live.com",
+      "msn.com",
+      "icloud.com",
+      "me.com",
+      "mac.com",
+      "rediffmail.com",
+      "rediff.com",
+      "mail.ru",
+      "proton.me",
+      "zoho.com",
+      "fastmail.com",
+      "mycompany.com",
+      "business.org",
+      "mywebsite.net",
+      "startup.io",
+      "school.edu",
+      "company.co.in"
+    ];
+
+    // extract domain from email
+    const domain = value.split("@")[1]?.toLowerCase();
+
+    // allow only if matches allowed domain list
+    return allowedDomains.includes(domain);
+  })
+  .required('Email is required'),
+
+
+
   password: Yup.string()
     .min(8, 'Password must be 8+ character with upper, lower, number & special charater')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/,'Password must be 8+ character with upper, lower, number & special character.')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/, 'Password must be 8+ character with upper, lower, number & special character.')
     .required('Password is required'),
   changepassword: Yup.string()
     .required('Password confirmation is required')
@@ -74,9 +115,9 @@ const Signup = () => {
         if (response?.success) {
           toast.success("Registered successfully!");
           navigate('/auth/login', { replace: true });
-          return; 
+          return;
         } else {
-          setStatus("Something went wrong, please try again");
+          setStatus("Iplease enter valid Email or password");
         }
       } catch (error: any) {
         console.error(error);
@@ -112,7 +153,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="card max-w-[370px] w-full">
+    <div className="card max-w-[370px] w-full overflow-hidden">
       <form
         className="card-body flex flex-col gap-5 p-10"
         noValidate
@@ -179,7 +220,8 @@ const Signup = () => {
           <label className="input">
             <input
               placeholder="email@email.com"
-              type="email"
+              // type="email"
+              type="text"
               autoComplete="off"
               {...formik.getFieldProps('email')}
               className={clsx(
@@ -216,7 +258,7 @@ const Signup = () => {
                 }
               )}
             />
-            <button className="btn btn-icon" onClick={togglePassword}>
+            <button type="button" className="btn btn-icon" onClick={togglePassword}>
               <KeenIcon icon="eye" className={clsx('text-gray-500', { hidden: showPassword })} />
               <KeenIcon
                 icon="eye-slash"
@@ -249,7 +291,7 @@ const Signup = () => {
                 }
               )}
             />
-            <button className="btn btn-icon" onClick={toggleConfirmPassword}>
+            <button type="button" className="btn btn-icon" onClick={toggleConfirmPassword}>
               <KeenIcon
                 icon="eye"
                 className={clsx('text-gray-500', { hidden: showConfirmPassword })}

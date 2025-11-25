@@ -231,7 +231,7 @@ const Login = () => {
                 'is-invalid': formik.touched.password && formik.errors.password
               })}
             />
-            <button className="btn btn-icon" onClick={togglePassword}>
+            <button type="button" className="btn btn-icon" onClick={togglePassword}>
               <KeenIcon icon="eye" className={clsx('text-gray-500', { hidden: showPassword })} />
               <KeenIcon
                 icon="eye-slash"
