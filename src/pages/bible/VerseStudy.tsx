@@ -5,6 +5,8 @@ import { KeenIcon } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
 import { toast } from "sonner";
 import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
+import { useReflection } from "@/providers/ReflectionProvider";
+
 
 
 interface TabItem {
@@ -21,6 +23,8 @@ const VerseStudy = () => {
   const [reportCategory, setReportCategory] = useState('');
   const [note, setNote] = useState("");
   const [savedNote, setSavedNote] = useState("");
+  const { submitReport } = useReflection();
+
 
 
   const { books, loadingDeepStudy, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, verseActiveTab, setVerseActiveTab } = useBible();
@@ -206,24 +210,54 @@ const VerseStudy = () => {
 
   // const currentDate = new Date().toLocaleDateString();
 
-  const handleReportSubmit = () => {
+  // const handleReportSubmit = () => {
+  //   if (!reportIssue.trim() || !reportCategory) {
+  //     alert('Please fill in all required fields.');
+  //     return;
+  //   }
+
+  //   console.log('Report submitted:', {
+  //     verse: `${book} ${chapter}:${verse}`,
+  //     issue: reportIssue,
+  //     category: reportCategory,
+  //     timestamp: new Date().toISOString(),
+  //   });
+
+  //   setReportIssue('');
+  //   setReportCategory('');
+  //   setShowReportModal(false);
+  //   alert('Report submitted successfully!');
+  // };
+
+  const handleReportSubmit = async () => {
     if (!reportIssue.trim() || !reportCategory) {
-      alert('Please fill in all required fields.');
+      toast.error("Please fill all fields");
       return;
     }
 
-    console.log('Report submitted:', {
-      verse: `${book} ${chapter}:${verse}`,
-      issue: reportIssue,
-      category: reportCategory,
-      timestamp: new Date().toISOString(),
-    });
+    const payload = {
+      book: book.charAt(0).toUpperCase() + book.slice(1),
+      chapter: Number(chapter),
+      verse: Number(verse),
+      version: "KJV",
+      description: reportIssue,
+      tags: [reportCategory.toLowerCase()]
+    };
 
-    setReportIssue('');
-    setReportCategory('');
-    setShowReportModal(false);
-    alert('Report submitted successfully!');
+    const response = await submitReport(payload);
+
+    if (response.success) {
+      toast.success("Report submitted successfully!");
+
+      setReportIssue("");
+      setReportCategory("");
+      setShowReportModal(false);
+    } else {
+      toast.error("Something went wrong, please try again.");
+    }
   };
+
+
 
   return (
     <div className="max-w-4xl mx-auto">

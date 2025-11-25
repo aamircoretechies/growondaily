@@ -148,6 +148,15 @@ import axios from "axios";
 import { useLanguage } from "@/providers/TranslationProvider";
 import { toast } from "sonner";
 
+interface ReportPayload {
+  book: string;
+  chapter: number;
+  verse: number;
+  version: string;
+  description: string;
+  tags: string[];
+}
+
 
 const ReflectionContext = createContext<any>(null);
 
@@ -276,6 +285,30 @@ export const ReflectionProvider = ({ children }: any) => {
     }
   };
 
+  const submitReport = async (payload: ReportPayload) => {
+  try {
+    const res = await axios.post(`/api/bible/report`,
+      payload,
+      { withCredentials: true }
+    );
+
+    if (res.data?.status === 1) {
+      // toast.success("Report submitted successfully!");
+      return { success: true, data: res.data.data };
+    } else {
+      // toast.error(res.data?.message || "Failed to submit report");
+      return { success: false };
+    }
+
+  } catch (error) {
+    console.log("REPORT ERROR:", error);
+    toast.error("Something went wrong!");
+    return { success: false };
+  }
+};
+
+
+
 
 
   useEffect(() => {
@@ -300,6 +333,7 @@ export const ReflectionProvider = ({ children }: any) => {
         fetchAllNotes,
         deleteNote,
         updateNote,
+        submitReport,
       }}
     >
       {children}
