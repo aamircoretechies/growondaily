@@ -87,7 +87,8 @@ import { useSettingEdit } from "../Provider/SettingeEditProvider";
 import { useState } from "react";
 import { useLanguage } from '@/providers/TranslationProvider';
 import { I18N_LANGUAGES, I18N_CONFIG_KEY } from '@/i18n';  
-import { setData } from '@/utils';                         
+import { setData } from '@/utils';
+import { FormattedMessage } from 'react-intl';                         
 
 const GeneralSettings = ({ user }: { user: any }) => {
   const { selectLanguage, languageLoading } = useSettingEdit();
@@ -119,19 +120,21 @@ const GeneralSettings = ({ user }: { user: any }) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="w-5 h-5" />
-          General Settings
+          <FormattedMessage id="SETTINGS.GENERAL" />
         </CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="language">Default Language</Label>
+            <Label htmlFor="language">
+              <FormattedMessage id="SETTINGS.DEFAULT_LANGUAGE" />
+            </Label>
             <div className="flex items-center gap-2">
               <Languages className="w-4 h-4 text-gray-400" />
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className="w-full bg-gray-100 rounded-xl border border-gray-300 text-gray-700 focus:ring-2 focus:ring-sand/50">
-                  <SelectValue placeholder="Select language" />
+                  <SelectValue placeholder={<FormattedMessage id="SETTINGS.SELECT_LANGUAGE" />} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="en">English</SelectItem>
@@ -149,7 +152,7 @@ const GeneralSettings = ({ user }: { user: any }) => {
             disabled={languageLoading}
           >
             <Save className="w-4 h-4" />
-            {languageLoading ? "Saving..." : "Save Settings"}
+            {languageLoading ? <FormattedMessage id="SETTINGS.SAVING" /> : <FormattedMessage id="SETTINGS.SAVE_SETTINGS" />}
           </Button>
 
           <Button
@@ -158,7 +161,7 @@ const GeneralSettings = ({ user }: { user: any }) => {
             onClick={handleReset}
           >
             <RefreshCw className="w-4 h-4" />
-            Reset to Default
+            <FormattedMessage id="SETTINGS.RESET_TO_DEFAULT" />
           </Button>
         </div>
       </CardContent>

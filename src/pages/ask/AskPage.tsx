@@ -182,6 +182,7 @@ import axios from "axios";
 import { Container } from "@/components/container";
 import { LucideMic } from "lucide-react";
 import { useAsk } from "@/providers";
+import { FormattedMessage, useIntl } from 'react-intl';
 
 
 interface Message {
@@ -193,6 +194,7 @@ interface Message {
 }
 
 const AskPage = () => {
+  const { formatMessage } = useIntl();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -283,13 +285,13 @@ const AskPage = () => {
         {/* Header */}
         <div className="text-left mb-8">
           <h1 className="font-merriweather text-2xl text-primary mb-3">
-            Ask Anything
+            <FormattedMessage id="ASK.ASK_ANYTHING" />
           </h1>
           <p className="text-gray-700 text-sm mb-2">
-            Get explanations, ask about verses, or explore deeper meaning.
+            <FormattedMessage id="ASK.GET_EXPLANATIONS" />
           </p>
           <p className="text-gray-600 text-sm italic">
-            e.g., "What does Romans 8:28 mean?"
+            <FormattedMessage id="ASK.EXAMPLE" />
           </p>
         </div>
 

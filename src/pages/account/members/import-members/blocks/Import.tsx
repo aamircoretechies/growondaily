@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FormattedMessage } from 'react-intl';
 
 interface IImportItem {
   label: string;
@@ -8,7 +9,7 @@ interface IImportItem {
 interface IImportItems extends Array<IImportItem> {}
 
 const Import = () => {
-  const [customInput, setCustomInput] = useState('Your welcome message here');
+  const [customInput, setCustomInput] = useState('');
   const options: IImportItems = [
     {
       label: 'Create new users',
@@ -58,7 +59,9 @@ const Import = () => {
   return (
     <div className="card">
       <div className="card-header">
-        <h3 className="card-title">Start Import</h3>
+        <h3 className="card-title">
+          <FormattedMessage id="IMPORT.START_IMPORT" />
+        </h3>
       </div>
 
       <div className="card-body grid gap-7.5 py-5 lg:py-7.5">
@@ -68,25 +71,29 @@ const Import = () => {
 
         <div className="flex flex-col gap-2.5">
           <div className="flex gap-2.5">
-            <button className="btn btn-sm btn-primary">Select CSV File</button>
-            <button className="btn btn-sm btn-clear btn-light">Choose File</button>
+            <button className="btn btn-sm btn-primary">
+              <FormattedMessage id="BUTTONS.SELECT_CSV_FILE" />
+            </button>
+            <button className="btn btn-sm btn-clear btn-light">
+              <FormattedMessage id="BUTTONS.CHOOSE_FILE" />
+            </button>
           </div>
           <p className="text-gray-700 text-2sm">
-            Use the 'Choose file' button to locate and upload the CSV file that contains the user
-            data.
+            <FormattedMessage id="IMPORT.CHOOSE_FILE_DESCRIPTION" />
           </p>
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="text-gray-900 text-2sm font-medium">Custom welcome message</div>
+          <div className="text-gray-900 text-2sm font-medium">
+            <FormattedMessage id="IMPORT.CUSTOM_WELCOME_MESSAGE" />
+          </div>
           <textarea
             className="textarea text-2sm text-gray-600 font-normal"
             rows={5}
             value={customInput}
             onChange={(e) => setCustomInput(e.target.value)}
-          >  
-            Your welcome message here
-          </textarea>
+            placeholder="Your welcome message here"
+          />
           <label className="flex items-center gap-1.5">
             <input
               type="checkbox"
@@ -96,15 +103,16 @@ const Import = () => {
               readOnly
             />
             <span className="text-gray-800 text-2sm font-medium">
-              Send welcome email to new users
+              <FormattedMessage id="IMPORT.SEND_WELCOME_EMAIL" />
             </span>
           </label>
         </div>
 
         <div className="text-gray-800 text-2sm">
-          <span className="text-danger uppercase">Warning:&nbsp;</span>
-          An email will be sent to all users created unless the welcome message is disabled in
-          settings. Ensure the correct communication preferences are set.
+          <span className="text-danger uppercase">
+            <FormattedMessage id="COMMON.WARNING" />:&nbsp;
+          </span>
+          <FormattedMessage id="IMPORT.WARNING_MESSAGE" />
         </div>
       </div>
 

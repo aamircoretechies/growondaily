@@ -5,6 +5,7 @@ import { MakeNote } from '@/components';
 import { useBible } from '@/providers/BibleProvider'; 
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import SharePopUp from "@/components/share/SharePopUp";
+import { FormattedMessage, useIntl } from 'react-intl';
 
 
 interface IDashboardDropdownItem {
@@ -20,6 +21,7 @@ interface IMenuItem {
   path: string;
   icon: string;
   active?: boolean;
+  action?: string;
 }
 
 interface IDashboardMenuItem {
@@ -29,6 +31,7 @@ interface IDashboardMenuItem {
 interface IDashboardMenuItems extends Array<IDashboardMenuItem> { }
 
 const SidebarMenuDashboard = () => {
+  const { formatMessage } = useIntl();
   const {
     books, chapters, verses,
     loadingBooks, loadingChapters, loadingVerses, // Granular loading states
@@ -261,25 +264,28 @@ const SidebarMenuDashboard = () => {
 
   const menuItems: IDashboardMenuItems = [
     {
-      title: 'Options',
+      title: formatMessage({ id: 'BIBLE.OPTIONS' }),
       children: [
         {
-          title: 'Bookmark',
+          title: formatMessage({ id: 'BIBLE.BOOKMARK' }),
           icon: 'bookmark',
           path: '',
-          active: false
+          active: false,
+          action: 'bookmark'
         },
         {
-          title: 'Make Note',
+          title: formatMessage({ id: 'BIBLE.MAKE_NOTE' }),
           icon: 'pencil',
           path: '',
-          active: false
+          active: false,
+          action: 'makeNote'
         },
         {
-          title: 'Share',
+          title: formatMessage({ id: 'BIBLE.SHARE' }),
           icon: 'share',
           path: '',
-          active: false
+          active: false,
+          action: 'share'
         },
         /*  {
            title: 'Deep Study',
@@ -337,7 +343,9 @@ const SidebarMenuDashboard = () => {
     <div className="flex flex-col gap-1 px-2.5">
       {/* Bible Books Section */}
       <div className="px-0 py-1">
-        <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Bible Books</h3>
+        <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <FormattedMessage id="BIBLE.BIBLE_BOOKS" />
+        </h3>
       </div>
 
       {loadingBooks ? (
@@ -404,7 +412,9 @@ const SidebarMenuDashboard = () => {
       )}
 
       <div className="px-0 py-1">
-        <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Chapters</h3>
+        <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <FormattedMessage id="BIBLE.CHAPTERS" />
+        </h3>
       </div>
       {/* Chapters Dropdown */}
       <Menu highlight={true} className="menu-default w-full p-0">
@@ -474,7 +484,9 @@ const SidebarMenuDashboard = () => {
 
       {/* Verse Dropdown */}
       <div className="px-0 py-1">
-        <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Verses</h3>
+        <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+          <FormattedMessage id="BIBLE.VERSES" />
+        </h3>
       </div>
 
       <Menu highlight={true} className="menu-default w-full p-0">
@@ -585,7 +597,7 @@ const SidebarMenuDashboard = () => {
                   //   window.dispatchEvent(event);
                   // } else 
 
-                  if (item.title === 'Bookmark') {
+                  if (item.action === 'bookmark') {
                     if (!selectedBookName || !selectedVerse) {
                       console.warn("No verse selected for bookmark");
                       return;
@@ -598,12 +610,12 @@ const SidebarMenuDashboard = () => {
                     );
                   }
 
-                  if (item.title === 'Make Note') {
+                  if (item.action === 'makeNote') {
                     setShowMakeNote(true);
                   }
                   console.log(`Toggled: ${item.title}`);
 
-                  if (item.title === "Share") {
+                  if (item.action === 'share') {
                     setShowSharePopup(true);
                   }
                 }}

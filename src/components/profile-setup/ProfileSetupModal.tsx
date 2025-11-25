@@ -510,6 +510,7 @@
 import { useState, useEffect } from 'react';
 import { KeenIcon } from '@/components';
 import { useAuthContext } from "@/auth";
+import { FormattedMessage, useIntl } from 'react-intl';
 
 interface ProfileSetupModalProps {
   isOpen: boolean;
@@ -524,6 +525,7 @@ interface Step {
 }
 
 const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
+  const { formatMessage } = useIntl();
   const [currentStep, setCurrentStep] = useState(0);
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -554,19 +556,23 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
   const steps: Step[] = [
     {
       id: 'name',
-      title: 'Personal Information',
-      description: 'Tell us your name',
+      title: formatMessage({ id: 'PROFILE_SETUP.PERSONAL_INFORMATION' }),
+      description: formatMessage({ id: 'PROFILE_SETUP.WHATS_YOUR_NAME' }),
       component: (
         <div className="space-y-4">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-primary mb-2">What's your name?</h3>
-            <p className="text-gray-600 dark:text-gray-400">Help us personalize your experience</p>
+            <h3 className="text-xl font-semibold text-primary mb-2">
+              <FormattedMessage id="PROFILE_SETUP.WHATS_YOUR_NAME" />
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              <FormattedMessage id="PROFILE_SETUP.HELP_PERSONALIZE" />
+            </p>
           </div>
 
           <div className="space-y-4">
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                First Name
+                <FormattedMessage id="PROFILE_SETUP.FIRST_NAME" />
               </label>
               <input
                 type="text"
@@ -574,14 +580,14 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
                 maxLength={20}
                 value={profileData.firstName}
                 onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
-                placeholder="Enter your first name"
+                placeholder={formatMessage({ id: 'PROFILE_SETUP.ENTER_FIRST_NAME' })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-400 rounded-xl bg-white/60 dark:bg-gray-200 text-primary placeholder-gray-500 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
             <div>
               <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Last Name
+                <FormattedMessage id="PROFILE_SETUP.LAST_NAME" />
               </label>
               <input
                 type="text"
@@ -589,7 +595,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
                 maxLength={20}
                 value={profileData.lastName}
                 onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
-                placeholder="Enter your last name"
+                placeholder={formatMessage({ id: 'PROFILE_SETUP.ENTER_LAST_NAME' })}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-400 rounded-xl bg-white/60 dark:bg-gray-200 text-primary placeholder-gray-500 dark:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
@@ -599,17 +605,27 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     },
     {
       id: 'experience',
-      title: 'Bible Experience',
-      description: 'Tell us about your experience with the Bible',
+      title: formatMessage({ id: 'PROFILE_SETUP.BIBLE_EXPERIENCE' }),
+      description: formatMessage({ id: 'PROFILE_SETUP.HELP_PERSONALIZE' }),
       component: (
         <div className="space-y-4">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-primary mb-2">What is your experience with Bible?</h3>
-            <p className="text-gray-600 dark:text-gray-400">Help us personalize your experience</p>
+            <h3 className="text-xl font-semibold text-primary mb-2">
+              <FormattedMessage id="PROFILE_SETUP.WHAT_EXPERIENCE" />
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              <FormattedMessage id="PROFILE_SETUP.HELP_PERSONALIZE" />
+            </p>
           </div>
 
           <div className="space-y-3">
-            {['First Time', 'Occasional', 'Regular', 'Theological'].map((option) => (
+            {['First Time', 'Occasional', 'Regular', 'Theological'].map((option) => {
+              const translatedOption = option === 'First Time' ? formatMessage({ id: 'PROFILE_SETUP.EXPERIENCE_FIRST_TIME' }) :
+                option === 'Occasional' ? formatMessage({ id: 'PROFILE_SETUP.EXPERIENCE_OCCASIONAL' }) :
+                option === 'Regular' ? formatMessage({ id: 'PROFILE_SETUP.EXPERIENCE_REGULAR' }) :
+                formatMessage({ id: 'PROFILE_SETUP.EXPERIENCE_THEOLOGICAL' });
+              
+              return (
               <button
                 key={option}
                 onClick={() => setProfileData(prev => ({ ...prev, experience: option }))}
@@ -619,54 +635,60 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
                   }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-primary font-medium">{option}</span>
+                  <span className="text-primary font-medium">{translatedOption}</span>
                   {profileData.experience === option && (
                     <KeenIcon icon="check" className="text-primary w-5 h-5" />
                   )}
                 </div>
               </button>
-            ))}
+            )})}
           </div>
         </div>
       )
     },
     {
       id: 'brings',
-      title: 'App Purpose',
-      description: 'What brings you to this app?',
+      title: formatMessage({ id: 'PROFILE_SETUP.APP_PURPOSE' }),
+      description: formatMessage({ id: 'PROFILE_SETUP.WHAT_BRINGS_YOU' }),
       component: (
         <div className="space-y-4">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-primary mb-2">What brings you to this app?</h3>
-            <p className="text-gray-600 dark:text-gray-400">Select all that apply</p>
+            <h3 className="text-xl font-semibold text-primary mb-2">
+              <FormattedMessage id="PROFILE_SETUP.WHAT_BRINGS_YOU" />
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              <FormattedMessage id="PROFILE_SETUP.SELECT_ALL_APPLY" />
+            </p>
           </div>
 
           <div className="space-y-3">
             {[
-              'To better understand what I read',
-              'To learn about faith and God',
-              'For daily inspiration or peace',
-              'For study or lesson preparation',
-              'Just curious'
-            ].map((option) => (
+              { key: 'To better understand what I read', id: 'PROFILE_SETUP.BRINGS_UNDERSTAND' },
+              { key: 'To learn about faith and God', id: 'PROFILE_SETUP.BRINGS_LEARN' },
+              { key: 'For daily inspiration or peace', id: 'PROFILE_SETUP.BRINGS_INSPIRATION' },
+              { key: 'For study or lesson preparation', id: 'PROFILE_SETUP.BRINGS_STUDY' },
+              { key: 'Just curious', id: 'PROFILE_SETUP.BRINGS_CURIOUS' }
+            ].map(({ key, id }) => (
               <button
-                key={option}
+                key={key}
                 onClick={() => {
                   setProfileData(prev => ({
                     ...prev,
-                    brings: prev.brings.includes(option)
-                      ? prev.brings.filter(item => item !== option)
-                      : [...prev.brings, option]
+                    brings: prev.brings.includes(key)
+                      ? prev.brings.filter(item => item !== key)
+                      : [...prev.brings, key]
                   }));
                 }}
-                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.brings.includes(option)
+                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.brings.includes(key)
                   ? 'bg-sand dark:bg-gray-400 border-2 border-primary'
                   : 'bg-white/60 dark:bg-gray-200 border-2 border-transparent hover:border-gray-300'
                   }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-primary font-medium">{option}</span>
-                  {profileData.brings.includes(option) && (
+                  <span className="text-primary font-medium">
+                    <FormattedMessage id={id} />
+                  </span>
+                  {profileData.brings.includes(key) && (
                     <KeenIcon icon="check" className="text-primary w-5 h-5" />
                   )}
                 </div>
@@ -678,35 +700,46 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     },
     {
       id: 'engage',
-      title: 'Engagement Style',
-      description: 'How do you prefer to engage with the Bible?',
+      title: formatMessage({ id: 'PROFILE_SETUP.ENGAGEMENT_STYLE' }),
+      description: formatMessage({ id: 'PROFILE_SETUP.HOW_ENGAGE' }),
       component: (
         <div className="space-y-4">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-primary mb-2">How do you prefer to engage with the Bible?</h3>
-            <p className="text-gray-600 dark:text-gray-400">Select all that apply</p>
+            <h3 className="text-xl font-semibold text-primary mb-2">
+              <FormattedMessage id="PROFILE_SETUP.HOW_ENGAGE" />
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              <FormattedMessage id="PROFILE_SETUP.SELECT_ALL_APPLY" />
+            </p>
           </div>
 
           <div className="space-y-3">
-            {['Reading', 'Listening', 'Speaking', 'Step-by-step guidance'].map((option) => (
+            {[
+              { key: 'Reading', id: 'PROFILE_SETUP.ENGAGE_READING' },
+              { key: 'Listening', id: 'PROFILE_SETUP.ENGAGE_LISTENING' },
+              { key: 'Speaking', id: 'PROFILE_SETUP.ENGAGE_SPEAKING' },
+              { key: 'Step-by-step guidance', id: 'PROFILE_SETUP.ENGAGE_GUIDANCE' }
+            ].map(({ key, id }) => (
               <button
-                key={option}
+                key={key}
                 onClick={() => {
                   setProfileData(prev => ({
                     ...prev,
-                    engage: prev.engage.includes(option)
-                      ? prev.engage.filter(item => item !== option)
-                      : [...prev.engage, option]
+                    engage: prev.engage.includes(key)
+                      ? prev.engage.filter(item => item !== key)
+                      : [...prev.engage, key]
                   }));
                 }}
-                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.engage.includes(option)
+                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.engage.includes(key)
                   ? 'bg-sand dark:bg-gray-400 border-2 border-primary'
                   : 'bg-white/60 dark:bg-gray-200 border-2 border-transparent hover:border-gray-300'
                   }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-primary font-medium">{option}</span>
-                  {profileData.engage.includes(option) && (
+                  <span className="text-primary font-medium">
+                    <FormattedMessage id={id} />
+                  </span>
+                  {profileData.engage.includes(key) && (
                     <KeenIcon icon="check" className="text-primary w-5 h-5" />
                   )}
                 </div>
@@ -718,33 +751,39 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     },
     {
       id: 'explainStyle',
-      title: 'Explanation Style',
-      description: 'What explanation style do you prefer?',
+      title: formatMessage({ id: 'PROFILE_SETUP.EXPLANATION_STYLE' }),
+      description: formatMessage({ id: 'PROFILE_SETUP.WHAT_EXPLANATION_STYLE' }),
       component: (
         <div className="space-y-4">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-primary mb-2">What explanation style do you prefer?</h3>
-            <p className="text-gray-600 dark:text-gray-400">Choose your preferred learning approach</p>
+            <h3 className="text-xl font-semibold text-primary mb-2">
+              <FormattedMessage id="PROFILE_SETUP.WHAT_EXPLANATION_STYLE" />
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              <FormattedMessage id="PROFILE_SETUP.CHOOSE_LEARNING" />
+            </p>
           </div>
 
           <div className="space-y-3">
             {[
-              'Clear and simple language',
-              'A bit deeper with context',
-              'Mixed depending on topic',
-              "I'll decide later"
-            ].map((option) => (
+              { key: 'Clear and simple language', id: 'PROFILE_SETUP.STYLE_SIMPLE' },
+              { key: 'A bit deeper with context', id: 'PROFILE_SETUP.STYLE_DEEPER' },
+              { key: 'Mixed depending on topic', id: 'PROFILE_SETUP.STYLE_MIXED' },
+              { key: "I'll decide later", id: 'PROFILE_SETUP.STYLE_DECIDE_LATER' }
+            ].map(({ key, id }) => (
               <button
-                key={option}
-                onClick={() => setProfileData(prev => ({ ...prev, explainStyle: option }))}
-                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.explainStyle === option
+                key={key}
+                onClick={() => setProfileData(prev => ({ ...prev, explainStyle: key }))}
+                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.explainStyle === key
                   ? 'bg-sand dark:bg-gray-400 border-2 border-primary'
                   : 'bg-white/60 dark:bg-gray-200 border-2 border-transparent hover:border-gray-300'
                   }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-primary font-medium">{option}</span>
-                  {profileData.explainStyle === option && (
+                  <span className="text-primary font-medium">
+                    <FormattedMessage id={id} />
+                  </span>
+                  {profileData.explainStyle === key && (
                     <KeenIcon icon="check" className="text-primary w-5 h-5" />
                   )}
                 </div>
@@ -756,13 +795,17 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     },
     {
       id: 'translations',
-      title: 'Bible Translations',
-      description: 'Which Bible translation do you prefer?',
+      title: formatMessage({ id: 'PROFILE_SETUP.BIBLE_TRANSLATIONS' }),
+      description: formatMessage({ id: 'PROFILE_SETUP.WHICH_TRANSLATION' }),
       component: (
         <div className="space-y-4">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-primary mb-2">Which Bible translation do you prefer?</h3>
-            <p className="text-gray-600 dark:text-gray-400">Select your preferred translations</p>
+            <h3 className="text-xl font-semibold text-primary mb-2">
+              <FormattedMessage id="PROFILE_SETUP.WHICH_TRANSLATION" />
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              <FormattedMessage id="PROFILE_SETUP.SELECT_TRANSLATIONS" />
+            </p>
           </div>
 
           <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -804,20 +847,24 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     },
     {
       id: 'dailyPref',
-      title: 'Daily Content',
-      description: 'Would you like to receive daily content?',
+      title: formatMessage({ id: 'PROFILE_SETUP.DAILY_CONTENT' }),
+      description: formatMessage({ id: 'PROFILE_SETUP.RECEIVE_DAILY' }),
       component: (
         <div className="space-y-4">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-primary mb-2">Would you like to receive a daily verse or reflection?</h3>
-            <p className="text-gray-600 dark:text-gray-400">Choose your preference</p>
+            <h3 className="text-xl font-semibold text-primary mb-2">
+              <FormattedMessage id="PROFILE_SETUP.RECEIVE_DAILY" />
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              <FormattedMessage id="PROFILE_SETUP.CHOOSE_PREFERENCE" />
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {[
-              { key: 'Daily', label: 'Yes, Daily', icon: 'sun' },
-              { key: 'Occasionally', label: 'Occasionally', icon: 'calendar' }
-            ].map(({ key, label, icon }) => (
+              { key: 'Daily', id: 'PROFILE_SETUP.YES_DAILY', icon: 'sun' },
+              { key: 'Occasionally', id: 'PROFILE_SETUP.OCCASIONALLY', icon: 'calendar' }
+            ].map(({ key, id, icon }) => (
               <button
                 key={key}
                 onClick={() => setProfileData(prev => ({ ...prev, dailyPref: key }))}
@@ -828,7 +875,9 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
               >
                 <div className="flex flex-col items-center justify-center gap-3 h-full">
                   <KeenIcon icon={icon} className="w-16 h-16 text-primary/80 text-6xl" />
-                  <span className="text-primary font-medium">{label}</span>
+                  <span className="text-primary font-medium">
+                    <FormattedMessage id={id} />
+                  </span>
                 </div>
               </button>
             ))}
@@ -838,32 +887,38 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     },
     {
       id: 'depth',
-      title: 'Reflection Depth',
-      description: 'How deep should each reflection be?',
+      title: formatMessage({ id: 'PROFILE_SETUP.REFLECTION_DEPTH' }),
+      description: formatMessage({ id: 'PROFILE_SETUP.HOW_DEEP' }),
       component: (
         <div className="space-y-4">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-primary mb-2">How deep should each reflection be?</h3>
-            <p className="text-gray-600 dark:text-gray-400">Choose your preferred depth</p>
+            <h3 className="text-xl font-semibold text-primary mb-2">
+              <FormattedMessage id="PROFILE_SETUP.HOW_DEEP" />
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              <FormattedMessage id="PROFILE_SETUP.CHOOSE_DEPTH" />
+            </p>
           </div>
 
           <div className="space-y-3">
             {[
-              'Short (1-2 min read)',
-              'Medium (3-4 min read)',
-              'Deep dive (5+ min read)'
-            ].map((option) => (
+              { key: 'Short (1-2 min read)', id: 'PROFILE_SETUP.DEPTH_SHORT' },
+              { key: 'Medium (3-4 min read)', id: 'PROFILE_SETUP.DEPTH_MEDIUM' },
+              { key: 'Deep dive (5+ min read)', id: 'PROFILE_SETUP.DEPTH_DEEP' }
+            ].map(({ key, id }) => (
               <button
-                key={option}
-                onClick={() => setProfileData(prev => ({ ...prev, depth: option }))}
-                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.depth === option
+                key={key}
+                onClick={() => setProfileData(prev => ({ ...prev, depth: key }))}
+                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.depth === key
                   ? 'bg-sand dark:bg-gray-400 border-2 border-primary'
                   : 'bg-white/60 dark:bg-gray-200 border-2 border-transparent hover:border-gray-300'
                   }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-primary font-medium">{option}</span>
-                  {profileData.depth === option && (
+                  <span className="text-primary font-medium">
+                    <FormattedMessage id={id} />
+                  </span>
+                  {profileData.depth === key && (
                     <KeenIcon icon="check" className="text-primary w-5 h-5" />
                   )}
                 </div>
@@ -1038,7 +1093,12 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
             ></div>
           </div>
           <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
-            <span>Step {currentStep + 1} of {steps.length}</span>
+            <span>
+              <FormattedMessage 
+                id="PROFILE_SETUP.STEP_PROGRESS" 
+                values={{ current: currentStep + 1, total: steps.length }} 
+              />
+            </span>
             <span>{Math.round(progress)}%</span>
           </div>
         </div>
@@ -1059,14 +1119,14 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
               }`}
           >
             <KeenIcon icon="left" className="w-4 h-4" />
-            Back
+            <FormattedMessage id="PROFILE_SETUP.BACK" />
           </button>
 
           <button
             onClick={handleNext}
             className="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
           >
-            {currentStep === steps.length - 1 ? 'Complete' : 'Next'}
+            {currentStep === steps.length - 1 ? <FormattedMessage id="PROFILE_SETUP.COMPLETE" /> : <FormattedMessage id="PROFILE_SETUP.NEXT" />}
             {currentStep < steps.length - 1 && <KeenIcon icon="right" className="w-4 h-4" />}
           </button>
         </div>

@@ -61,9 +61,11 @@ import { Button } from '@/components/ui/button';
 import { UserRound } from 'lucide-react';
 import { useSettingEdit } from '../Provider/SettingeEditProvider';
 import { useAuthContext } from "@/auth";
+import { FormattedMessage, useIntl } from 'react-intl';
 
 
 const EditProfileCard = () => {
+  const { formatMessage } = useIntl();
   const { user, updateProfile, profileLoading } = useSettingEdit();
   const { currentUser } = useAuthContext();
 
@@ -111,42 +113,48 @@ const EditProfileCard = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <UserRound className="w-5 h-5" />
-          Edit Profile
+          <FormattedMessage id="PROFILE.EDIT_PROFILE" />
         </CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="first_name">First Name</Label>
+            <Label htmlFor="first_name">
+              <FormattedMessage id="PROFILE.FIRST_NAME" />
+            </Label>
             <Input
               id="first_name"
               value={firstName}
               maxLength={40}
               onChange={(e) => setFirstName(e.target.value)}
-              placeholder="First name"
+              placeholder={formatMessage({ id: 'PROFILE.FIRST_NAME_PLACEHOLDER' })}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="last_name">Last Name</Label>
+            <Label htmlFor="last_name">
+              <FormattedMessage id="PROFILE.LAST_NAME" />
+            </Label>
             <Input
               id="last_name"
               value={lastName}
               maxLength={40}
               onChange={(e) => setLastName(e.target.value)}
-              placeholder="Last name"
+              placeholder={formatMessage({ id: 'PROFILE.LAST_NAME_PLACEHOLDER' })}
             />
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">
+              <FormattedMessage id="PROFILE.EMAIL" />
+            </Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@email.com"
+              placeholder={formatMessage({ id: 'PROFILE.EMAIL_PLACEHOLDER' })}
               disabled
             />
           </div>
@@ -158,12 +166,16 @@ const EditProfileCard = () => {
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
           <Button onClick={handleUpdate} disabled={profileLoading} className="w-full sm:w-auto">
-            {profileLoading ? "Updating..." : "Update Profile"}
+            {profileLoading ? <FormattedMessage id="PROFILE.UPDATING" /> : <FormattedMessage id="PROFILE.UPDATE_PROFILE" />}
           </Button>
 
           <Button variant="ghost" className="text-red-500 hover:text-red-600 w-full sm:w-auto text-sm">
-            <span className="hidden sm:inline">Delete account permanently</span>
-            <span className="sm:hidden">Delete account</span>
+            <span className="hidden sm:inline">
+              <FormattedMessage id="PROFILE.DELETE_ACCOUNT_PERMANENTLY" />
+            </span>
+            <span className="sm:hidden">
+              <FormattedMessage id="PROFILE.DELETE_ACCOUNT" />
+            </span>
           </Button>
         </div>
       </CardContent>

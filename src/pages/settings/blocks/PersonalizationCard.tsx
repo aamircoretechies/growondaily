@@ -5,6 +5,7 @@ import { useContext } from 'react';
 import { AuthContext } from '@/auth/providers/JWTProvider';
 import { Button } from '@/components/ui/button';
 import { toast } from "sonner";
+import { FormattedMessage, useIntl } from 'react-intl';
 
 import {
   Dialog,
@@ -34,6 +35,7 @@ const Row = ({ title, subtitle, onClick }: RowProps) => (
 );
 
 const PersonalizationCard = ({ user }: { user: any }) => {
+  const { formatMessage } = useIntl();
   const [featuresOpen, setFeaturesOpen] = useState(false);
   const [experienceOpen, setExperienceOpen] = useState(false);
   const [experience, setExperience] = useState<'First Time' | 'Occasional' | 'Regular' | 'Theological'>('First Time');
@@ -306,51 +308,82 @@ const PersonalizationCard = ({ user }: { user: any }) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ListChecks className="w-5 h-5" />
-          Personalization
+          <FormattedMessage id="SETTINGS.PERSONALIZATION" />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <Row
-          title="What is your experience with Bible?"
-          subtitle={experience}
+          title={formatMessage({ id: 'PROFILE_SETUP.WHAT_EXPERIENCE' })}
+          subtitle={formatMessage({ 
+            id: experience === 'First Time' ? 'PROFILE_SETUP.EXPERIENCE_FIRST_TIME' :
+                experience === 'Occasional' ? 'PROFILE_SETUP.EXPERIENCE_OCCASIONAL' :
+                experience === 'Regular' ? 'PROFILE_SETUP.EXPERIENCE_REGULAR' :
+                'PROFILE_SETUP.EXPERIENCE_THEOLOGICAL'
+          })}
           onClick={() => setExperienceOpen(true)}
         />
         <Row
-          title="What brings you to this app?"
-          subtitle={brings.join(', ') || 'Select one or more'}
+          title={formatMessage({ id: 'PROFILE_SETUP.WHAT_BRINGS_YOU' })}
+          subtitle={brings.length > 0 ? brings.map(b => {
+            if (b === 'To better understand what I read') return formatMessage({ id: 'PROFILE_SETUP.BRINGS_UNDERSTAND' });
+            if (b === 'To learn about faith and God') return formatMessage({ id: 'PROFILE_SETUP.BRINGS_LEARN' });
+            if (b === 'For daily inspiration or peace') return formatMessage({ id: 'PROFILE_SETUP.BRINGS_INSPIRATION' });
+            if (b === 'For study or lesson preparation') return formatMessage({ id: 'PROFILE_SETUP.BRINGS_STUDY' });
+            if (b === 'Just curious') return formatMessage({ id: 'PROFILE_SETUP.BRINGS_CURIOUS' });
+            return b;
+          }).join(', ') : formatMessage({ id: 'SETTINGS.SELECT_ONE_OR_MORE' })}
           onClick={() => setBringsOpen(true)}
         />
         <Row
-          title="How do you prefer to engage with the Bible?"
-          subtitle={engage.join(', ') || 'Select one or more'}
+          title={formatMessage({ id: 'PROFILE_SETUP.HOW_ENGAGE' })}
+          subtitle={engage.length > 0 ? engage.map(e => {
+            if (e === 'Reading') return formatMessage({ id: 'PROFILE_SETUP.ENGAGE_READING' });
+            if (e === 'Listening') return formatMessage({ id: 'PROFILE_SETUP.ENGAGE_LISTENING' });
+            if (e === 'Speaking') return formatMessage({ id: 'PROFILE_SETUP.ENGAGE_SPEAKING' });
+            if (e === 'Step-by-step guidance') return formatMessage({ id: 'PROFILE_SETUP.ENGAGE_GUIDANCE' });
+            return e;
+          }).join(', ') : formatMessage({ id: 'SETTINGS.SELECT_ONE_OR_MORE' })}
           onClick={() => setEngageOpen(true)}
         />
         <Row
-          title="What explanation style do you prefer?"
-          subtitle={explain}
+          title={formatMessage({ id: 'PROFILE_SETUP.WHAT_EXPLANATION_STYLE' })}
+          subtitle={formatMessage({ 
+            id: explain === 'Clear and simple language' ? 'PROFILE_SETUP.STYLE_SIMPLE' :
+                explain === 'A bit deeper with context' ? 'PROFILE_SETUP.STYLE_DEEPER' :
+                explain === 'Mixed depending on topic' ? 'PROFILE_SETUP.STYLE_MIXED' :
+                'PROFILE_SETUP.STYLE_DECIDE_LATER'
+          })}
           onClick={() => setExplainOpen(true)}
         />
         <Row
-          title="Which Bible translation do you prefer?"
+          title={formatMessage({ id: 'PROFILE_SETUP.WHICH_TRANSLATION' })}
           subtitle={translations.join(', ')}
           onClick={() => setTranslationsOpen(true)}
         />
         <Row
-          title="Would you like to receive a daily verse or reflection?"
-          subtitle={dailyPref === 'Daily' ? 'Yes, Daily' : 'Occasionally'}
+          title={formatMessage({ id: 'PROFILE_SETUP.RECEIVE_DAILY' })}
+          subtitle={dailyPref === 'Daily' ? formatMessage({ id: 'PROFILE_SETUP.YES_DAILY' }) : formatMessage({ id: 'PROFILE_SETUP.OCCASIONALLY' })}
           onClick={() => setDailyOpen(true)}
         />
         <Row
-          title="How deep should each reflection be?"
-          subtitle={depth}
+          title={formatMessage({ id: 'PROFILE_SETUP.HOW_DEEP' })}
+          subtitle={formatMessage({ 
+            id: depth === 'Short (1-2 min read)' ? 'PROFILE_SETUP.DEPTH_SHORT' :
+                depth === 'Medium (3-4 min read)' ? 'PROFILE_SETUP.DEPTH_MEDIUM' :
+                'PROFILE_SETUP.DEPTH_DEEP'
+          })}
           onClick={() => setDepthOpen(true)}
         />
 
         <button type="button" onClick={() => setFeaturesOpen(true)} className="w-full text-left bg-sand rounded-xl">
           <div className="flex items-center justify-between px-4 py-4 rounded-xl bg-white/90 hover:bg-white dark:bg-[--tw-page-bg-dark] dark:hover:bg-[--tw-page-bg-dark] transition-colors">
             <div>
-              <div className="text-[15px] text-primary">Reflection Features</div>
-              <div className="text-sm text-gray-500">Enable or Disable</div>
+              <div className="text-[15px] text-primary">
+                <FormattedMessage id="SETTINGS.REFLECTION_FEATURES" />
+              </div>
+              <div className="text-sm text-gray-500">
+                <FormattedMessage id="SETTINGS.ENABLE_OR_DISABLE" />
+              </div>
             </div>
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </div>
@@ -359,7 +392,9 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         <Dialog open={featuresOpen} onOpenChange={() => setFeaturesOpen(false)}>
           <DialogContent className="max-w-sm sm:max-w-md lg:max-w-xl">
             <DialogHeader>
-              <DialogTitle>Reflection Features</DialogTitle>
+              <DialogTitle>
+                <FormattedMessage id="SETTINGS.REFLECTION_FEATURES" />
+              </DialogTitle>
             </DialogHeader>
             <DialogBody className="space-y-4">
               {[
@@ -387,11 +422,19 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         <Dialog open={experienceOpen} onOpenChange={() => setExperienceOpen(false)}>
           <DialogContent className="max-w-sm sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>What is your experience with Bible?</DialogTitle>
+              <DialogTitle>
+                <FormattedMessage id="PROFILE_SETUP.WHAT_EXPERIENCE" />
+              </DialogTitle>
             </DialogHeader>
             <DialogBody className="space-y-2">
               {(['First Time', 'Occasional', 'Regular', 'Theological'] as const).map((option) => {
                 const selected = experience === option;
+                const translatedOption = formatMessage({ 
+                  id: option === 'First Time' ? 'PROFILE_SETUP.EXPERIENCE_FIRST_TIME' :
+                      option === 'Occasional' ? 'PROFILE_SETUP.EXPERIENCE_OCCASIONAL' :
+                      option === 'Regular' ? 'PROFILE_SETUP.EXPERIENCE_REGULAR' :
+                      'PROFILE_SETUP.EXPERIENCE_THEOLOGICAL'
+                });
                 return (
                   <button
                     type="button"
@@ -403,7 +446,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
                     className={`w-full text-left rounded-xl transition-colors ${selected ? 'bg-sand dark:bg-[--tw-page-bg-dark]' : 'dark:bg-[--tw-page-bg-dark]'} `}
                   >
                     <div className="flex items-center justify-between px-4 py-4 rounded-xl bg-white/90 hover:bg-white dark:bg-[--tw-page-bg-dark] dark:hover:bg-[--tw-page-bg-dark]">
-                      <div className="text-[15px] text-primary">{option}</div>
+                      <div className="text-[15px] text-primary">{translatedOption}</div>
                       {selected && <Check className="w-4 h-4 text-primary" />}
                     </div>
                   </button>
@@ -416,11 +459,20 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         <Dialog open={bringsOpen} onOpenChange={() => setBringsOpen(false)}>
           <DialogContent className="max-w-sm sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>What brings you to this app?</DialogTitle>
+              <DialogTitle>
+                <FormattedMessage id="PROFILE_SETUP.WHAT_BRINGS_YOU" />
+              </DialogTitle>
             </DialogHeader>
             <DialogBody className="space-y-2">
               {bringsOptions.map((option) => {
                 const selected = brings.includes(option);
+                const translatedOption = formatMessage({ 
+                  id: option === 'To better understand what I read' ? 'PROFILE_SETUP.BRINGS_UNDERSTAND' :
+                      option === 'To learn about faith and God' ? 'PROFILE_SETUP.BRINGS_LEARN' :
+                      option === 'For daily inspiration or peace' ? 'PROFILE_SETUP.BRINGS_INSPIRATION' :
+                      option === 'For study or lesson preparation' ? 'PROFILE_SETUP.BRINGS_STUDY' :
+                      'PROFILE_SETUP.BRINGS_CURIOUS'
+                });
                 return (
                   <button
                     type="button"
@@ -429,7 +481,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
                     className={`w-full text-left rounded-xl transition-colors ${selected ? 'bg-sand dark:bg-[--tw-page-bg-dark]' : 'dark:bg-[--tw-page-bg-dark]'} `}
                   >
                     <div className="flex items-center justify-between px-4 py-4 rounded-xl bg-white/90 hover:bg-white dark:bg-[--tw-page-bg-dark] dark:hover:bg-[--tw-page-bg-dark]">
-                      <div className="text-[15px] text-primary">{option}</div>
+                      <div className="text-[15px] text-primary">{translatedOption}</div>
                       {selected && <Check className="w-4 h-4 text-primary" />}
                     </div>
                   </button>
@@ -442,11 +494,19 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         <Dialog open={engageOpen} onOpenChange={() => setEngageOpen(false)}>
           <DialogContent className="max-w-sm sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>How do you prefer to engage with the Bible?</DialogTitle>
+              <DialogTitle>
+                <FormattedMessage id="PROFILE_SETUP.HOW_ENGAGE" />
+              </DialogTitle>
             </DialogHeader>
             <DialogBody className="space-y-2">
               {engageOptions.map((option) => {
                 const selected = engage.includes(option);
+                const translatedOption = formatMessage({ 
+                  id: option === 'Reading' ? 'PROFILE_SETUP.ENGAGE_READING' :
+                      option === 'Listening' ? 'PROFILE_SETUP.ENGAGE_LISTENING' :
+                      option === 'Speaking' ? 'PROFILE_SETUP.ENGAGE_SPEAKING' :
+                      'PROFILE_SETUP.ENGAGE_GUIDANCE'
+                });
                 return (
                   <button
                     type="button"
@@ -455,7 +515,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
                     className={`w-full text-left rounded-xl transition-colors ${selected ? 'bg-sand dark:bg-[--tw-page-bg-dark]' : 'dark:bg-[--tw-page-bg-dark]'} `}
                   >
                     <div className="flex items-center justify-between px-4 py-4 rounded-xl bg-white/90 hover:bg-white dark:bg-[--tw-page-bg-dark] dark:hover:bg-[--tw-page-bg-dark]">
-                      <div className="text-[15px] text-primary">{option}</div>
+                      <div className="text-[15px] text-primary">{translatedOption}</div>
                       {selected && <Check className="w-4 h-4 text-primary" />}
                     </div>
                   </button>
@@ -468,11 +528,19 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         <Dialog open={explainOpen} onOpenChange={() => setExplainOpen(false)}>
           <DialogContent className="max-w-sm sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>What explanation style do you prefer?</DialogTitle>
+              <DialogTitle>
+                <FormattedMessage id="PROFILE_SETUP.WHAT_EXPLANATION_STYLE" />
+              </DialogTitle>
             </DialogHeader>
             <DialogBody className="space-y-2">
               {explainOptions.map((option) => {
                 const selected = explain === option;
+                const translatedOption = formatMessage({ 
+                  id: option === 'Clear and simple language' ? 'PROFILE_SETUP.STYLE_SIMPLE' :
+                      option === 'A bit deeper with context' ? 'PROFILE_SETUP.STYLE_DEEPER' :
+                      option === 'Mixed depending on topic' ? 'PROFILE_SETUP.STYLE_MIXED' :
+                      'PROFILE_SETUP.STYLE_DECIDE_LATER'
+                });
                 return (
                   <button
                     type="button"
@@ -484,7 +552,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
                     className={`w-full text-left rounded-xl transition-colors ${selected ? 'bg-sand dark:bg-[--tw-page-bg-dark]' : 'dark:bg-[--tw-page-bg-dark]'} `}
                   >
                     <div className="flex items-center justify-between px-4 py-4 rounded-xl bg-white/90 hover:bg-white dark:bg-[--tw-page-bg-dark] dark:hover:bg-[--tw-page-bg-dark]">
-                      <div className="text-[15px] text-primary">{option}</div>
+                      <div className="text-[15px] text-primary">{translatedOption}</div>
                       {selected && <Check className="w-4 h-4 text-primary" />}
                     </div>
                   </button>
@@ -497,13 +565,15 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         <Dialog open={translationsOpen} onOpenChange={() => setTranslationsOpen(false)}>
           <DialogContent className="max-w-sm sm:max-w-md lg:max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Which Bible translation do you prefer?</DialogTitle>
+              <DialogTitle>
+                <FormattedMessage id="PROFILE_SETUP.WHICH_TRANSLATION" />
+              </DialogTitle>
             </DialogHeader>
             <DialogBody className="space-y-3">
               <div className="px-3">
                 <input
                   type="text"
-                  placeholder="Search translations..."
+                  placeholder={formatMessage({ id: 'SETTINGS.SEARCH_TRANSLATIONS' })}
                   value={translationQuery}
                   onChange={(e) => setTranslationQuery(e.target.value)}
                   className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
@@ -536,14 +606,16 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         <Dialog open={dailyOpen} onOpenChange={() => setDailyOpen(false)}>
           <DialogContent className="max-w-sm sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Would you like to receive a daily verse or reflection?</DialogTitle>
+              <DialogTitle>
+                <FormattedMessage id="PROFILE_SETUP.RECEIVE_DAILY" />
+              </DialogTitle>
             </DialogHeader>
             <DialogBody>
               <div className="grid grid-cols-2 gap-4 p-2">
                 {[
-                  { key: 'Daily' as const, label: 'Yes, Daily', icon: Sun },
-                  { key: 'Occasionally' as const, label: 'Occasionally', icon: CalendarClock }
-                ].map(({ key, label, icon: Icon }) => {
+                  { key: 'Daily' as const, id: 'PROFILE_SETUP.YES_DAILY', icon: Sun },
+                  { key: 'Occasionally' as const, id: 'PROFILE_SETUP.OCCASIONALLY', icon: CalendarClock }
+                ].map(({ key, id, icon: Icon }) => {
                   const selected = dailyPref === key;
                   return (
                     <button
@@ -558,7 +630,9 @@ const PersonalizationCard = ({ user }: { user: any }) => {
                     >
                       <div className="flex flex-col items-center gap-3">
                         <Icon className="w-8 h-8 text-primary/80" />
-                        <span className="text-[15px] text-primary">{label}</span>
+                        <span className="text-[15px] text-primary">
+                          <FormattedMessage id={id} />
+                        </span>
                       </div>
                     </button>
                   );
@@ -571,11 +645,18 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         <Dialog open={depthOpen} onOpenChange={() => setDepthOpen(false)}>
           <DialogContent className="max-w-sm sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>How deep should each reflection be?</DialogTitle>
+              <DialogTitle>
+                <FormattedMessage id="PROFILE_SETUP.HOW_DEEP" />
+              </DialogTitle>
             </DialogHeader>
             <DialogBody className="space-y-2">
               {depthOptions.map((option) => {
                 const selected = depth === option;
+                const translatedOption = formatMessage({ 
+                  id: option === 'Short (1-2 min read)' ? 'PROFILE_SETUP.DEPTH_SHORT' :
+                      option === 'Medium (3-4 min read)' ? 'PROFILE_SETUP.DEPTH_MEDIUM' :
+                      'PROFILE_SETUP.DEPTH_DEEP'
+                });
                 return (
           <button
                     type="button"
@@ -587,7 +668,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
                     className={`w-full text-left rounded-xl transition-colors ${selected ? 'bg-sand dark:bg-[--tw-page-bg-dark]' : 'dark:bg-[--tw-page-bg-dark]'} `}
                   >
                     <div className="flex items-center justify-between px-4 py-4 rounded-xl bg-white/90 hover:bg-white dark:bg-[--tw-page-bg-dark] dark:hover:bg-[--tw-page-bg-dark]">
-                      <div className="text-[15px] text-primary">{option}</div>
+                      <div className="text-[15px] text-primary">{translatedOption}</div>
                       {selected && <Check className="w-4 h-4 text-primary" />}
                     </div>
           </button>
@@ -598,7 +679,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         </Dialog>
         <div className="pt-4 text-center">
           <Button onClick={handleSave} className="bg-primary text-white px-5 py-2 rounded-xl">
-            Save Changes
+            <FormattedMessage id="SETTINGS.SAVE_CHANGES" />
           </Button>
         </div>
 

@@ -5,6 +5,7 @@ import {LucideSearch,LucideCalendar,LucideTrash2,LucideArrowLeft,} from "lucide-
 import { useNavigate } from "react-router-dom";
 import { useBible } from "@/providers/BibleProvider";
 import { useReflection } from "@/providers/ReflectionProvider";
+import { FormattedMessage } from 'react-intl';
 
 const BookmarksPage = () => {
   const navigate = useNavigate();
@@ -68,7 +69,9 @@ const BookmarksPage = () => {
               className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
             >
               <LucideArrowLeft className="w-5 h-5" />
-              <span className="text-sm font-medium">Back to Reflections</span>
+              <span className="text-sm font-medium">
+                <FormattedMessage id="COMMON.BACK_TO_REFLECTIONS" />
+              </span>
             </button>
           </div>
 
@@ -101,15 +104,22 @@ const BookmarksPage = () => {
         {/* Results Count */}
         <div className="mb-6">
           <h2 className="font-merriweather text-lg text-gray-600">
-            Showing {filtered.length} Bookmarks
+            <FormattedMessage 
+              id="REFLECTIONS.SHOWING_BOOKMARKS" 
+              values={{ count: filtered.length }} 
+            />
           </h2>
         </div>
 
         {/* Bookmarks Grid */}
         {loading ? (
-          <p className="text-gray-500 italic">Loading bookmarks...</p>
+          <p className="text-gray-500 italic">
+            <FormattedMessage id="COMMON.LOADING_BOOKMARKS" />
+          </p>
         ) : filtered.length === 0 ? (
-          <p className="text-gray-500 italic">No bookmarks found.</p>
+          <p className="text-gray-500 italic">
+            <FormattedMessage id="COMMON.NO_BOOKMARKS" />
+          </p>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

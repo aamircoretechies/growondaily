@@ -6,6 +6,7 @@ import { useBible } from '@/providers/BibleProvider';
 import { toast } from "sonner";
 import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
 import { useReflection } from "@/providers/ReflectionProvider";
+import { FormattedMessage } from 'react-intl';
 
 
 
@@ -270,7 +271,9 @@ const VerseStudy = () => {
             className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
           >
             <KeenIcon icon="black-left-line" className="w-5 h-5" />
-            <span className="text-sm font-medium">Back to Bible</span>
+            <span className="text-sm font-medium">
+              <FormattedMessage id="COMMON.BACK_TO_BIBLE" />
+            </span>
           </button>
         </div>
 
@@ -287,7 +290,7 @@ const VerseStudy = () => {
                 }`}
             >
               <KeenIcon icon={isRead ? 'check' : 'book'} className="w-4 h-4" />
-              {isRead ? 'Mark as Unread' : 'Mark as Read'}
+              {isRead ? <FormattedMessage id="BIBLE.MARK_AS_UNREAD" /> : <FormattedMessage id="BIBLE.MARK_AS_READ" />}
             </button>
 
 
@@ -351,7 +354,9 @@ const VerseStudy = () => {
 
                 return (
                   <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
-                    <h3 className="text-lg font-semibold text-primary mb-3">Your Notes</h3>
+                    <h3 className="text-lg font-semibold text-primary mb-3">
+                      <FormattedMessage id="COMMON.YOUR_NOTES" />
+                    </h3>
 
                     {verseNotes.length > 0 ? (
                       <div className="space-y-3">
@@ -384,7 +389,9 @@ const VerseStudy = () => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 italic">No saved notes yet.</p>
+                      <p className="text-gray-500 italic">
+                        <FormattedMessage id="COMMON.NO_NOTES" />
+                      </p>
                     )}
                   </div>
                 );
