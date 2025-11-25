@@ -119,39 +119,28 @@ const SidebarMenuDashboard = () => {
 
 
 
-  const chapterItems: IDashboardDropdownItems = Array.from({ length: 150 }, (_, index) => ({
-    title: `Chapter ${index + 1}`,
-    path: `/bible-content/psalm-23/chapter-${index + 1}`,
-    icon: 'calendar',
-    active: false
-  }));
-
-  // Filter chapter items based on search term
-  const filteredChapterItems = useMemo(() => {
-    if (!chapterSearchTerm) return chapterItems;
-    return chapterItems.filter(item =>
-      item.title.toLowerCase().includes(chapterSearchTerm.toLowerCase())
+  // Filter chapters based on search term - similar to books search
+  const filteredChapters = useMemo(() => {
+    if (!Array.isArray(chapters)) return [];
+    if (!chapterSearchTerm) return chapters;
+    const searchLower = chapterSearchTerm.toLowerCase();
+    return chapters.filter((chapter: any) =>
+      chapter?.chapter?.toString().includes(searchLower) ||
+      `Chapter ${chapter?.chapter}`.toLowerCase().includes(searchLower)
     );
-  }, [chapterItems, chapterSearchTerm]);
+  }, [chapters, chapterSearchTerm]);
 
-  // Generate verse items (1-176)
-  const verseItems: IDashboardDropdownItems = useMemo(() => {
+  // Filter verses based on search term - similar to books search
+  const filteredVerses = useMemo(() => {
     if (!Array.isArray(verses)) return [];
-    return verses.map((v, index) => ({
-      title: `Verse ${v.verse}: ${v.text.slice(0, 30)}...`,
-      path: `/bible-content/${v.book_name?.toLowerCase().replace(/\s+/g, '-')}/chapter-${v.chapter}/verse-${v.verse}`,
-      icon: 'book',
-      active: false,
-    }));
-  }, [verses]);
-
-  // filter verses by search term
-  const filteredVerseItems = useMemo(() => {
-    if (!verseSearchTerm) return verseItems;
-    return verseItems.filter(item =>
-      item.title.toLowerCase().includes(verseSearchTerm.toLowerCase())
+    if (!verseSearchTerm) return verses;
+    const searchLower = verseSearchTerm.toLowerCase();
+    return verses.filter((v: any) =>
+      v?.verse?.toString().includes(searchLower) ||
+      `Verse ${v?.verse}`.toLowerCase().includes(searchLower) ||
+      (v?.text && v.text.toLowerCase().includes(searchLower))
     );
-  }, [verseItems, verseSearchTerm]);
+  }, [verses, verseSearchTerm]);
 
   // Function to determine what text to share based on selection and deep study state
   const getShareText = (): string => {
@@ -441,12 +430,11 @@ const SidebarMenuDashboard = () => {
             </div>
 
             {/* Filtered Results */}
-
             <div className="max-h-60 overflow-y-auto">
               {loadingChapters ? (
                 <div className="px-3 py-2 text-sm text-gray-500">Loading chapters...</div>
-              ) : Array.isArray(chapters) && chapters.length > 0 ? (
-                chapters.map((c, index) => (
+              ) : filteredChapters.length > 0 ? (
+                filteredChapters.map((c, index) => (
                   <div
                     key={index}
                     className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${selectedChapter === c.chapter ? 'bg-gray-200 font-semibold' : ''
@@ -508,38 +496,29 @@ const SidebarMenuDashboard = () => {
 
             {/* Filtered Verse List */}
             <div className="max-h-60 overflow-y-auto">
-
               {loadingVerses ? (
                 <div className="px-3 py-2 text-sm text-gray-500">Loading verses...</div>
-              ) : Array.isArray(verses) && verses.length > 0 ? (
-                verses
-                  .filter((v) =>
-                    verseSearchTerm
-                      ? v.verse.toString().includes(verseSearchTerm)
-                      : true
-                  )
-                  .map((v, index) => (
-                    <div
-                      key={index}
-                      className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        console.log(" Selected Verse:", v);
-                        if (selectedBookId) {
-                          await fetchSingleVerse(selectedBookId, v.chapter, v.verse, version || 'KJV');
-                        } else {
-                          setSelectedVerse(v);
-                        }
+              ) : filteredVerses.length > 0 ? (
+                filteredVerses.map((v, index) => (
+                  <div
+                    key={index}
+                    className="px-3 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      console.log(" Selected Verse:", v);
+                      if (selectedBookId) {
+                        await fetchSingleVerse(selectedBookId, v.chapter, v.verse, version || 'KJV');
+                      } else {
+                        setSelectedVerse(v);
+                      }
 
-                        const bookSlug = (selectedBookName || v.book_name)?.toLowerCase().replace(/\s+/g, '-');
-                        navigate(`/bible?bible=${bookSlug}&chapter=${v.chapter}&verse=${v.verse}`);
-
-                      }}
-
-                    >
-                      Verse {v.verse}
-                    </div>
-                  ))
+                      const bookSlug = (selectedBookName || v.book_name)?.toLowerCase().replace(/\s+/g, '-');
+                      navigate(`/bible?bible=${bookSlug}&chapter=${v.chapter}&verse=${v.verse}`);
+                    }}
+                  >
+                    Verse {v.verse}
+                  </div>
+                ))
               ) : (
                 <div className="px-3 py-2 text-sm text-gray-500">
                   No verses found
