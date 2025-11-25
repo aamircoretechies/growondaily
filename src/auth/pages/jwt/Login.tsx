@@ -18,14 +18,22 @@ const loginSchema = Yup.object().shape({
   //   .required('Email is required'),
   email: Yup.string()
     // .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{3,}$/i, 'Please enter a valid email address.')
-    .matches(/^[A-Za-z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.')
+    .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,'Please enter a valid email address.')
     .required('Email is required'),
 
+  // password: Yup.string()
+  //   .min(3, 'Minimum 3 symbols')
+  //   .max(50, 'Maximum 50 symbols')
+  //   .required('Password is required'),
+  // remember: Yup.boolean()
   password: Yup.string()
-    .min(3, 'Minimum 3 symbols')
-    .max(50, 'Maximum 50 symbols')
+    .min(8, 'Password must be 8+ character with upper, lower, number & special charater')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      'Password must be 8+ character with upper, lower, number & special charater'
+    )
     .required('Password is required'),
-  remember: Yup.boolean()
+
 });
 
 const initialValues = {
@@ -71,8 +79,6 @@ const Login = () => {
     // }
 
 
-
-
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
       try {
@@ -88,7 +94,18 @@ const Login = () => {
         navigate(from, { replace: true });
       } catch (error: any) {
         console.error("Login error", error);
-        setStatus(error.message || "Invalid email or password");
+
+        let msg = error?.message || "Invalid email or password";
+
+        if (
+          msg.toLowerCase().includes("token") ||
+          msg.toLowerCase().includes("invalid") ||
+          msg.toLowerCase().includes("not found")
+        ) {
+          msg = "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character";
+        }
+
+        setStatus(msg);
         setSubmitting(false);
       }
       setLoading(false);

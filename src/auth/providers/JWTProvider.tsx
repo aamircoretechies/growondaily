@@ -138,7 +138,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       );
 
       const authData = response.data.data;
-      if (!authData?.token) throw new Error("No token found in response");
+      if (!authData?.token) throw new Error("Please Enter Valid email or password");
 
       const authObj: AuthModel = {
         access_token: authData.token,
@@ -155,7 +155,11 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     } catch (error: any) {
       console.error("LOGIN ERROR:", error);
       saveAuth(undefined);
-      throw new Error(`Error ${error}`);
+      // throw new Error(`Error ${error}`);
+      let msg =
+        error?.response?.data?.message ||
+        error?.message ||"Invalid email or password";
+      throw new Error(msg);
     }
   };
 

@@ -8,6 +8,7 @@ import { useAuthContext } from '../../useAuthContext';
 import { toAbsoluteUrl } from '@/utils';
 import { Alert, KeenIcon } from '@/components';
 import { useLayout } from '@/providers';
+import { toast } from "sonner";
 
 const initialValues = {
   email: '',
@@ -19,14 +20,12 @@ const initialValues = {
 const signupSchema = Yup.object().shape({
   email: Yup.string()
     // .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Please enter a valid email address.')
-    .matches(/^[A-Za-z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.')
+    // .matches(/^[A-Za-z0-9._%+-]+@gmail\.com$/, 'Please enter a valid Gmail address.')
+    .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,'Please enter a valid email address.')
     .required('Email is required'),
   password: Yup.string()
-    .min(8, 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.')
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/,
-      'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.'
-    )
+    .min(8, 'Password must be 8+ character with upper, lower, number & special charater')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/,'Password must be 8+ character with upper, lower, number & special character.')
     .required('Password is required'),
   changepassword: Yup.string()
     .required('Password confirmation is required')
@@ -45,45 +44,59 @@ const Signup = () => {
   const { currentLayout } = useLayout();
 
 
-  // const formik = useFormik({
-  //   initialValues,
-  //   validationSchema: signupSchema,
-  //   onSubmit: async (values, { setStatus, setSubmitting }) => {
-  //     setLoading(true);
-  //     try {
-  //       if (!register) {
-  //         throw new Error('JWTProvider is required for this form.');
-  //       }
-  //       await register(values.email, values.password, values.changepassword);
-  //       navigate(from, { replace: true });
-  //     } catch (error) {
-  //       console.error(error);
-  //       setStatus('The sign up details are incorrect');
-  //       setSubmitting(false);
-  //       setLoading(false);
-  //     }
-  //   }
-  // });
-
-
   const formik = useFormik({
     initialValues,
     validationSchema: signupSchema,
+    // onSubmit: async (values, { setStatus, setSubmitting }) => {
+    //   setLoading(true);
+    //   try {
+    //     if (!register) throw new Error('JWTProvider is required for this form.');
+    //     const response = await register(values.email, values.password, values.changepassword);
+    //     if (response?.success) {
+    //       navigate('/auth/login', { replace: true });
+    //     }
+    //   } catch (error: any) {
+    //     console.error(error);
+    //     setStatus(error.message || 'The sign up details are incorrect');
+    //     setSubmitting(false);
+    //     setLoading(false);
+    //   }
+    // }
+
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
+
       try {
         if (!register) throw new Error('JWTProvider is required for this form.');
+
         const response = await register(values.email, values.password, values.changepassword);
+
         if (response?.success) {
+          toast.success("Registered successfully!");
           navigate('/auth/login', { replace: true });
+          return; 
+        } else {
+          setStatus("Something went wrong, please try again");
         }
       } catch (error: any) {
         console.error(error);
-        setStatus(error.message || 'The sign up details are incorrect');
-        setSubmitting(false);
-        setLoading(false);
+
+        let message = error?.message || "Registration failed, please try again";
+
+        if (
+          message.toLowerCase().includes("invalid") ||
+          message.toLowerCase().includes("exists")
+        ) {
+          message = "Please enter valid details";
+        }
+
+        setStatus(message);
+      } finally {
+        setSubmitting(false); // << important
+        setLoading(false); // << important
       }
     }
+
 
   });
 

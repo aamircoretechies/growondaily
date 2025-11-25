@@ -509,9 +509,9 @@ const HomePage = () => {
     }
   };
 
-  const truncateName = (name = "", maxLength = 11) => {
-    return name.length > maxLength ? name.slice(0, maxLength) + "..." : name;
-  };
+  // const truncateName = (name = "", maxLength = 11) => {
+  //   return name.length > maxLength ? name.slice(0, maxLength) + "..." : name;
+  // };
 
 
   // const profileProgress = 75;
@@ -526,10 +526,10 @@ const HomePage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex-1">
 
-            <h1 className="font-merriweather text-xl sm:text-2xl text-primary ">
+            <h1 className="font-merriweather text-xl sm:text-2xl text-primary whitespace-nowrap">
               {/* {dashboardData?.greeting || getGreeting()}, {currentUser?.first_name ?? dashboardData?.user?.first_name ?? 'User'} */}
               {dashboardData?.greeting || getGreeting()},{" "}
-              {`${truncateName(currentUser?.first_name || dashboardData?.user?.first_name || '')} ${truncateName(currentUser?.last_name || dashboardData?.user?.last_name || '')}`}
+              {`${(currentUser?.first_name || dashboardData?.user?.first_name || '')} ${(currentUser?.last_name || dashboardData?.user?.last_name || '')}`}
             </h1>
 
             <p className="text-gray-600 text-xs sm:text-sm">
