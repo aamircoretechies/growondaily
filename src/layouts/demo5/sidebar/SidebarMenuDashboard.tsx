@@ -1,8 +1,8 @@
-import {Menu,MenuItem,MenuLink,MenuTitle,MenuToggle,KeenIcon,MenuSub,MenuIcon} from '@/components';
+import { Menu, MenuItem, MenuLink, MenuTitle, MenuToggle, KeenIcon, MenuSub, MenuIcon } from '@/components';
 import { useLanguage } from '@/i18n';
 import { useState, useMemo, useEffect } from 'react';
 import { MakeNote } from '@/components';
-import { useBible } from '@/providers/BibleProvider'; 
+import { useBible } from '@/providers/BibleProvider';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import SharePopUp from "@/components/share/SharePopUp";
 
@@ -322,10 +322,6 @@ const SidebarMenuDashboard = () => {
     const bookSlug = selectedBookName?.toLowerCase().replace(/\s+/g, '-') || '';
     if (bookSlug) {
       navigate(`/bible?bible=${bookSlug}&chapter=${chapterNumber}`);
-    }
-
-    if (bookId && chapterNumber && version && selectedVerse) {
-      await fetchDeepStudy(bookId, chapterNumber, version);
     }
   };
 

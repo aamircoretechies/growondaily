@@ -20,9 +20,9 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
 
   useEffect(() => {
     if (selectedBookId && selectedChapter && version) {
-      fetchDeepStudy(selectedBookId, selectedChapter, version);
+      fetchDeepStudy(selectedBookId, selectedChapter, version, activeTab);
     }
-  }, [selectedBookId, selectedChapter, version]);
+  }, [selectedBookId, selectedChapter, version, activeTab]);
 
   const tabs: TabItem[] = [
     { id: 'original', title: 'Original', icon: 'document', content: '' },

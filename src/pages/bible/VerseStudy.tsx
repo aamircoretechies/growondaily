@@ -146,10 +146,7 @@ const VerseStudy = () => {
       }
 
       if (bookId) {
-        await Promise.all([
-          fetchSingleVerse(bookId, Number(chapter), Number(verse), 'KJV'),
-          fetchDeepStudyForVerse(bookId, Number(chapter), Number(verse), 'KJV'),
-        ]);
+        await fetchSingleVerse(bookId, Number(chapter), Number(verse), 'KJV');
       }
     };
 
@@ -162,6 +159,26 @@ const VerseStudy = () => {
     }
     loadVerse();
   }, [book, chapter, verse, books]);
+
+  // Separate effect for lazy loading deep study content
+  useEffect(() => {
+    const loadDeepStudy = async () => {
+      let bookId = book;
+      if (books.length > 0 && book.length !== 36) {
+        const found = books.find(
+          (b) =>
+            (b.name || '').toLowerCase().replace(/\s+/g, '-') ===
+            book.toLowerCase()
+        );
+        if (found) bookId = found.book_id;
+      }
+
+      if (bookId) {
+        await fetchDeepStudyForVerse(bookId, Number(chapter), Number(verse), 'KJV', verseActiveTab);
+      }
+    };
+    loadDeepStudy();
+  }, [book, chapter, verse, books, verseActiveTab]);
 
 
 
