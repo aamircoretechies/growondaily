@@ -214,59 +214,61 @@ const AskPage = () => {
   // const [isTyping, setIsTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
 
-  const { sendMessage } = useAsk();
-  const { generateAIContent } = useAsk();
+  // const { sendMessage } = useAsk();
+  // const { generateAIContent } = useAsk();
+  const { sendMessage, generateAIContent } = useAsk();
+
 
   const run = async () => {
-  const data = await generateAIContent("Explain Psalm 23:1 in detail.");
+    const data = await generateAIContent("Explain Psalm 23:1 in detail.");
 
-  console.log(data.content);     
-  console.log(data.content_id);   
-};
-
-  const handleSendMessage = async () => {
-  if (!inputText.trim()) return;
-
-  const newMessage: Message =  {
-    id: Date.now().toString(),
-    type: "user",
-    content: inputText,
+    console.log(data.content);
+    console.log(data.content_id);
   };
 
-  setMessages((prev) => [...prev, newMessage]);
-  const userText = inputText;
-  setInputText("");
-  setIsTyping(true);
+  const handleSendMessage = async () => {
+    if (!inputText.trim()) return;
 
-  try {
-    const ai = await sendMessage(userText);
-
-    const aiMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      type: "ai",
-      content: ai.answer,
-      timestamp: "just now",
-      reference: ai.reference || "—",
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      type: "user",
+      content: inputText,
     };
 
-    setMessages((prev) => [...prev, aiMessage]);
-  } catch (err) {
-    console.error("Error:", err);
+    setMessages((prev) => [...prev, newMessage]);
+    const userText = inputText;
+    setInputText("");
+    setIsTyping(true);
 
-    setMessages((prev) => [
-      ...prev,
-      {
+    try {
+      const ai = await sendMessage(userText);
+
+      const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: "ai",
-        content: "AI service failed. Please try later.",
-        timestamp: "error",
-        reference: "",
-      },
-    ]);
-  } finally {
-    setIsTyping(false);
-  }
-};
+        content: ai.answer,
+        timestamp: "just now",
+        reference: ai.reference || "—",
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (err) {
+      console.error("Error:", err);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          type: "ai",
+          content: "AI service failed. Please try later.",
+          timestamp: "error",
+          reference: "",
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
 
 

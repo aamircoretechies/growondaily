@@ -9,7 +9,6 @@ interface AskContextType {
 
 const AskContext = createContext<AskContextType | null>(null);
 
-const API_BASE = "https://api.growondaily.com";
 
 export const AskProvider = ({ children }: any) => {
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -24,23 +23,18 @@ export const AskProvider = ({ children }: any) => {
 
   // SEND CHAT MESSAGE
   const sendMessage = async (text: string) => {
-    let convId = conversationId;
-    if (!convId) {
-      convId = await createConversation();
-    }
-
     try {
-      const res = await axios.post(`/api/ai/chat`, {
-        conversation_id: convId,
-        message: text,
+      const res = await axios.post(`/api/ai/generate`, {
+        prompt: text,
+        content_type: "reflection",
       });
 
       return {
-        answer: res.data.data.response,
+        answer: res.data.data.generated_text,
         reference: "",
       };
     } catch (err: any) {
-      console.log("CHAT API ERROR", err.response?.data || err.message);
+      console.log("GENERATE API ERROR", err.response?.data || err.message);
       throw err;
     }
   };
