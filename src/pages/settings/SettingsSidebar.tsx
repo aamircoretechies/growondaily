@@ -1,24 +1,26 @@
 import { IScrollspyMenuItems, ScrollspyMenu } from '@/partials/menu';
+import { useIntl } from 'react-intl';
 
 const SettingsSidebar = () => {
+  const { formatMessage } = useIntl();
   const items: IScrollspyMenuItems = [
     {
-      title: 'Edit Profile',
+      title: formatMessage({ id: 'SETTINGS.EDIT_PROFILE' }),
       target: 'edit_profile',
       active: true
     },
     {
-      title: 'Change Password',
+      title: formatMessage({ id: 'SETTINGS.CHANGE_PASSWORD' }),
       target: 'change_password',
       active: false
     },
     {
-      title: 'Personalization',
+      title: formatMessage({ id: 'SETTINGS.PERSONALIZATION' }),
       target: 'personalization',
       active: false
     },
     {
-      title: 'General Settings',
+      title: formatMessage({ id: 'SETTINGS.GENERAL' }),
       target: 'general_settings',
       active: false
     },
@@ -69,7 +71,7 @@ const SettingsSidebar = () => {
     }, */
   
         {
-          title: 'Notification Settings',
+          title: formatMessage({ id: 'SETTINGS.NOTIFICATION_SETTINGS' }),
           target: 'notifications_email'
         },
       /*   {

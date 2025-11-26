@@ -90,6 +90,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Bell, Save, RefreshCw } from "lucide-react";
 import { useSettingEdit } from "../Provider/SettingeEditProvider";
+import { FormattedMessage } from 'react-intl';
 
 const NotificationsEmail = () => {
   const { getNotificationPreferences, updateNotificationPreferences, notificationLoading } = useSettingEdit();
@@ -200,20 +201,26 @@ const NotificationsEmail = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bell className="w-5 h-5" />
-          Notification Settings
+          <FormattedMessage id="SETTINGS.NOTIFICATION_SETTINGS" />
         </CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-6">
         <div className="space-y-4">
-          <h4 className="font-medium text-gray-900">Notification Types</h4>
+          <h4 className="font-medium text-gray-900">
+            <FormattedMessage id="SETTINGS.NOTIFICATION_TYPES" />
+          </h4>
 
           <div className="space-y-3">
             {/* Main Notifications */}
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="welcome_emails">Notifications</Label>
-                <p className="text-sm text-gray-500">In-app notifications</p>
+                <Label htmlFor="welcome_emails">
+                  <FormattedMessage id="SETTINGS.NOTIFICATIONS" />
+                </Label>
+                <p className="text-sm text-gray-500">
+                  <FormattedMessage id="SETTINGS.IN_APP_NOTIFICATIONS" />
+                </p>
               </div>
               <Switch
                 id="welcome_emails"
@@ -225,8 +232,12 @@ const NotificationsEmail = () => {
             {/* Push Notifications */}
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="password_reset">Push Notifications</Label>
-                <p className="text-sm text-gray-500">Push notifications in the system</p>
+                <Label htmlFor="password_reset">
+                  <FormattedMessage id="SETTINGS.PUSH_NOTIFICATIONS_LABEL" />
+                </Label>
+                <p className="text-sm text-gray-500">
+                  <FormattedMessage id="SETTINGS.PUSH_NOTIFICATIONS" />
+                </p>
               </div>
               <Switch
                 id="password_reset"
@@ -238,8 +249,12 @@ const NotificationsEmail = () => {
             {/* Email Notifications */}
             <div className="flex items-center justify-between">
               <div>
-                <Label htmlFor="content_notifications">Email Notifications</Label>
-                <p className="text-sm text-gray-500">Notifications to the registered email</p>
+                <Label htmlFor="content_notifications">
+                  <FormattedMessage id="SETTINGS.EMAIL_NOTIFICATIONS_LABEL" />
+                </Label>
+                <p className="text-sm text-gray-500">
+                  <FormattedMessage id="SETTINGS.EMAIL_NOTIFICATIONS" />
+                </p>
               </div>
               <Switch
                 id="content_notifications"
@@ -259,7 +274,7 @@ const NotificationsEmail = () => {
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2" onClick={handleSave} disabled={notificationLoading}>
             <Save className="w-4 h-4" />
-            {notificationLoading ? "Saving..." : "Save Settings"}
+            {notificationLoading ? <FormattedMessage id="SETTINGS.SAVING" /> : <FormattedMessage id="SETTINGS.SAVE_SETTINGS" />}
           </Button>
 
           <Button
@@ -269,7 +284,7 @@ const NotificationsEmail = () => {
             disabled={notificationLoading}
           >
             <RefreshCw className="w-4 h-4" />
-            Reset to Default
+            <FormattedMessage id="SETTINGS.RESET_TO_DEFAULT" />
           </Button>
         </div>
       </CardContent>

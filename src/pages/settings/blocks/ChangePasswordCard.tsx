@@ -59,8 +59,10 @@ import { Button } from '@/components/ui/button';
 import { LockKeyhole } from 'lucide-react';
 import { useSettingEdit } from '../Provider/SettingeEditProvider';
 import { Alert, KeenIcon } from '@/components';
+import { FormattedMessage, useIntl } from 'react-intl';
 
 const ChangePasswordCard = () => {
+  const { formatMessage } = useIntl();
   const { changePassword, passwordLoading } = useSettingEdit();
 
   const [currentPassword, setCurrentPassword] = useState('');
@@ -141,14 +143,16 @@ const ChangePasswordCard = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <LockKeyhole className="w-5 h-5" />
-          Change Password
+          <FormattedMessage id="PASSWORD.CHANGE_PASSWORD" />
         </CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-6">
         <div className="w-full max-w-lg space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="current_password">Current Password</Label>
+            <Label htmlFor="current_password">
+              <FormattedMessage id="PASSWORD.CURRENT_PASSWORD" />
+            </Label>
             {/* <Input
               id="current_password"
               type="password"
@@ -161,7 +165,7 @@ const ChangePasswordCard = () => {
                 id="current_password"
                 maxLength={16}
                 type={showCurrent ? "text" : "password"}
-                placeholder="Current Password"
+                placeholder={formatMessage({ id: 'PASSWORD.CURRENT_PASSWORD' })}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
               />
@@ -194,7 +198,9 @@ const ChangePasswordCard = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="new_password">New Password</Label>
+            <Label htmlFor="new_password">
+              <FormattedMessage id="PASSWORD.NEW_PASSWORD" />
+            </Label>
             {/* <Input
               id="new_password"
               type="password"
@@ -207,7 +213,7 @@ const ChangePasswordCard = () => {
                 id="new_password"
                 maxLength={16}
                 type={showNew ? "text" : "password"}
-                placeholder="New Password"
+                placeholder={formatMessage({ id: 'PASSWORD.NEW_PASSWORD' })}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
@@ -241,7 +247,9 @@ const ChangePasswordCard = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm_password">Retype New Password</Label>
+            <Label htmlFor="confirm_password">
+              <FormattedMessage id="PASSWORD.RETYPE_NEW_PASSWORD" />
+            </Label>
             {/* <Input
               id="confirm_password"
               type="password"
@@ -254,7 +262,7 @@ const ChangePasswordCard = () => {
                 id="confirm_password"
                 maxLength={16}
                 type={showConfirm ? "text" : "password"}
-                placeholder="Retype New Password"
+                placeholder={formatMessage({ id: 'PASSWORD.RETYPE_NEW_PASSWORD' })}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
@@ -293,7 +301,7 @@ const ChangePasswordCard = () => {
 
         <div className="pt-2">
           <Button onClick={handlePasswordChange} disabled={passwordLoading}>
-            {passwordLoading ? "Updating..." : "Update"}
+            {passwordLoading ? <FormattedMessage id="PASSWORD.UPDATING" /> : <FormattedMessage id="PASSWORD.UPDATE" />}
           </Button>
         </div>
       </CardContent>

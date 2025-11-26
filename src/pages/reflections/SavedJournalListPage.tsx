@@ -7,6 +7,7 @@ import { useReflection } from '@/providers/ReflectionProvider';
 import { useBible } from "@/providers/BibleProvider";
 import EditNotePopup from "@/components/makenote/EditNotePopup";
 import { toast } from "sonner";
+import { FormattedMessage } from 'react-intl';
 
 
 
@@ -111,7 +112,9 @@ const visibleEntries = filteredEntries.slice(0, visibleCount);
               className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
             >
               <LucideArrowLeft className="w-5 h-5" />
-              <span className="text-sm font-medium">Back to Reflections</span>
+              <span className="text-sm font-medium">
+                <FormattedMessage id="COMMON.BACK_TO_REFLECTIONS" />
+              </span>
             </button>
           </div>
 

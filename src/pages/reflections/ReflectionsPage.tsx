@@ -9,6 +9,7 @@ import axios from "axios";
 import { useLanguage } from "@/providers/TranslationProvider";
 import EditNotePopup from "@/components/makenote/EditNotePopup";
 import { toast } from "sonner";
+import { FormattedMessage, useIntl } from 'react-intl';
 
 
 
@@ -16,6 +17,7 @@ import { toast } from "sonner";
 const ReflectionsPage = () => {
   const navigate = useNavigate();
   const { currentLanguage } = useLanguage();
+  const { formatMessage } = useIntl();
   const { selectBook, selectChapter, fetchSingleVerse, books, toggleVerseBookmark, version, fetchDeepStudy, fetchDeepStudyForVerse, setShowDeepStudy, setActiveTab, setVerseActiveTab } = useBible();
   const { dailyReflection, loading, error, bookmarks, bmLoading, fetchBookmarks, setBookmarks, allNotes, fetchAllNotes, notesLoading, deleteNote } = useReflection();
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
@@ -211,7 +213,13 @@ const ReflectionsPage = () => {
 
             <h4 className="font-merriweather text-sm text-gray-600 mb-2">
               {/* Showing 2 Items */}
-              Showing {latestNotes.length} Item{latestNotes.length !== 1 ? "s" : ""}
+              <FormattedMessage 
+                id="REFLECTIONS.SHOWING_ITEMS" 
+                values={{ 
+                  count: latestNotes.length, 
+                  plural: latestNotes.length !== 1 ? "s" : "" 
+                }} 
+              />
             </h4>
 
             {/* Journal Entries List */}
@@ -220,7 +228,9 @@ const ReflectionsPage = () => {
                 // <p className="text-gray-500 text-sm">Loading notes...</p>
                 <Loader />
               ) : latestNotes.length === 0 ? (
-                <p className="text-gray-500 text-sm">No saved notes yet.</p>
+                <p className="text-gray-500 text-sm">
+                  <FormattedMessage id="COMMON.NO_NOTES" />
+                </p>
               ) : (
                 latestNotes.map((entry: any) => (
                   <div
@@ -324,7 +334,9 @@ const ReflectionsPage = () => {
 
             <div className="bg-white/40 dark:bg-gray-200 backdrop-blur-sm rounded-2xl p-8">
               {loading ? (
-                <p className="text-gray-600">Loading reflection...</p>
+                <p className="text-gray-600">
+                  <FormattedMessage id="COMMON.LOADING_REFLECTION" />
+                </p>
               ) : error ? (
                 <p className="text-red-500">{error}</p>
               ) : dailyReflection ? (
@@ -353,12 +365,14 @@ const ReflectionsPage = () => {
                       onClick={handleReflectAndJournal}
                       className="bg-transparent border border-gray-500 text-primary hover:text-white px-8 py-3 rounded-lg font-medium hover:bg-sand transition-colors duration-200"
                     >
-                      Reflect & Journal
+                      <FormattedMessage id="REFLECTIONS.REFLECT_JOURNAL" />
                     </button>
                   </div>
                 </>
               ) : (
-                <p className="text-gray-500">No reflection found for today.</p>
+                <p className="text-gray-500">
+                  <FormattedMessage id="COMMON.NO_REFLECTION" />
+                </p>
               )}
             </div>
 
@@ -370,13 +384,13 @@ const ReflectionsPage = () => {
           <div className="lg:col-span-1">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-merriweather text-2xl text-primary">
-                Bookmarks
+                <FormattedMessage id="REFLECTIONS.BOOKMARKS" />
               </h3>
               <button
                 onClick={() => navigate('/reflections/bookmarks')}
                 className="text-sm text-gray-600 hover:text-primary transition-colors"
               >
-                View All
+                <FormattedMessage id="REFLECTIONS.VIEW_ALL" />
               </button>
             </div>
 
@@ -386,7 +400,7 @@ const ReflectionsPage = () => {
                 <LucideSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search bookmarks.."
+                  placeholder={formatMessage({ id: 'REFLECTIONS.SEARCH_BOOKMARKS' })}
                   className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-xl border-0 text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sand/50"
                 // optional: you can wire a local search state to filter bookmarks
                 />
@@ -395,12 +409,20 @@ const ReflectionsPage = () => {
 
             <h4 className="font-merriweather text-sm text-gray-600 mb-2">
               {/* Showing {bookmarks && bookmarks.length > 0 ? Math.min(2, bookmarks.length) : 2} Items */}
-              Showing {Math.min(2, bookmarks?.length || 0)} Item{Math.min(2, bookmarks?.length || 0) !== 1 ? "s" : ""}
+              <FormattedMessage 
+                id="REFLECTIONS.SHOWING_ITEMS" 
+                values={{ 
+                  count: Math.min(2, bookmarks?.length || 0), 
+                  plural: Math.min(2, bookmarks?.length || 0) !== 1 ? "s" : "" 
+                }} 
+              />
             </h4>
 
             <div className="space-y-4">
               {bmLoading ? (
-                <div className="text-sm text-gray-500">Loading bookmarks...</div>
+                <div className="text-sm text-gray-500">
+                  <FormattedMessage id="COMMON.LOADING_BOOKMARKS" />
+                </div>
               ) : bookmarks && bookmarks.length > 0 ? (
                 // show top 2 bookmarks
                 bookmarks.slice(0, 2).map((entry: any) => (
@@ -434,7 +456,9 @@ const ReflectionsPage = () => {
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-sm">No bookmarks found.</p>
+                <p className="text-gray-500 text-sm">
+                  <FormattedMessage id="COMMON.NO_BOOKMARKS" />
+                </p>
               )}
             </div>
 
