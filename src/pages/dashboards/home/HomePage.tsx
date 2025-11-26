@@ -333,7 +333,7 @@ import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
 import { useBible } from '@/providers/BibleProvider';
 import { useAuthContext } from "@/auth";
 import { useLanguage } from '@/providers/TranslationProvider';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import AudioPlay from "@/components/audio/audioplay";
 import axios from 'axios';
 
@@ -347,7 +347,6 @@ const HomePage = () => {
   const { selectBook, selectChapter, fetchSingleVerse, books } = useBible();
   const { profileProgress, currentUser } = useAuthContext();
   const { currentLanguage } = useLanguage();
-  const { formatMessage } = useIntl();
   const [showAudioPopup, setShowAudioPopup] = useState(false);
 
   const { dashboardData, loading } = useDashboard();
@@ -360,8 +359,6 @@ const HomePage = () => {
       </div>
     );
   };
-
-  
 
   useEffect(() => {
     const calculateProgress = async () => {
@@ -499,9 +496,9 @@ const HomePage = () => {
   const getGreeting = () => {
     const now = new Date();
     const hour = now.getHours();
-    if (hour >= 5 && hour < 12) return formatMessage({ id: 'GREETING.MORNING' });
-    if (hour >= 12 && hour < 17) return formatMessage({ id: 'GREETING.AFTERNOON' });
-    return formatMessage({ id: 'GREETING.EVENING' });
+    if (hour >= 5 && hour < 12) return 'Good Morning';
+    if (hour >= 12 && hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
   };
 
   const handleReadDailyWord = () => {

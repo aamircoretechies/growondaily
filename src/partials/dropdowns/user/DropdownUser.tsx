@@ -257,7 +257,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
   const buildHeader = () => {
     const imageURL =
       currentUser?.profile_picture
-        ? `${import.meta.env.VITE_APP_API_URL}/uploads/profile-pictures/${currentUser.profile_picture}`
+        ? `/uploads/profile-pictures/${currentUser.profile_picture}`
         : toAbsoluteUrl("/media/avatars/300-2.png");
     // console.log("Uploaded Image Full URL =>", imageURL);
 

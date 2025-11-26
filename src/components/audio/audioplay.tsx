@@ -208,7 +208,15 @@ const AudioPlay: React.FC<AudioPlayProps> = ({
   const startSpeech = () => {
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(safeText);
+    // const readableRef = `${book} ${chapter} ${verse}`;
+    // const speechText = `${readableRef}. ${safeText}`;
+    // const utterance = new SpeechSynthesisUtterance(speechText);
+    const cleanedText = safeText.replace(/chapter/gi, "");
+    const readableRef = `${book} ${chapter}. ${verse}.`;
+    const speechText = `${readableRef} ${safeText}`;
+
+    const utterance = new SpeechSynthesisUtterance(speechText);
+
     utterance.lang = "en-US";
     utterance.rate = 1;
     utterance.pitch = 1;

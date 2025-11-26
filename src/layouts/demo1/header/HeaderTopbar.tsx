@@ -8,6 +8,8 @@ import { DropdownApps } from '@/partials/dropdowns/apps';
 import { DropdownChat } from '@/partials/dropdowns/chat';
 import { ModalSearch } from '@/partials/modals/search/ModalSearch';
 import { useLanguage } from '@/i18n';
+import { useAuthContext } from "@/auth";
+
 
 const HeaderTopbar = () => {
   const { isRTL } = useLanguage();
@@ -15,6 +17,8 @@ const HeaderTopbar = () => {
   const itemAppsRef = useRef<any>(null);
   const itemUserRef = useRef<any>(null);
   const itemNotificationsRef = useRef<any>(null);
+  const { currentUser } = useAuthContext();
+
 
   const handleShow = () => {
     window.dispatchEvent(new Event('resize'));
@@ -111,7 +115,7 @@ const HeaderTopbar = () => {
         </MenuItem>
       </Menu>
 
-      {/* <Menu>
+      <Menu>
         <MenuItem
           ref={itemUserRef}
           toggle="dropdown"
@@ -129,15 +133,26 @@ const HeaderTopbar = () => {
           }}
         >
           <MenuToggle className="btn btn-icon rounded-full">
-            <img
+            {/* <img
               className="size-9 rounded-full border-2 border-success shrink-0"
               src={toAbsoluteUrl('/media/avatars/300-2.png')}
               alt=""
+            /> */}
+
+            <img
+              className="size-9 rounded-full border-2 border-success shrink-0"
+              src={
+                currentUser?.profile_picture
+                  ? `/uploads/profile-pictures/${currentUser.profile_picture}`
+                  : toAbsoluteUrl("/media/avatars/300-2.png")
+              }
+              alt=""
             />
+
           </MenuToggle>
-          {DropdownUser({ menuItemRef: itemUserRef })}
+          {/* {DropdownUser({ menuItemRef: itemUserRef })} */}
         </MenuItem>
-      </Menu> */}
+      </Menu>
     </div>
   );
 };

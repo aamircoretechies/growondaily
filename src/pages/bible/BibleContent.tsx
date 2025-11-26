@@ -77,7 +77,7 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
                 onClick={onDeepStudyToggle}
                 className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-sm w-full sm:w-auto ${isDeepStudyActive
                   ? 'bg-primary text-white hover:bg-primary/90'
-                  : 'bg-sand text-primary hover:bg-sand/80'
+                  : 'bg-sand hover:bg-sand/80 text-primary dark:!text-white'
                   }`}
               >
                 <KeenIcon icon="book" className="w-4 h-4" />
