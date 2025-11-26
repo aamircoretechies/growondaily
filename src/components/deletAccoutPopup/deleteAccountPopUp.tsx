@@ -6,28 +6,42 @@ const DeleteAccountPopUp = ({ onClose }: any) => {
   const { deleteAccount } = useSettingEdit();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleDelete = async () => {
-  setLoading(true);
-  const response = await deleteAccount();
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const response = await deleteAccount();
 
-  if (response?.success) {
-    // Clear storage safely
-    localStorage.clear();
-    sessionStorage.clear();
+      if (response?.success) {
+        // Clear storage safely
+        localStorage.clear();
+        sessionStorage.clear();
 
-    // Close popup
-    onClose();
+        // Close popup
+        onClose();
 
-    // IMPORTANT: add small delay to avoid conflict with modal closing transition
-    setTimeout(() => {
-      navigate("/signup", { replace: true });
-      window.location.reload(); // ensures user logged out fully
-    }, 300);
-  }
-
-  setLoading(false);
-};
+        // Redirect to signup page immediately
+        navigate("/auth/signup", { replace: true });
+      } else {
+        // Log validation errors for debugging
+        if (response?.errors && response.errors.length > 0) {
+          console.error("Validation errors:", response.errors);
+          const errorMessages = response.errors.map((err: any) => 
+            err.msg || err.message || JSON.stringify(err)
+          ).join(", ");
+          setErrorMessage(errorMessages || response.message || "Failed to delete account");
+        } else {
+          setErrorMessage(response.message || "Failed to delete account");
+        }
+        setLoading(false);
+      }
+    } catch (error) {
+      setErrorMessage("An unexpected error occurred");
+      setLoading(false);
+    }
+  };
 
 
   return (
@@ -37,6 +51,12 @@ const DeleteAccountPopUp = ({ onClose }: any) => {
         <p className="text-sm text-gray-500 mt-2">
           Are you sure you want to delete your account? This action cannot be undone.
         </p>
+
+        {errorMessage && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{errorMessage}</p>
+          </div>
+        )}
 
         <div className="flex justify-end gap-3 mt-6">
           <button

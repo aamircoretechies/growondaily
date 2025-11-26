@@ -171,6 +171,9 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      data: {
+        confirmation_code: "DELETE_MY_ACCOUNT"
+      }
     });
 
     console.log("DELETE RESPONSE =>", response.data); 
@@ -182,11 +185,22 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
       return { success: true };
     }
 
-    return { success: false, message: response.data.message };
+    return { success: false, message: response.data.message, errors: response.data.errors };
 
   } catch (error: any) {
-    console.log("DELETE ERROR =>", error?.response?.data);
-    return { success: false, message: error?.response?.data?.message };
+    const errorData = error?.response?.data;
+    console.log("DELETE ERROR =>", errorData);
+    if (errorData?.errors) {
+      console.log("Validation errors:", errorData.errors);
+      errorData.errors.forEach((err: any, index: number) => {
+        console.log(`Error ${index + 1}:`, err);
+      });
+    }
+    return { 
+      success: false, 
+      message: errorData?.message || "Failed to delete account",
+      errors: errorData?.errors || []
+    };
   }
 };
 
