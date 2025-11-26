@@ -25,7 +25,7 @@ const HeaderTopbar = () => {
       </Link> */}
 
       <div className="flex items-center gap-1">
-        <Menu>
+        {/* <Menu>
           <MenuItem
             ref={itemNotificationsRef}
             toggle="dropdown"
@@ -36,7 +36,7 @@ const HeaderTopbar = () => {
                 {
                   name: 'offset',
                   options: {
-                    offset: isRTL() ? [0, 10] : [115, 10] // [skid, distance]
+                    offset: isRTL() ? [0, 10] : [115, 10] 
                   }
                 }
               ]
@@ -47,7 +47,7 @@ const HeaderTopbar = () => {
             </MenuToggle>
             {DropdownNotifications({ menuTtemRef: itemNotificationsRef })}
           </MenuItem>
-        </Menu>
+        </Menu> */}
 
        {/*  <Menu>
           <MenuItem
