@@ -53,7 +53,7 @@
 
 
 
-import { useState , useEffect} from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -61,11 +61,14 @@ import { Button } from '@/components/ui/button';
 import { UserRound } from 'lucide-react';
 import { useSettingEdit } from '../Provider/SettingeEditProvider';
 import { useAuthContext } from "@/auth";
+import DeleteAccountPopUp from "@/components/deletAccoutPopup/deleteAccountPopUp";
+
 
 
 const EditProfileCard = () => {
   const { user, updateProfile, profileLoading } = useSettingEdit();
   const { currentUser } = useAuthContext();
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
 
   // const [firstName, setFirstName] = useState(user?.first_name || '');
   // const [lastName, setLastName] = useState(user?.last_name || '');
@@ -98,7 +101,7 @@ const EditProfileCard = () => {
     }
   };
 
-   useEffect(() => {
+  useEffect(() => {
     if (currentUser) {
       setFirstName(currentUser?.first_name || currentUser?.first_name?.split(" ")[0] || "");
       setLastName(currentUser?.last_name || currentUser?.first_name?.split(" ")[1] || "");
@@ -161,12 +164,18 @@ const EditProfileCard = () => {
             {profileLoading ? "Updating..." : "Update Profile"}
           </Button>
 
-          <Button variant="ghost" className="text-red-500 hover:text-red-600 w-full sm:w-auto text-sm">
+          <Button variant="ghost"
+            onClick={() => setShowDeletePopup(true)}
+            className="text-red-500 hover:text-red-600 w-full sm:w-auto text-sm">
             <span className="hidden sm:inline">Delete account permanently</span>
             <span className="sm:hidden">Delete account</span>
           </Button>
         </div>
       </CardContent>
+      {showDeletePopup && (
+        <DeleteAccountPopUp onClose={() => setShowDeletePopup(false)} />
+      )}
+
     </Card>
   );
 };

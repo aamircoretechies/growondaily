@@ -44,10 +44,10 @@ const VerseStudy = () => {
   useEffect(() => {
     // Compute verseKey inside effect to ensure we're checking the current verse
     const currentVerseKey = `${book}-${chapter}-${verse}`;
-    
+
     // Always reset to false first to ensure new verses start inactive
     setIsRead(false);
-    
+
     // Then check localStorage for the current verse
     const saved = localStorage.getItem(`verse-read-${currentVerseKey}`);
     // Only set to true if localStorage explicitly has 'true' for THIS specific verse
@@ -195,7 +195,37 @@ const VerseStudy = () => {
 
 
 
-  const tabs: TabItem[] = [
+  const [enabledTabs, setEnabledTabs] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('reflection_feature_preferences');
+      const prefs = saved ? JSON.parse(saved) : {};
+
+      // Default to true if not set (backward compatibility)
+      const isEnabled = (id: string) => prefs[id] !== false;
+
+      const newEnabledTabs = ['original', 'explanations'];
+      if (isEnabled('historical')) newEnabledTabs.push('historical');
+      if (isEnabled('cultural')) newEnabledTabs.push('cultural'); // Assuming cultural maps to something or always shown? User didn't specify cultural in the list, but it's in the tabs. I'll assume it's always shown or maps to historical? The user list: Historical, Ground Text, Special, Daily Life, Cross Ref, Commentary, Key Takeaways, Reflection. Cultural is NOT in the user list. I will assume it is always enabled or maybe grouped with historical? The user said "All of these options are enabled by default". If cultural isn't in the list, maybe it shouldn't be filtered? Or maybe it's part of historical? I'll leave it enabled for now to be safe, or maybe it's missing from the settings? The user instructions were specific about the list. I will leave 'cultural' and 'theological' and 'practical' enabled as they are not in the toggle list.
+      if (isEnabled('theological')) newEnabledTabs.push('theological');
+      if (isEnabled('practical')) newEnabledTabs.push('practical');
+      if (isEnabled('commentary')) newEnabledTabs.push('commentary');
+      if (isEnabled('ground_text')) newEnabledTabs.push('ground_text');
+      if (isEnabled('special')) newEnabledTabs.push('special');
+      if (isEnabled('daily_life')) newEnabledTabs.push('daily_life');
+      if (isEnabled('cross_reference')) newEnabledTabs.push('cross_reference');
+      if (isEnabled('key_takeaways')) newEnabledTabs.push('key_takeaways');
+      if (isEnabled('reflection')) newEnabledTabs.push('reflection');
+
+      setEnabledTabs(newEnabledTabs);
+    } catch {
+      // If error, show all
+      setEnabledTabs(['original', 'explanations', 'historical', 'cultural', 'theological', 'practical', 'commentary', 'ground_text', 'special', 'daily_life', 'cross_reference', 'key_takeaways', 'reflection']);
+    }
+  }, []);
+
+  const allTabs: TabItem[] = [
     { id: 'original', title: 'Original', icon: 'document' },
     { id: 'explanations', title: 'Explanation', icon: 'book-open' },
     { id: 'historical', title: 'Historical Context', icon: 'calendar' },
@@ -210,6 +240,15 @@ const VerseStudy = () => {
     { id: 'key_takeaways', title: 'Key Takeaways', icon: 'star' },
     { id: 'reflection', title: 'Reflection Prompts', icon: 'question' },
   ];
+
+  const tabs = allTabs.filter(t => enabledTabs.includes(t.id) || enabledTabs.length === 0);
+
+  // Reset active tab if it becomes disabled
+  useEffect(() => {
+    if (enabledTabs.length > 0 && !enabledTabs.includes(verseActiveTab)) {
+      setVerseActiveTab('original');
+    }
+  }, [enabledTabs, verseActiveTab, setVerseActiveTab]);
 
 
 

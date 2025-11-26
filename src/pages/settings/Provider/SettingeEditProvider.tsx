@@ -162,8 +162,38 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
     }
   };
 
+  const deleteAccount = async () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+
+    const response = await axios.delete("/api/auth/delete-account", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("DELETE RESPONSE =>", response.data); 
+
+    if (response.data.status === 1) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+
+      return { success: true };
+    }
+
+    return { success: false, message: response.data.message };
+
+  } catch (error: any) {
+    console.log("DELETE ERROR =>", error?.response?.data);
+    return { success: false, message: error?.response?.data?.message };
+  }
+};
+
+
+
   return (
-    <SettingEditContext.Provider value={{ user, loading, profileLoading, passwordLoading, notificationLoading,updateProfile,languageLoading, changePassword, getNotificationPreferences, updateNotificationPreferences, selectLanguage, }}>
+    <SettingEditContext.Provider value={{ user, loading, profileLoading, passwordLoading, notificationLoading, updateProfile, languageLoading, changePassword, getNotificationPreferences, updateNotificationPreferences, selectLanguage,deleteAccount  }}>
       {children}
     </SettingEditContext.Provider>
   );

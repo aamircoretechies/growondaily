@@ -180,7 +180,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { Container } from "@/components/container";
-import { LucideMic } from "lucide-react";
+import { LucideMic, LucideMicOff, LucideSend } from "lucide-react";
 import { useAsk } from "@/providers";
 
 
@@ -216,7 +216,7 @@ const AskPage = () => {
 
   // const { sendMessage } = useAsk();
   // const { generateAIContent } = useAsk();
-  const { sendMessage, generateAIContent } = useAsk();
+  const { sendMessage, generateAIContent, startListening, stopListening, isListening } = useAsk();
 
 
   const run = async () => {
@@ -270,7 +270,17 @@ const AskPage = () => {
     }
   };
 
-
+  const handleMicClick = () => {
+    if (isListening) {
+      stopListening();
+    } else if (inputText.trim()) {
+      handleSendMessage();
+    } else {
+      startListening((text) => {
+        setInputText(text);
+      });
+    }
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -334,7 +344,7 @@ const AskPage = () => {
         </div>
 
         {/* Input Section */}
-        <div className="fixed bottom-10 left-0 right-0 bg-transparent backdrop-blur-sm border-t border-gray-100 dark:border-gray-100 p-4 z-30">
+        <div className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-gradient-to-t from-white/50 via-white/50 to-transparent border-t border-gray-200 dark:border-gray-100 p-6 z-40">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-end gap-3 p-4 bg-white/80 dark:bg-gray-200 rounded-xl border border-gray-200 dark:border-gray-300 shadow-lg">
               <div className="flex-1">
@@ -342,17 +352,26 @@ const AskPage = () => {
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Type your question here..."
-                  className="w-full resize-none border-0 bg-transparent focus:outline-none focus:ring-0 text-gray-700 dark:text-gray-800 placeholder-gray-400 dark:placeholder-gray-500 text-sm"
+                  placeholder={isListening ? "Listening..." : "Type your question here..."}
+                  className="w-full resize-none border-0 bg-transparent focus:outline-none focus:ring-0 text-gray-700 dark:text-gray-800 placeholder-gray-400 dark:placeholder-gray-500 text-sm overflow-y-auto"
                   rows={1}
                   style={{ minHeight: "40px", maxHeight: "120px" }}
                 />
               </div>
               <button
-                onClick={handleSendMessage}
-                className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors duration-200 flex-shrink-0"
+                onClick={handleMicClick}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0 ${isListening
+                    ? "bg-red-500 text-white"
+                    : "bg-primary text-white hover:bg-primary/90"
+                  }`}
               >
-                <LucideMic />
+                {isListening ? (
+                  <LucideMicOff size={20} />
+                ) : inputText.trim() ? (
+                  <LucideSend size={20} className="rotate-45"/>
+                ) : (
+                  <LucideMic size={20} />
+                )}
               </button>
             </div>
           </div>

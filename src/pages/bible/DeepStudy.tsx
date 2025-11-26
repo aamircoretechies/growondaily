@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { KeenIcon } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
 
@@ -24,7 +24,36 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
     }
   }, [selectedBookId, selectedChapter, version, activeTab]);
 
-  const tabs: TabItem[] = [
+  const [enabledTabs, setEnabledTabs] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('reflection_feature_preferences');
+      const prefs = saved ? JSON.parse(saved) : {};
+
+      // Default to true if not set
+      const isEnabled = (id: string) => prefs[id] !== false;
+
+      const newEnabledTabs = ['original', 'explanations'];
+      if (isEnabled('historical')) newEnabledTabs.push('historical');
+      if (isEnabled('cultural')) newEnabledTabs.push('cultural');
+      if (isEnabled('theological')) newEnabledTabs.push('theological');
+      if (isEnabled('practical')) newEnabledTabs.push('practical');
+      if (isEnabled('commentary')) newEnabledTabs.push('commentary');
+      if (isEnabled('ground_text')) newEnabledTabs.push('ground_text');
+      if (isEnabled('special')) newEnabledTabs.push('special');
+      if (isEnabled('daily_life')) newEnabledTabs.push('daily_life');
+      if (isEnabled('cross_reference')) newEnabledTabs.push('cross_reference');
+      if (isEnabled('key_takeaways')) newEnabledTabs.push('key_takeaways');
+      if (isEnabled('reflection')) newEnabledTabs.push('reflection');
+
+      setEnabledTabs(newEnabledTabs);
+    } catch {
+      setEnabledTabs(['original', 'explanations', 'historical', 'cultural', 'theological', 'practical', 'commentary', 'ground_text', 'special', 'daily_life', 'cross_reference', 'key_takeaways', 'reflection']);
+    }
+  }, []);
+
+  const allTabs: TabItem[] = [
     { id: 'original', title: 'Original', icon: 'document', content: '' },
     { id: 'explanations', title: 'Explanation', icon: 'book-open', content: '' },
     { id: 'historical', title: 'Historical Context', icon: 'calendar', content: '' },
@@ -39,6 +68,15 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
     { id: 'key_takeaways', title: 'Key Takeaways', icon: 'star', content: '' },
     { id: 'reflection', title: 'Reflection Prompts', icon: 'question', content: '' },
   ];
+
+  const tabs = allTabs.filter(t => enabledTabs.includes(t.id) || enabledTabs.length === 0);
+
+  // Reset active tab if it becomes disabled
+  useEffect(() => {
+    if (enabledTabs.length > 0 && !enabledTabs.includes(activeTab)) {
+      setActiveTab('original');
+    }
+  }, [enabledTabs, activeTab, setActiveTab]);
 
   const getTabContent = (tabId: string) => {
     if (loadingDeepStudy) return 'Loading deep study content...';

@@ -129,7 +129,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
     '한국어 개역개정 (Korean RVRK)',
     '日本語口語訳 (Japanese Kougo Yaku)',
     'Hindi - आसान बाइबल (ERV-HI)'
-  ] as const; 
+  ] as const;
   const [translations, setTranslations] = useState<string[]>(['KJV - King James Version']);
   const toggleTranslation = (option: string) => {
     setTranslations((prev) =>
@@ -145,6 +145,49 @@ const PersonalizationCard = ({ user }: { user: any }) => {
     'Deep dive (5+ min read)'
   ] as const;
   const [depth, setDepth] = useState<(typeof depthOptions)[number]>('Short (1-2 min read)');
+
+  const [reflectionFeatures, setReflectionFeatures] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('reflection_feature_preferences');
+      return saved ? JSON.parse(saved) : {
+        historical: true,
+        ground_text: true,
+        special: true,
+        daily_life: true,
+        cross_reference: true,
+        commentary: true,
+        key_takeaways: true,
+        reflection: true
+      };
+    } catch {
+      return {
+        historical: true,
+        ground_text: true,
+        special: true,
+        daily_life: true,
+        cross_reference: true,
+        commentary: true,
+        key_takeaways: true,
+        reflection: true
+      };
+    }
+  });
+
+  const toggleReflectionFeature = (id: string, title: string) => {
+    setReflectionFeatures(prev => {
+      const newState = !prev[id];
+      const next = { ...prev, [id]: newState };
+      localStorage.setItem('reflection_feature_preferences', JSON.stringify(next));
+
+      if (newState) {
+        toast.success(`${title} enabled!`);
+      } else {
+        toast.success(`${title} disabled!`);
+      }
+
+      return next;
+    });
+  };
 
   // Map backend enums or human-readable phrases -> UI labels
   const experienceFromEnum = (val?: string): 'First Time' | 'Occasional' | 'Regular' | 'Theological' => {
@@ -190,13 +233,13 @@ const PersonalizationCard = ({ user }: { user: any }) => {
           Array.isArray(prefs.translations)
             ? prefs.translations
             : prefs.translations
-            ? [prefs.translations]
-            : ['KJV - King James Version']
+              ? [prefs.translations]
+              : ['KJV - King James Version']
         );
         setDailyPref(prefs.dailyPref || 'Daily');
         setDepth(prefs.depth || 'Short (1-2 min read)');
-      return;
-      } catch {}
+        return;
+      } catch { }
     }
 
     // 2) Otherwise, try backend canonical fields mapping
@@ -208,8 +251,8 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         depthLevel === 'short'
           ? 'Short (1-2 min read)'
           : depthLevel === 'medium'
-          ? 'Medium (3-4 min read)'
-          : 'Deep dive (5+ min read)'
+            ? 'Medium (3-4 min read)'
+            : 'Deep dive (5+ min read)'
       );
 
       // experience_with_bible -> ['FIRST_TIME'] etc.
@@ -224,10 +267,10 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         Array.isArray(bringsVal)
           ? bringsVal
           : typeof bringsVal === 'string' && bringsVal.includes(',')
-          ? bringsVal.split(',').map((s: string) => s.trim())
-          : bringsVal
-          ? [bringsVal]
-          : []
+            ? bringsVal.split(',').map((s: string) => s.trim())
+            : bringsVal
+              ? [bringsVal]
+              : []
       );
 
       // engagement_preference: ['READING', 'LISTENING'] -> ['Reading', ...]
@@ -236,8 +279,8 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         Array.isArray(engageVal)
           ? engageVal.map((e: string) => toTitleCase((e || '').toString()))
           : engageVal
-          ? [toTitleCase((engageVal || '').toString())]
-          : []
+            ? [toTitleCase((engageVal || '').toString())]
+            : []
       );
 
       // explanation_style -> UI option
@@ -246,8 +289,8 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         style === 'simple'
           ? 'Clear and simple language'
           : style === 'deep'
-          ? 'A bit deeper with context'
-          : 'Mixed depending on topic'
+            ? 'A bit deeper with context'
+            : 'Mixed depending on topic'
       );
 
       // bible_version code -> full title if possible
@@ -270,9 +313,6 @@ const PersonalizationCard = ({ user }: { user: any }) => {
     }
   }, [authContext?.currentUser]);
 
-
-
-  
   const handleSave = async () => {
     const preferences = {
       experience,
@@ -292,11 +332,9 @@ const PersonalizationCard = ({ user }: { user: any }) => {
       }
       const updatedUser = await authContext?.getUser();
       authContext?.setCurrentUser(updatedUser);
-      // alert("Preferences saved successfully!");
       toast.success("Preferences saved successfully!")
     } catch (err) {
       console.error("Save failed:", err);
-      // alert("Failed to save preferences. Please try again.");
       toast.error("Preferences failed to save! ")
     }
   };
@@ -363,21 +401,24 @@ const PersonalizationCard = ({ user }: { user: any }) => {
             </DialogHeader>
             <DialogBody className="space-y-4">
               {[
-                ['Historical Context', 'Background information and relevant...'],
-                ['Ground Text Analysis', 'Insights from the original Hebrew..'],
-                ['Special Insights', 'Surprising or lesser-known facts'],
-                ['Daily Life Application', 'Practical guidance for living out the..'],
-                ['Cross-References', 'Related Bible verses for deeper study'],
-                ['Commentary Insights', 'Explanations or interpretations from..'],
-                ['Key Takeaways', "Points summarizing the passage’s..."],
-                ['Reflection Prompts', 'Questions or prayer suggestions...']
-              ].map(([title, subtitle]) => (
-                <div key={title as string} className="flex items-center justify-between px-3 py-3 rounded-xl bg-white/80 dark:bg-[--tw-page-bg-dark]">
+                ['Historical Context', 'Background information and relevant...', 'historical'],
+                ['Ground Text Analysis', 'Insights from the original Hebrew..', 'ground_text'],
+                ['Special Insights', 'Surprising or lesser-known facts', 'special'],
+                ['Daily Life Application', 'Practical guidance for living out the..', 'daily_life'],
+                ['Cross-References', 'Related Bible verses for deeper study', 'cross_reference'],
+                ['Commentary Insights', 'Explanations or interpretations from..', 'commentary'],
+                ['Key Takeaways', "Points summarizing the passage’s...", 'key_takeaways'],
+                ['Reflection Prompts', 'Questions or prayer suggestions...', 'reflection']
+              ].map(([title, subtitle, id]) => (
+                <div key={id as string} className="flex items-center justify-between px-3 py-3 rounded-xl bg-white/80 dark:bg-[--tw-page-bg-dark]">
                   <div>
                     <div className="text-[15px] text-primary">{title as string}</div>
                     <div className="text-sm text-gray-500">{subtitle as string}</div>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={reflectionFeatures[id as string] ?? true}
+                    onCheckedChange={() => toggleReflectionFeature(id as string, title as string)}
+                  />
                 </div>
               ))}
             </DialogBody>
@@ -577,7 +618,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
               {depthOptions.map((option) => {
                 const selected = depth === option;
                 return (
-          <button
+                  <button
                     type="button"
                     key={option}
                     onClick={() => {
@@ -590,7 +631,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
                       <div className="text-[15px] text-primary">{option}</div>
                       {selected && <Check className="w-4 h-4 text-primary" />}
                     </div>
-          </button>
+                  </button>
                 );
               })}
             </DialogBody>
@@ -602,8 +643,8 @@ const PersonalizationCard = ({ user }: { user: any }) => {
           </Button>
         </div>
 
-      </CardContent>
-    </Card>
+      </CardContent >
+    </Card >
   );
 };
 
