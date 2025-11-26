@@ -361,6 +361,8 @@ const HomePage = () => {
     );
   };
 
+  
+
   useEffect(() => {
     const calculateProgress = async () => {
       if (!dashboardData?.continue_reading || !books.length) return;
