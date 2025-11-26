@@ -15,6 +15,15 @@ interface DeepStudyProps {
   isDeepStudyActive?: boolean;
 }
 
+const Loader = () => {
+  return (
+    <div className="flex justify-center items-center py-10">
+      <div className="w-6 h-6 border-2 border-gray-400 border-t-primary rounded-full animate-spin"></div>
+    </div>
+  );
+};
+
+
 const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, }: DeepStudyProps) => {
   const { selectedBookId, selectedChapter, version, deepStudyData, fetchDeepStudy, selectedBookName, loadingDeepStudy, activeTab, setActiveTab } = useBible();
 
@@ -79,7 +88,8 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
   }, [enabledTabs, activeTab, setActiveTab]);
 
   const getTabContent = (tabId: string) => {
-    if (loadingDeepStudy) return 'Loading deep study content...';
+    // if (loadingDeepStudy) return 'Loading deep study content...';
+    if (loadingDeepStudy) return <Loader />;
     if (!deepStudyData) return 'No data available.';
     const currentKey = `${selectedBookId}-${selectedChapter}`;
     const ctx = deepStudyData?.[currentKey]?.[tabId];
@@ -145,9 +155,13 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
               >
                 {/* Main Content */}
                 <div className="mb-4 sm:mb-6">
-                  <p className="font-merriweather text-base sm:text-lg leading-relaxed text-primary break-words whitespace-pre-line">
+                  {/* <p className="font-merriweather text-base sm:text-lg leading-relaxed text-primary break-words whitespace-pre-line">
                     {getTabContent(tab.id)}
-                  </p>
+                  </p> */}
+                  <div className="font-merriweather text-base sm:text-lg leading-relaxed text-primary break-words whitespace-pre-line">
+                    {getTabContent(tab.id)}
+                  </div>
+
                 </div>
 
                 {/* Nested Card (Notes & Date Section) */}

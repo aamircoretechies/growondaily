@@ -352,6 +352,14 @@ const HomePage = () => {
   const { dashboardData, loading } = useDashboard();
   const [readingProgress, setReadingProgress] = useState(0);
 
+  const Loader = () => {
+    return (
+      <div className="flex justify-center items-center py-10">
+        <div className="w-6 h-6 border-2 border-gray-400 border-t-primary rounded-full animate-spin"></div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     const calculateProgress = async () => {
       if (!dashboardData?.continue_reading || !books.length) return;
@@ -401,7 +409,12 @@ const HomePage = () => {
     calculateProgress();
   }, [dashboardData?.continue_reading, books]);
   if (loading) {
-    return <div className="text-center mt-10"><FormattedMessage id="HOME.LOADING_DASHBOARD" /></div>;
+    // return <div className="text-center mt-10"><FormattedMessage id="HOME.LOADING_DASHBOARD" /></div>;
+    return (
+      <div className="mt-10">
+        <Loader />
+      </div>
+    );
   }
 
 
@@ -416,6 +429,9 @@ const HomePage = () => {
       year: 'numeric'
     });
   };
+
+  
+
 
   const handleAudioPlay = () => {
     console.log('Audio play clicked');
@@ -627,15 +643,15 @@ const HomePage = () => {
                 <div className="flex gap-2 sm:gap-3 justify-end">
                   <button
                     onClick={handleAudioPlay}
-                    className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                    className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white hover:text-sand transition-colors"
                   >
-                    <LucideVolume2 className='text-white text-sm sm:text-base' />
+                    <LucideVolume2 className='text-white hover:text-sand text-sm sm:text-base transition-colors' />
                   </button>
                   <button
                     onClick={handleReadDailyWord}
-                    className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                    className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white hover:text-sand transition-colors"
                   >
-                    <LucideBook className='text-white text-sm sm:text-base' />
+                    <LucideBook className='text-white hover:text-sand text-sm sm:text-base transition-colors' />
                   </button>
                 </div>
               </div>

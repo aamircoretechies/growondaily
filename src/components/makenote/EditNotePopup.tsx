@@ -67,7 +67,7 @@ export default function EditNotePopup({ note, onClose }: Props) {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full h-40 p-4 bg-white rounded-xl border border-gray-300 text-primary focus:outline-none focus:ring-2 focus:ring-sand"
+          className="w-full h-40 p-4 bg-white rounded-lg border border-gray-300 text-primary focus:outline-none focus:ring-2 focus:ring-sand max-h-32 overflow-y-auto resize-none"
         />
 
         {/* Tags */}

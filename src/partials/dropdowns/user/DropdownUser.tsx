@@ -283,15 +283,21 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
           />
 
           <div className="flex flex-col gap-1.5 max-w-[140px]">
-            <Link
+            {/* <Link
               to="/account"
               className="text-sm text-gray-800 hover:text-primary font-semibold leading-none truncate"
             >
               {currentUser?.first_name || "User"}
-            </Link>
+            </Link> */}
+            <span
+              className="text-sm text-gray-800 font-semibold leading-none truncate cursor-default"
+            >
+              {currentUser?.first_name || "User"}
+            </span>
+
             <a
               href={`mailto:${currentUser?.email}`}
-              className="text-xs text-gray-600 hover:text-primary font-medium leading-none truncate"
+              className="text-xs text-gray-600 hover:text-primary font-medium truncate pt-[2px]"
             >
               {currentUser?.email || "example@gmail.com"}
             </a>

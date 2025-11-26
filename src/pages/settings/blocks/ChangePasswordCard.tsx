@@ -94,31 +94,47 @@ const ChangePasswordCard = () => {
   // };
 
   const handlePasswordChange = async () => {
-  if (!currentPassword.trim()) {
-    setMessage("Current password is required");
-    return;
-  }
-  if (newPassword !== confirmPassword) {
-    setMessage("New passwords do not match");
-    return;
-  }
 
-  const res = await changePassword({
-    current_password: currentPassword,
-    new_password: newPassword,
-    confirm_password: confirmPassword,
-  });
+    if (!currentPassword.trim()) {
+      setMessage("Current password is required");
+      return;
+    }
 
-  setMessage(res.message);
+    if (newPassword.length > 16) {
+      setMessage("Password cannot be more than 16 characters");
+      return;
+    }
 
-  if (res.success) {
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    if (confirmPassword.length > 16) {
+      setMessage("Confirm password cannot be more than 16 characters");
+      return;
+    }
 
-    setTimeout(() => setMessage(""), 3000);
-  }
-};
+    if (newPassword !== confirmPassword) {
+      setMessage("New passwords do not match");
+      return;
+    }
+
+    const res = await changePassword({
+      current_password: currentPassword,
+      new_password: newPassword,
+      confirm_password: confirmPassword,
+    });
+
+    if (!res.success) {
+      setMessage(res.message || "Current password is incorrect");
+      return;
+    }
+    setMessage(res.message);
+
+    if (res.success) {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+
+      setTimeout(() => setMessage(""), 3000);
+    }
+  };
 
   return (
     <Card id="change_password" className='bg-white/40 dark:bg-gray-100'>
@@ -143,23 +159,36 @@ const ChangePasswordCard = () => {
             <div className="relative">
               <Input
                 id="current_password"
+                maxLength={16}
                 type={showCurrent ? "text" : "password"}
                 placeholder="Current Password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
               />
 
-              <button
+              {/* <button
                 type="button"
-                className="absolute right-3 top-3"
+                className="absolute right-3 top-3 text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
                 onClick={() => setShowCurrent(!showCurrent)}
               >
                 {showCurrent ? (
-                  <KeenIcon icon="eye-slash" className="text-gray-500" />
+                  <KeenIcon icon="eye-slash" className="transition text-gray-500 group-hover:text-primary dark:group-hover:text-white" />
                 ) : (
-                  <KeenIcon icon="eye" className="text-gray-500" />
+                  <KeenIcon icon="eye" className="transition text-gray-500 group-hover:text-primary dark:group-hover:text-white" />
+                )}
+              </button> */}
+              <button
+                type="button"
+                className="absolute right-3 top-3 group text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
+                onClick={() => setShowCurrent(!showCurrent)}
+              >
+                {showCurrent ? (
+                  <KeenIcon icon="eye-slash" className="transition group-hover:text-primary dark:group-hover:text-white" />
+                ) : (
+                  <KeenIcon icon="eye" className="transition group-hover:text-primary dark:group-hover:text-white" />
                 )}
               </button>
+
             </div>
 
           </div>
@@ -176,23 +205,37 @@ const ChangePasswordCard = () => {
             <div className="relative">
               <Input
                 id="new_password"
+                maxLength={16}
                 type={showNew ? "text" : "password"}
                 placeholder="New Password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
 
-              <button
+              {/* <button
                 type="button"
-                className="absolute right-3 top-3"
+                className="absolute right-3 top-3 text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
                 onClick={() => setShowNew(!showNew)}
               >
                 {showNew ? (
-                  <KeenIcon icon="eye-slash" className="text-gray-500" />
+                  <KeenIcon icon="eye-slash" className="transition text-gray-500 group-hover:text-primary dark:group-hover:text-white" />
                 ) : (
-                  <KeenIcon icon="eye" className="text-gray-500" />
+                  <KeenIcon icon="eye" className="transition text-gray-500 group-hover:text-primary dark:group-hover:text-white" />
+                )}
+              </button> */}
+
+              <button
+                type="button"
+                className="absolute right-3 top-3 group text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
+                onClick={() => setShowNew(!showNew)}
+              >
+                {showNew ? (
+                  <KeenIcon icon="eye-slash" className="transition group-hover:text-primary dark:group-hover:text-white" />
+                ) : (
+                  <KeenIcon icon="eye" className="transition group-hover:text-primary dark:group-hover:text-white" />
                 )}
               </button>
+
             </div>
 
           </div>
@@ -209,23 +252,36 @@ const ChangePasswordCard = () => {
             <div className="relative">
               <Input
                 id="confirm_password"
+                maxLength={16}
                 type={showConfirm ? "text" : "password"}
                 placeholder="Retype New Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
 
-              <button
+              {/* <button
                 type="button"
-                className="absolute right-3 top-3"
+                className="absolute right-3 top-3 text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
                 onClick={() => setShowConfirm(!showConfirm)}
               >
                 {showConfirm ? (
-                  <KeenIcon icon="eye-slash" className="text-gray-500" />
+                  <KeenIcon icon="eye-slash" className="transition text-gray-500 group-hover:text-primary dark:group-hover:text-white" />
                 ) : (
-                  <KeenIcon icon="eye" className="text-gray-500" />
+                  <KeenIcon icon="eye" className="transition text-gray-500 group-hover:text-primary dark:group-hover:text-white" />
+                )}
+              </button> */}
+              <button
+                type="button"
+                className="absolute right-3 top-3 group text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
+                onClick={() => setShowConfirm(!showConfirm)}
+              >
+                {showConfirm ? (
+                  <KeenIcon icon="eye-slash" className="transition group-hover:text-primary dark:group-hover:text-white" />
+                ) : (
+                  <KeenIcon icon="eye" className="transition group-hover:text-primary dark:group-hover:text-white" />
                 )}
               </button>
+
             </div>
 
           </div>

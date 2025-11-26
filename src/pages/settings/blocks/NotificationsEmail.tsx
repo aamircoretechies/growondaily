@@ -92,7 +92,7 @@ import { Bell, Save, RefreshCw } from "lucide-react";
 import { useSettingEdit } from "../Provider/SettingeEditProvider";
 
 const NotificationsEmail = () => {
-  const { getNotificationPreferences, updateNotificationPreferences,notificationLoading } = useSettingEdit();
+  const { getNotificationPreferences, updateNotificationPreferences, notificationLoading } = useSettingEdit();
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true); // main switch
   const [emailNotification, setEmailNotification] = useState(false);
@@ -163,26 +163,37 @@ const NotificationsEmail = () => {
     setMessage(res.message);
   };
 
+  // const handleReset = async () => {
+  //   if (defaultPrefs) {
+  //     const { email_notification, push_notification } = defaultPrefs;
+  //     setEmailNotification(email_notification);
+  //     setPushNotification(push_notification);
+  //     setNotificationsEnabled(email_notification || push_notification);
+  //     setMessage("Reset to default preferences");
+  //   } else {
+  //     const res = await getNotificationPreferences();
+  //     if (res.success) {
+  //       const { email_notification, push_notification } = res.data;
+  //       setEmailNotification(email_notification);
+  //       setPushNotification(push_notification);
+  //       setNotificationsEnabled(email_notification || push_notification);
+  //       setDefaultPrefs(res.data);
+  //       setMessage("Reset to default preferences");
+  //     }
+  //   }
+  // };
+
   // Reset to Default button
+ 
   const handleReset = async () => {
-    if (defaultPrefs) {
-      const { email_notification, push_notification } = defaultPrefs;
-      setEmailNotification(email_notification);
-      setPushNotification(push_notification);
-      setNotificationsEnabled(email_notification || push_notification);
-      setMessage("Reset to default preferences");
-    } else {
-      const res = await getNotificationPreferences();
-      if (res.success) {
-        const { email_notification, push_notification } = res.data;
-        setEmailNotification(email_notification);
-        setPushNotification(push_notification);
-        setNotificationsEnabled(email_notification || push_notification);
-        setDefaultPrefs(res.data);
-        setMessage("Reset to default preferences");
-      }
-    }
+
+    setEmailNotification(true);
+    setPushNotification(true);
+    setNotificationsEnabled(true);
+
+    setMessage("Preferences reset — All notifications enabled");
   };
+
 
   return (
     <Card id="notifications_email" className="bg-white/40 dark:bg-gray-100 ">

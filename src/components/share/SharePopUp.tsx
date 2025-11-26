@@ -81,7 +81,7 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
             rel="noopener noreferrer"
             onClick={!hasContent ? (e) => e.preventDefault() : undefined}
             className={`w-full block text-center py-2 rounded-lg font-medium transition ${hasContent
-              ? 'bg-sand text-primary hover:bg-sand/80'
+              ? 'bg-sand text-primary dark:text-white hover:bg-sand/80 dark:hover:bg-sand/80'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
           >

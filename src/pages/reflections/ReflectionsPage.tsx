@@ -54,7 +54,7 @@ const ReflectionsPage = () => {
 
       // Navigate immediately - let BiblePage handle data fetching
       navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
-      
+
       // Fetch data in background (non-blocking)
       const book = books?.find(
         (b: any) => b.name.toLowerCase() === bookName.trim().toLowerCase()
@@ -69,31 +69,22 @@ const ReflectionsPage = () => {
     }
   };
 
-  // const handleEditReflection = (id: string) => {
-  //   console.log('Edit reflection:', id);
-  // };
-
   const handleEditReflection = (note: any) => {
     setSelectedNote(note);
     setIsEditPopupOpen(true);
   };
 
-
-  // const handleDeleteReflection = async (entry: any) => {
-  //   const noteId = entry.note_id;
-  //   await deleteNote(noteId);
-  // };
   const handleDeleteReflection = async (entry: any) => {
-  try {
-    const noteId = entry.note_id;
-    await deleteNote(noteId);
+    try {
+      const noteId = entry.note_id;
+      await deleteNote(noteId);
 
-    toast.success("Note deleted successfully");
-  } catch (err) {
-    console.error("Error deleting note:", err);
-    toast.error("Failed to delete note");
-  }
-};
+      toast.success("Note deleted successfully");
+    } catch (err) {
+      console.error("Error deleting note:", err);
+      toast.error("Failed to delete note");
+    }
+  };
 
 
 
@@ -107,10 +98,10 @@ const ReflectionsPage = () => {
     if (!book || !chapter || !verse) return;
 
     const bookSlug = book.trim().toLowerCase().replace(/\s+/g, "-");
-    
+
     // Navigate immediately - let BiblePage handle data fetching
     navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
-    
+
     // Fetch data in background (non-blocking)
     const foundBook = books?.find(
       (b: any) => b.name.toLowerCase() === book.trim().toLowerCase()
@@ -165,7 +156,7 @@ const ReflectionsPage = () => {
       // Fetch data in background (non-blocking)
       selectBook(foundBook.book_id, foundBook.name);
       selectChapter(Number(chapter));
-      
+
       if (verse) {
         fetchSingleVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
         fetchDeepStudyForVerse(foundBook.book_id, Number(chapter), Number(verse), noteVersion || version || "KJV");
@@ -177,6 +168,11 @@ const ReflectionsPage = () => {
     }
   };
 
+  const Loader = () => (
+    <div className="flex justify-center items-center py-6">
+      <div className="w-6 h-6 border-2 border-gray-400 border-t-primary rounded-full animate-spin"></div>
+    </div>
+  );
 
 
 
@@ -221,7 +217,8 @@ const ReflectionsPage = () => {
             {/* Journal Entries List */}
             <div className="space-y-4">
               {notesLoading ? (
-                <p className="text-gray-500 text-sm">Loading notes...</p>
+                // <p className="text-gray-500 text-sm">Loading notes...</p>
+                <Loader />
               ) : latestNotes.length === 0 ? (
                 <p className="text-gray-500 text-sm">No saved notes yet.</p>
               ) : (

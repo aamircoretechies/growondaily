@@ -15,6 +15,15 @@ interface TabItem {
   icon: string;
 }
 
+const Loader = () => {
+  return (
+    <div className="flex justify-center items-center py-10">
+      <div className="w-6 h-6 border-2 border-gray-400 border-t-primary rounded-full animate-spin"></div>
+    </div>
+  );
+};
+
+
 const VerseStudy = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -39,13 +48,8 @@ const VerseStudy = () => {
   // Always initialize to false - will be updated by useEffect when verse loads
   const [isRead, setIsRead] = useState(false);
 
-  // Update isRead state when verse changes - reset to false first, then check localStorage
-  // Depend on book, chapter, and verse directly to ensure effect runs on any change
   useEffect(() => {
-    // Compute verseKey inside effect to ensure we're checking the current verse
     const currentVerseKey = `${book}-${chapter}-${verse}`;
-
-    // Always reset to false first to ensure new verses start inactive
     setIsRead(false);
 
     // Then check localStorage for the current verse
@@ -253,7 +257,8 @@ const VerseStudy = () => {
 
 
   const getTabContent = (tabId: string) => {
-    if (loadingDeepStudy) return 'Loading deep study content...';
+    // if (loadingDeepStudy) return 'Loading deep study content...';
+    if (loadingDeepStudy) return <Loader />;
     if (!deepStudyData) return 'No data available.';
 
     // Find the correct bookId
@@ -399,9 +404,12 @@ const VerseStudy = () => {
               className={`${verseActiveTab === tab.id ? 'block' : 'hidden'}`}
             >
               <div className="mb-6">
-                <p className="font-merriweather text-lg leading-relaxed text-primary whitespace-pre-line">
+                {/* <p className="font-merriweather text-lg leading-relaxed text-primary whitespace-pre-line">
                   {getTabContent(tab.id)}
-                </p>
+                </p> */}
+                <div className="font-merriweather text-lg leading-relaxed text-primary whitespace-pre-line">
+                  {getTabContent(tab.id)}
+                </div>
               </div>
 
               {/* Nested Card */}
@@ -499,7 +507,7 @@ const VerseStudy = () => {
                   value={reportIssue}
                   onChange={(e) => setReportIssue(e.target.value)}
                   placeholder="Describe the issue and share your thoughts"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white dark:bg-gray-100 text-primary placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white dark:bg-gray-100 text-primary placeholder-gray-400 max-h-32 overflow-y-auto resize-none"
                   rows={4}
                 />
               </div>
