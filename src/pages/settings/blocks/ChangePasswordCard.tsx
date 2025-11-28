@@ -123,7 +123,7 @@ const ChangePasswordCard = () => {
       confirm_password: confirmPassword,
     });
 
-    if (!res.success) {
+    if (!res || res.success === false || res.status === 0) {
       setMessage(res.message || "Current password is incorrect");
       return;
     }
@@ -136,6 +136,8 @@ const ChangePasswordCard = () => {
 
       setTimeout(() => setMessage(""), 3000);
     }
+    console.log("PASSWORD API RESPONSE:", res);
+
   };
 
   return (

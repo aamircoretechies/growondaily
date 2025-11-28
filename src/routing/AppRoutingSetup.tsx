@@ -98,6 +98,7 @@ import {
   AuthenticationGetStartedPage
 } from '@/pages/authentication';
 import { HomePage } from '@/pages/dashboards/home/HomePage';
+import { ResetPasswordChange } from '@/auth/pages/jwt/reset-password/ResetPasswordChange';
 
 const AppRoutingSetup = (): ReactElement => {
   return (
@@ -225,6 +226,7 @@ const AppRoutingSetup = (): ReactElement => {
         </Route>
       </Route>
       <Route path="error/*" element={<ErrorsRouting />} />
+      <Route path="/reset-password" element={<ResetPasswordChange />} />
       <Route path="auth/*" element={<AuthPage />} />
       <Route path="*" element={<Navigate to="/error/404" />} />
     </Routes>

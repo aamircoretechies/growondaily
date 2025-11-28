@@ -19,7 +19,7 @@
 //   build: {
 //     chunkSizeWarningLimit: 3000
 //   },
-  
+
 //   server: {
 //     port: 3000, 
 //     proxy: {
@@ -103,15 +103,32 @@ export default defineConfig({
     chunkSizeWarningLimit: 3000
   },
 
+  // server: {
+  //   port: 3000,
+  //   proxy: {
+  //     '/api': {
+  //       target: 'https://api.growondaily.com', 
+  //       changeOrigin: true,
+  //       secure: false, // added for https backend
+  //       rewrite: (path) => path.replace(/^\/api/, '/api') // keep path same
+  //     }
+  //   }
+  // }
+
   server: {
     port: 3000,
     proxy: {
-      '/api': {
-        target: 'https://api.growondaily.com', 
+      "/api": {
+        target: "https://api.growondaily.com",
         changeOrigin: true,
-        secure: false, // added for https backend
-        rewrite: (path) => path.replace(/^\/api/, '/api') // keep path same
+        secure: false,
+      },
+      "/uploads": {
+        target: "https://api.growondaily.com",
+        changeOrigin: true,
+        secure: false,
       }
     }
   }
+
 });

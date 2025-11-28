@@ -74,6 +74,7 @@ const ResetPasswordChange = () => {
   });
 
   return (
+    <div className="flex justify-center items-center min-h-screen w-full">
     <div className="card max-w-[370px] w-full">
       <form
         className="card-body flex flex-col gap-5 p-10"
@@ -168,6 +169,7 @@ const ResetPasswordChange = () => {
           {loading ? 'Please wait...' : 'Submit'}
         </button>
       </form>
+    </div>
     </div>
   );
 };

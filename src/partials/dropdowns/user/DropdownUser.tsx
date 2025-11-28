@@ -256,10 +256,15 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
 
   const buildHeader = () => {
     const imageURL =
+      // currentUser?.profile_picture
+      //   ? `/uploads/profile-pictures/${currentUser.profile_picture}`
+      //   : toAbsoluteUrl("/media/avatars/300-2.png");
+
       currentUser?.profile_picture
-        ? `/uploads/profile-pictures/${currentUser.profile_picture}`
+        ? `/uploads/profile-pictures/${currentUser.profile_picture}?v=${Date.now()}`
         : toAbsoluteUrl("/media/avatars/300-2.png");
-    // console.log("Uploaded Image Full URL =>", imageURL);
+
+
 
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">

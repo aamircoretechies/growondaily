@@ -44,6 +44,9 @@ interface AuthContextProps {
   setProfileProgress: Dispatch<SetStateAction<number>>;
   refreshDashboard: () => Promise<void>;
   updateProfileImage: (file: File) => Promise<UserModel | null>;
+
+    changeLanguage: (langCode: string) => Promise<any>;
+
 }
 
 const AuthContext = createContext<AuthContextProps | null>(null);
@@ -158,7 +161,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       // throw new Error(`Error ${error}`);
       let msg =
         error?.response?.data?.message ||
-        error?.message ||"Invalid email or password";
+        error?.message || "Invalid email or password";
       throw new Error(msg);
     }
   };
@@ -556,6 +559,40 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   };
 
 
+  // const updateProfileImage = async (file: File): Promise<UserModel | null> => {
+  //   try {
+  //     const token =
+  //       auth?.access_token ||
+  //       auth?.api_token ||
+  //       authHelper.getAuth()?.access_token ||
+  //       authHelper.getAuth()?.api_token;
+
+  //     if (!token) {
+  //       throw new Error("No auth token found");
+  //     }
+
+  //     const formData = new FormData();
+  //     formData.append("profile_picture", file);
+
+  //     const response = await axios.put(`/api/auth/profile-picture`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "multipart/form-data",
+  //         },
+  //       }
+  //     );
+  //     const updatedUser = await getUser(token);
+  //     setCurrentUser(updatedUser);
+
+  //     return updatedUser;
+  //   } catch (error: any) {
+  //     console.error("Profile Image Update Error:", error.response?.data || error);
+  //     return null;
+  //   }
+  // };
+
   const updateProfileImage = async (file: File): Promise<UserModel | null> => {
     try {
       const token =
@@ -564,12 +601,10 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         authHelper.getAuth()?.access_token ||
         authHelper.getAuth()?.api_token;
 
-      if (!token) {
-        throw new Error("No auth token found");
-      }
-
       const formData = new FormData();
       formData.append("profile_picture", file);
+      console.log(import.meta.env.VITE_APP_API_URL);
+
 
       const response = await axios.put(`/api/auth/profile-picture`,
         formData,
@@ -580,15 +615,63 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
           },
         }
       );
+
+      console.log("Backend:", response.data);
+
+      // Smart handling
+      const newProfile =
+        response?.data?.data?.user?.profile_picture ||
+        response?.data?.data?.profile_picture ||
+        response?.data?.data?.file_info?.filename;
+
+      console.log("NEW PROFILE PIC:", newProfile);
+
+      if (!newProfile) {
+        console.error("Backend did not return correct profile_picture");
+        return null;
+      }
+
       const updatedUser = await getUser(token);
       setCurrentUser(updatedUser);
 
       return updatedUser;
     } catch (error: any) {
-      console.error("Profile Image Update Error:", error.response?.data || error);
+      console.error("Update error:", error.response?.data || error);
       return null;
     }
   };
+
+
+  const changeLanguage = async (langCode: string) => {
+    try {
+      const token =
+        auth?.access_token ||
+        auth?.api_token ||
+        authHelper.getAuth()?.access_token;
+
+      if (!token) throw new Error("No token available");
+
+      const response = await axios.post(`/api/auth/change-language`,
+        { language: langCode },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // SUCCESSFUL
+      const updatedUser = await getUser(token);
+      setCurrentUser(updatedUser);
+
+      return response.data;
+    } catch (error: any) {
+      console.error("Language change error:", error.response?.data || error);
+      throw error;
+    }
+  };
+
 
 
 
@@ -603,7 +686,8 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       value={{
         loading, setLoading, auth, saveAuth, currentUser, setCurrentUser, login, register, requestPasswordResetLink, changePassword,
         getUser, saveUserPreferences, updateUserPreferences, saveOrUpdateUserPreferences, updateProfileImage, loginWithGoogle, logout,
-        verify, profileProgress, setProfileProgress, refreshDashboard
+        verify, profileProgress, setProfileProgress, refreshDashboard,changeLanguage,
+
       }}
     >
       {children}
