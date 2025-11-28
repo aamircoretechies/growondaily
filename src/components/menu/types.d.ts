@@ -17,7 +17,7 @@ export type TMenuToggle = 'accordion' | 'dropdown';
 
 export type TMenuItemToggle = Record<string, TMenuToggle> | TMenuToggle;
 
-export type TMenuDropdown = Partial<Omit<PopperProps, 'children'>>;
+export type TMenuDropdown = Partial<Omit<PopperProps, 'children'>> & { strategy?: 'absolute' | 'fixed'; disablePortal?: boolean };
 
 export type TMenuTabIndex = number;
 

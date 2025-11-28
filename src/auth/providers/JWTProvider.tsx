@@ -612,4 +612,3 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 };
 
 export { AuthContext, AuthProvider };
-
