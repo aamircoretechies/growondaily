@@ -108,6 +108,8 @@ import clsx from "clsx";
 import { I18N_LANGUAGES, TLanguage, useLanguage } from "@/i18n";
 import { useAuthContext } from "@/auth";
 import { toast } from "sonner";
+import { useSettingEdit } from "@/pages/settings/Provider/SettingeEditProvider";
+
 
 interface IDropdownUserLanguagesProps {
   menuItemRef: any;
@@ -116,24 +118,52 @@ interface IDropdownUserLanguagesProps {
 const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => {
   const { currentLanguage, changeLanguage: changeFrontendLanguage, isRTL } = useLanguage();
   const { changeLanguage: changeBackendLanguage } = useAuthContext(); 
+  const { changeLanguageBackend } = useSettingEdit();
 
-  const handleLanguageChange = async (lang: TLanguage) => {
-    try {
-      changeFrontendLanguage(lang);
 
-      await changeBackendLanguage(lang.code); // lang.code like "en" or "nl"
+  // const handleLanguageChange = async (lang: TLanguage) => {
+  //   try {
+  //     changeFrontendLanguage(lang);
 
+  //     await changeBackendLanguage(lang.code);
+
+  //     toast.success(`Language changed to ${lang.label}`);
+
+  //     if (menuItemRef.current) {
+  //       menuItemRef.current.hide();
+  //     }
+
+  //   } catch (error) {
+  //     console.error("Language change failed:", error);
+  //     toast.error("Failed to change language");
+  //   }
+  // };
+
+    const handleLanguageChange = async (lang: TLanguage) => {
+  try {
+    // Frontend language update
+    changeFrontendLanguage(lang);
+
+    // Backend API call
+    const result = await changeLanguageBackend(lang.code);
+
+    if (result.success) {
       toast.success(`Language changed to ${lang.label}`);
-
-      if (menuItemRef.current) {
-        menuItemRef.current.hide();
-      }
-
-    } catch (error) {
-      console.error("Language change failed:", error);
-      toast.error("Failed to change language");
+    } else {
+      toast.error(result.message);
     }
-  };
+
+    if (menuItemRef.current) {
+      menuItemRef.current.hide();
+    }
+
+  } catch (error) {
+    console.error("Language change failed:", error);
+    toast.error("Failed to change language");
+  }
+};
+
+
 
   const buildItems = () => {
     return I18N_LANGUAGES.map((item, index) => (

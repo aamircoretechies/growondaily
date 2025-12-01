@@ -129,38 +129,83 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
     }
   };
 
-  const selectLanguage = async (language_code: string) => {
-    try {
-      // setLoading(true);
-      setLanguageLoading(true);
-      const token = localStorage.getItem("accessToken");
+  // const selectLanguage = async (language_code: string) => {
+  //   try {
+  //     // setLoading(true);
+  //     setLanguageLoading(true);
+  //     const token = localStorage.getItem("accessToken");
 
-      const response = await axios.post("/api/auth/select-language", { language_code }, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
+  //     const response = await axios.post("/api/auth/select-language", { language_code }, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } });
 
 
-      if (response.data.status === 1) {
-        const updatedUser = { ...user, language_code };
-        setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+  //     if (response.data.status === 1) {
+  //       const updatedUser = { ...user, language_code };
+  //       setUser(updatedUser);
+  //       localStorage.setItem("user", JSON.stringify(updatedUser));
 
-        const selectedLang = I18N_LANGUAGES.find((l) => l.code === language_code);
-        if (selectedLang) {
-          setData(I18N_CONFIG_KEY, selectedLang); // persist
-          changeLanguage(selectedLang); // update context immediately
+  //       const selectedLang = I18N_LANGUAGES.find((l) => l.code === language_code);
+  //       if (selectedLang) {
+  //         setData(I18N_CONFIG_KEY, selectedLang); // persist
+  //         changeLanguage(selectedLang); // update context immediately
+  //       }
+
+  //       return { success: true, message: response.data.message || "Language selected successfully" };
+  //     } else {
+  //       return { success: false, message: response.data.message || "Failed to select language" };
+  //     }
+  //   } catch (error: any) {
+  //     console.error("Error selecting language:", error);
+  //     return { success: false, message: error.response?.data?.message || "Something went wrong" };
+  //   } finally {
+  //     // setLoading(false);
+  //     setLanguageLoading(false);
+  //   }
+  // };
+
+  const changeLanguageBackend = async (language_code: string) => {
+  try {
+    setLanguageLoading(true);
+    const token = localStorage.getItem("accessToken");
+
+    const response = await axios.post("/api/auth/change-language",
+      { language_code },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         }
-
-        return { success: true, message: response.data.message || "Language selected successfully" };
-      } else {
-        return { success: false, message: response.data.message || "Failed to select language" };
       }
-    } catch (error: any) {
-      console.error("Error selecting language:", error);
-      return { success: false, message: error.response?.data?.message || "Something went wrong" };
-    } finally {
-      // setLoading(false);
-      setLanguageLoading(false);
+    );
+
+    if (response.data.status === 1) {
+
+      // Update user object
+      const updatedUser = { ...user, language_code };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      // Update frontend language
+      const selectedLang = I18N_LANGUAGES.find((x) => x.code === language_code);
+      if (selectedLang) {
+        setData(I18N_CONFIG_KEY, selectedLang);
+        changeLanguage(selectedLang);
+      }
+
+      return { success: true, message: "Language changed successfully" };
     }
-  };
+
+    return { success: false, message: response.data.message };
+
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "Something went wrong"
+    };
+  } finally {
+    setLanguageLoading(false);
+  }
+};
+
 
   const deleteAccount = async () => {
   try {
@@ -207,7 +252,7 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
 
 
   return (
-    <SettingEditContext.Provider value={{ user, loading, profileLoading, passwordLoading, notificationLoading, updateProfile, languageLoading, changePassword, getNotificationPreferences, updateNotificationPreferences, selectLanguage,deleteAccount  }}>
+    <SettingEditContext.Provider value={{ user, loading, profileLoading, passwordLoading, notificationLoading, updateProfile, languageLoading, changePassword, getNotificationPreferences, updateNotificationPreferences,deleteAccount,changeLanguageBackend,  }}>
       {children}
     </SettingEditContext.Provider>
   );

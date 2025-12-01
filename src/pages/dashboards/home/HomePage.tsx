@@ -379,8 +379,7 @@ const HomePage = () => {
         // Fetch all verses for the chapter
         // We use a direct axios call here to avoid affecting the global BibleContext state
         // which might be displaying a different chapter/book
-        const response = await axios.get(
-          `/api/bible/books/${bookObj.book_id}/chapters/${chapter}/verses/${version || 'KJV'}`
+        const response = await axios.get(`/api/bible/books/${bookObj.book_id}/chapters/${chapter}/verses/${version || 'KJV'}`
         );
 
         const verses = response.data?.data?.verses || [];
@@ -430,7 +429,7 @@ const HomePage = () => {
     });
   };
 
-  
+
 
 
   const handleAudioPlay = () => {
@@ -467,10 +466,26 @@ const HomePage = () => {
     }
   };
 
+  // const handleReadBible = () => {
+  //   console.log('Read Bible clicked');
+  //   navigate('/bible');
+  // };
+
   const handleReadBible = () => {
-    console.log('Read Bible clicked');
-    navigate('/bible');
+    const defaultBookSlug = "genesis";
+    const defaultChapter = 1;
+    navigate(`/bible?bible=${defaultBookSlug}&chapter=${defaultChapter}`);
+    const genesisBook = books?.find(
+      (b) => b.name.toLowerCase() === "genesis"
+    );
+
+    // Set global state for BiblePage
+    if (genesisBook) {
+      selectBook(genesisBook.book_id, genesisBook.name);
+      selectChapter(defaultChapter);
+    }
   };
+
 
   const handleContinueReadingClick = () => {
     const data = dashboardData?.continue_reading;

@@ -122,6 +122,10 @@ const ChangePasswordCard = () => {
       new_password: newPassword,
       confirm_password: confirmPassword,
     });
+    console.log("FULL PASSWORD API RESPONSE =>", res);
+    console.log("ERRORS =>", res.errors);
+
+
 
     if (!res || res.success === false || res.status === 0) {
       setMessage(res.message || "Current password is incorrect");

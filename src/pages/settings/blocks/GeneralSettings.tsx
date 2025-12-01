@@ -78,36 +78,49 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Settings, Languages, Save, RefreshCw } from 'lucide-react';
 import { useSettingEdit } from "../Provider/SettingeEditProvider";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from '@/providers/TranslationProvider';
-import { I18N_LANGUAGES, I18N_CONFIG_KEY } from '@/i18n';  
-import { setData } from '@/utils';
-import { FormattedMessage } from 'react-intl';                         
+import { I18N_LANGUAGES } from '@/i18n';
+import { FormattedMessage } from 'react-intl';
+import { toast } from "sonner";
 
 const GeneralSettings = ({ user }: { user: any }) => {
-  const { selectLanguage, languageLoading } = useSettingEdit();
-  const { changeLanguage } = useLanguage();
-  const [language, setLanguage] = useState(user?.language_code || "en");
+  const { changeLanguageBackend, languageLoading } = useSettingEdit();
+  const { currentLanguage } = useLanguage();
+
+  const [language, setLanguage] = useState(currentLanguage.code);
+
+  // When global language changes from dropdown, update this page as well
+  useEffect(() => {
+    setLanguage(currentLanguage.code);
+  }, [currentLanguage.code]);
 
   const handleSave = async () => {
-    const res = await selectLanguage(language);
+    const res = await changeLanguageBackend(language);
 
     if (res.success) {
-      const selectedLang = I18N_LANGUAGES.find((lang) => lang.code === language);
-      if (selectedLang) {
-        setData(I18N_CONFIG_KEY, selectedLang);
-        changeLanguage(selectedLang);
-        window.location.reload();
-      }
-      // alert(res.message);
+      toast.success("Language updated");
     } else {
-      alert("Failed: " + res.message);
+      toast.error("Failed: " + res.message);
     }
   };
 
@@ -132,15 +145,21 @@ const GeneralSettings = ({ user }: { user: any }) => {
             </Label>
             <div className="flex items-center gap-2">
               <Languages className="w-4 h-4 text-gray-400" />
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="w-full bg-gray-100 rounded-xl border border-gray-300 text-gray-700 focus:ring-2 focus:ring-sand/50">
+              
+              {/* FIXED: Added type for val */}
+              <Select defaultValue={language} onValueChange={(val: any) => setLanguage(val)}>
+                <SelectTrigger className="w-full bg-gray-100 rounded-xl border border-gray-300 text-gray-700">
                   <SelectValue placeholder={<FormattedMessage id="SETTINGS.SELECT_LANGUAGE" />} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="nl">Dutch</SelectItem>
+                  {I18N_LANGUAGES.map(lang => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+
             </div>
           </div>
         </div>
@@ -170,6 +189,8 @@ const GeneralSettings = ({ user }: { user: any }) => {
 };
 
 export { GeneralSettings };
+
+
 
 
 

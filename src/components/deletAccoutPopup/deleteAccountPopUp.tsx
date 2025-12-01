@@ -61,9 +61,9 @@ const DeleteAccountPopUp = ({ onClose }: any) => {
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+            className="px-4 py-2 rounded-lg border bg-transparent text-gray-800 border-gray-300 hover:bg-gray-100 dark:text-gray-700 dark:border-gray-500 dark:hover:bg-gray-700 dark:hover:text-white"
           >
-            Cancel
+            Cancel 
           </button>
 
           <button
