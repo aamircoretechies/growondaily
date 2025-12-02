@@ -84,15 +84,15 @@ const SavedJournalListPage = () => {
     }
   };
 
- const journalEntries = allNotes || [];
+  const journalEntries = allNotes || [];
 
-const filteredEntries = journalEntries.filter((entry: any) =>
-  entry.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  entry.book?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  (entry.emotion_tags?.join(' ') || '').toLowerCase().includes(searchQuery.toLowerCase())
-);
+  const filteredEntries = journalEntries.filter((entry: any) =>
+    entry.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    entry.book?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (entry.emotion_tags?.join(' ') || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-const visibleEntries = filteredEntries.slice(0, visibleCount);
+  const visibleEntries = filteredEntries.slice(0, visibleCount);
 
 
 
@@ -157,7 +157,7 @@ const visibleEntries = filteredEntries.slice(0, visibleCount);
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
           {/* {journalEntries.slice(0, visibleCount).map((entry: any) => ( */}
-            {visibleEntries.map((entry: any) => (
+          {visibleEntries.map((entry: any) => (
             <div key={entry.note_id} onClick={() => handleOpenNote(entry)} className="bg-white/80 dark:bg-transparent rounded-xl p-6 border border-transparent dark:border-gray-400 hover:shadow-lg transition-shadow cursor-pointer">
               {/* Entry Header */}
               <div className="flex items-center gap-2 mb-4">
@@ -183,7 +183,7 @@ const visibleEntries = filteredEntries.slice(0, visibleCount);
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mb-4 ">
-                {(entry.emotion_tags?.length
+                {(entry.emotion_tags !== undefined && entry.emotion_tags !== null
                   ? entry.emotion_tags
                   : entry.original_tags || []
                 ).map((tag: string, index: number) => (

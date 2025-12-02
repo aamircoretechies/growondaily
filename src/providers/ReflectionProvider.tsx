@@ -143,9 +143,10 @@
 
 
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useLanguage } from "@/providers/TranslationProvider";
+import { I18N_LANGUAGES } from "@/i18n";
 import { toast } from "sonner";
 
 interface ReportPayload {
@@ -171,7 +172,7 @@ export const ReflectionProvider = ({ children }: any) => {
   const [notesLoading, setNotesLoading] = useState(false);
 
   //  Fetch today's reflection (with language param)
-  const fetchDailyReflection = async (timezone = "UTC", personalize = true) => {
+  const fetchDailyReflection = useCallback(async (timezone = "UTC", personalize = true) => {
     try {
       setLoading(true);
       const res = await axios.get(`/api/reflections/daily?timezone=${timezone}&personalize=${personalize}&lang=${currentLanguage.code}`, { withCredentials: true });
@@ -184,10 +185,10 @@ export const ReflectionProvider = ({ children }: any) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentLanguage.code]);
 
   //  Fetch bookmarks (with language param)
-  const fetchBookmarks = async () => {
+  const fetchBookmarks = useCallback(async () => {
     try {
       setBmLoading(true);
       const res = await axios.get(`/api/bible/bookmarks?limit=100&offset=0&lang=${currentLanguage.code}`, { withCredentials: true });
@@ -201,31 +202,46 @@ export const ReflectionProvider = ({ children }: any) => {
     } finally {
       setBmLoading(false);
     }
-  };
+  }, [currentLanguage.code]);
 
-  // Fetch all notes (with language param)
-  const fetchAllNotes = async () => {
+  // Fetch all notes (for ALL languages)
+  const fetchAllNotes = useCallback(async () => {
     try {
       setNotesLoading(true);
-      const res = await axios.get(`/api/reflections/notes?lang=${currentLanguage.code}`, { withCredentials: true });
 
-      if (res.data?.status === 1) {
-        const notes = res.data.data?.notes || [];
-        setAllNotes(notes);
-      } else {
-        console.error("Failed to fetch notes:", res.data?.message);
-        setAllNotes([]);
-      }
+      // Create an array of promises for each supported language
+      const requests = I18N_LANGUAGES.map(lang =>
+        axios.get(`/api/reflections/notes?lang=${lang.code}`, { withCredentials: true })
+          .then(res => res.data?.status === 1 ? res.data.data?.notes || [] : [])
+          .catch(err => {
+            console.error(`Error fetching notes for ${lang.code}:`, err);
+            return [];
+          })
+      );
+
+      // Wait for all requests to complete
+      const results = await Promise.all(requests);
+
+      // Flatten the array of arrays
+      const allFetchedNotes = results.flat();
+
+      // Remove duplicates based on note_id
+      const uniqueNotes = Array.from(
+        new Map(allFetchedNotes.map(note => [note.note_id, note])).values()
+      );
+
+      setAllNotes(uniqueNotes);
+
     } catch (err: any) {
       console.error("Error fetching notes:", err.response?.data || err.message);
       setAllNotes([]);
     } finally {
       setNotesLoading(false);
     }
-  };
+  }, []);
 
   // Delete note (no need for language param)
-  const deleteNote = async (noteId: string) => {
+  const deleteNote = useCallback(async (noteId: string) => {
     try {
       const res = await axios.delete(`/api/reflections/notes/${noteId}`, { withCredentials: true });
       if (res.data?.status === 1) {
@@ -241,11 +257,11 @@ export const ReflectionProvider = ({ children }: any) => {
       console.error("Error deleting note:", err.response?.data || err.message);
       return false;
     }
-  };
+  }, []);
 
 
   // Update a note
-  const updateNote = async (noteId: string, updatedContent: string, updatedTags?: string[]) => {
+  const updateNote = useCallback(async (noteId: string, updatedContent: string, updatedTags?: string[]) => {
     try {
       const payload: any = { content: updatedContent };
       if (updatedTags) payload.tags = updatedTags;
@@ -270,9 +286,9 @@ export const ReflectionProvider = ({ children }: any) => {
       console.error("Error updating note:", err);
       return false;
     }
-  };
+  }, []);
 
-  const submitReport = async (payload: ReportPayload) => {
+  const submitReport = useCallback(async (payload: ReportPayload) => {
     try {
       const res = await axios.post(`/api/bible/report`,
         payload,
@@ -292,7 +308,7 @@ export const ReflectionProvider = ({ children }: any) => {
       toast.error("Something went wrong!");
       return { success: false };
     }
-  };
+  }, []);
 
 
 
@@ -314,7 +330,7 @@ export const ReflectionProvider = ({ children }: any) => {
     return () => {
       window.removeEventListener('bookmark-updated', handleBookmarkUpdate);
     };
-  }, [currentLanguage.code]);
+  }, [currentLanguage.code, fetchDailyReflection, fetchBookmarks, fetchAllNotes]);
 
   return (
     <ReflectionContext.Provider
