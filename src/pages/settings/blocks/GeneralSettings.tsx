@@ -124,9 +124,22 @@ const GeneralSettings = ({ user }: { user: any }) => {
     }
   };
 
-  const handleReset = () => {
+  // const handleReset = () => {
+  //   setLanguage("en");
+  // };
+
+  const handleReset = async () => {
     setLanguage("en");
+
+    const res = await changeLanguageBackend("en");
+
+    if (res.success) {
+      toast.success("Language reset to English");
+    } else {
+      toast.error(res.message);
+    }
   };
+
 
   return (
     <Card id="general_settings" className='bg-white/40 dark:bg-gray-100'>
@@ -145,7 +158,7 @@ const GeneralSettings = ({ user }: { user: any }) => {
             </Label>
             <div className="flex items-center gap-2">
               <Languages className="w-4 h-4 text-gray-400" />
-              
+
               {/* FIXED: Added type for val */}
               <Select defaultValue={language} onValueChange={(val: any) => setLanguage(val)}>
                 <SelectTrigger className="w-full bg-gray-100 rounded-xl border border-gray-300 text-gray-700">

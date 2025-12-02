@@ -11,6 +11,9 @@ export const REGISTER_URL = `/api/auth/create-account`;
 export const FORGOT_PASSWORD_URL = `/api/auth/forgot-password`;
 export const RESET_PASSWORD_URL = `/api/auth/reset-password`;
 export const GET_USER_URL = `/api/auth/profile`;
+export const VERIFY_RESET_TOKEN_URL = `/api/auth/verify-reset-token`;
+
+
 
 import { signInWithPopup } from "firebase/auth";
 import { auth as firebaseAuth, googleProvider } from "@/firebaseConfig";
@@ -46,6 +49,8 @@ interface AuthContextProps {
   updateProfileImage: (file: File) => Promise<UserModel | null>;
 
     changeLanguage: (langCode: string) => Promise<any>;
+    verifyResetToken: (token: string) => Promise<any>;
+
 
 }
 
@@ -464,7 +469,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   };
 
 
-
   const loginWithGoogle = async (): Promise<boolean> => {
     try {
       console.log(" Starting Google login...");
@@ -559,40 +563,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   };
 
 
-  // const updateProfileImage = async (file: File): Promise<UserModel | null> => {
-  //   try {
-  //     const token =
-  //       auth?.access_token ||
-  //       auth?.api_token ||
-  //       authHelper.getAuth()?.access_token ||
-  //       authHelper.getAuth()?.api_token;
-
-  //     if (!token) {
-  //       throw new Error("No auth token found");
-  //     }
-
-  //     const formData = new FormData();
-  //     formData.append("profile_picture", file);
-
-  //     const response = await axios.put(`/api/auth/profile-picture`,
-  //       formData,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "multipart/form-data",
-  //         },
-  //       }
-  //     );
-  //     const updatedUser = await getUser(token);
-  //     setCurrentUser(updatedUser);
-
-  //     return updatedUser;
-  //   } catch (error: any) {
-  //     console.error("Profile Image Update Error:", error.response?.data || error);
-  //     return null;
-  //   }
-  // };
-
   const updateProfileImage = async (file: File): Promise<UserModel | null> => {
     try {
       const token =
@@ -673,6 +643,32 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   };
 
 
+  const verifyResetToken = async (token: string) => {
+    
+
+    console.log("this is rest token", token);
+  try {
+    console.log("API is calling");
+    const response = await axios.get(`/api/auth/verify-reset-token/${token}`);
+
+    console.log("APi responce 2345673456",response);
+    return {
+      success: response.data?.status === 1,
+      message: response.data?.message,
+      data: response.data?.data
+    };
+
+   
+
+  } catch (error: any) {
+    console.error("Verify reset token error:", error.response_?.data || error);
+
+    return {
+      success: false,
+      message: error.response?.data?.message || "Invalid or expired reset token"
+    };
+  }
+};
 
 
 
@@ -686,7 +682,8 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       value={{
         loading, setLoading, auth, saveAuth, currentUser, setCurrentUser, login, register, requestPasswordResetLink, changePassword,
         getUser, saveUserPreferences, updateUserPreferences, saveOrUpdateUserPreferences, updateProfileImage, loginWithGoogle, logout,
-        verify, profileProgress, setProfileProgress, refreshDashboard,changeLanguage,
+        verify, profileProgress, setProfileProgress, refreshDashboard,changeLanguage,verifyResetToken,
+
 
       }}
     >

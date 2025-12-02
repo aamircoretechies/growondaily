@@ -174,10 +174,6 @@ export const ReflectionProvider = ({ children }: any) => {
   const fetchDailyReflection = async (timezone = "UTC", personalize = true) => {
     try {
       setLoading(true);
-      // const res = await axios.get(
-      //   `https://api.growondaily.com/api/reflections/daily?timezone=${timezone}&personalize=${personalize}&lang=${currentLanguage.code}`,
-      //   { withCredentials: true }
-      // );
       const res = await axios.get(`/api/reflections/daily?timezone=${timezone}&personalize=${personalize}&lang=${currentLanguage.code}`, { withCredentials: true });
 
       setDailyReflection(res.data?.data?.reflection || null);
@@ -194,10 +190,6 @@ export const ReflectionProvider = ({ children }: any) => {
   const fetchBookmarks = async () => {
     try {
       setBmLoading(true);
-      // const res = await axios.get(
-      //   `https://api.growondaily.com/api/bible/bookmarks?limit=100&offset=0&lang=${currentLanguage.code}`,
-      //   { withCredentials: true }
-      // );
       const res = await axios.get(`/api/bible/bookmarks?limit=100&offset=0&lang=${currentLanguage.code}`, { withCredentials: true });
 
       if (res.data?.status === 1) {
@@ -215,11 +207,6 @@ export const ReflectionProvider = ({ children }: any) => {
   const fetchAllNotes = async () => {
     try {
       setNotesLoading(true);
-      // const res = await axios.get(
-      //   `https://api.growondaily.com/api/reflections/notes?lang=${currentLanguage.code}`,
-      //   { withCredentials: true }
-      // );
-
       const res = await axios.get(`/api/reflections/notes?lang=${currentLanguage.code}`, { withCredentials: true });
 
       if (res.data?.status === 1) {
@@ -286,26 +273,26 @@ export const ReflectionProvider = ({ children }: any) => {
   };
 
   const submitReport = async (payload: ReportPayload) => {
-  try {
-    const res = await axios.post(`/api/bible/report`,
-      payload,
-      { withCredentials: true }
-    );
+    try {
+      const res = await axios.post(`/api/bible/report`,
+        payload,
+        { withCredentials: true }
+      );
 
-    if (res.data?.status === 1) {
-      // toast.success("Report submitted successfully!");
-      return { success: true, data: res.data.data };
-    } else {
-      // toast.error(res.data?.message || "Failed to submit report");
+      if (res.data?.status === 1) {
+        // toast.success("Report submitted successfully!");
+        return { success: true, data: res.data.data };
+      } else {
+        // toast.error(res.data?.message || "Failed to submit report");
+        return { success: false };
+      }
+
+    } catch (error) {
+      console.log("REPORT ERROR:", error);
+      toast.error("Something went wrong!");
       return { success: false };
     }
-
-  } catch (error) {
-    console.log("REPORT ERROR:", error);
-    toast.error("Something went wrong!");
-    return { success: false };
-  }
-};
+  };
 
 
 
@@ -315,6 +302,18 @@ export const ReflectionProvider = ({ children }: any) => {
     fetchDailyReflection();
     fetchBookmarks();
     fetchAllNotes();
+
+    // Listen for bookmark updates from BibleProvider
+    const handleBookmarkUpdate = () => {
+      console.log("Bookmark update event received, reloading bookmarks...");
+      fetchBookmarks();
+    };
+
+    window.addEventListener('bookmark-updated', handleBookmarkUpdate);
+
+    return () => {
+      window.removeEventListener('bookmark-updated', handleBookmarkUpdate);
+    };
   }, [currentLanguage.code]);
 
   return (

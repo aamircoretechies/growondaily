@@ -207,7 +207,7 @@ const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => 
     >
       <MenuLink>
         <MenuIcon>
-          <KeenIcon icon="earth" />
+          <KeenIcon icon="icon" />
         </MenuIcon>
 
         <MenuTitle>

@@ -634,6 +634,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         toast.info(res?.data?.message || "Updated");
       }
+
+      // Dispatch event to notify ReflectionProvider to reload bookmarks
+      window.dispatchEvent(new CustomEvent('bookmark-updated'));
     } catch (err) {
       console.error("Bookmark toggle error:", err);
       toast.error("Something went wrong");

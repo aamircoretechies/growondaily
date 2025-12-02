@@ -189,7 +189,7 @@ const ChangePasswordCard = () => {
               </button> */}
               <button
                 type="button"
-                className="absolute right-3 top-3 group text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 group text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
                 onClick={() => setShowCurrent(!showCurrent)}
               >
                 {showCurrent ? (
@@ -238,7 +238,7 @@ const ChangePasswordCard = () => {
 
               <button
                 type="button"
-                className="absolute right-3 top-3 group text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 group text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
                 onClick={() => setShowNew(!showNew)}
               >
                 {showNew ? (
@@ -286,7 +286,7 @@ const ChangePasswordCard = () => {
               </button> */}
               <button
                 type="button"
-                className="absolute right-3 top-3 group text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 group text-gray-500 hover:text-primary dark:hover:text-white transition cursor-pointer"
                 onClick={() => setShowConfirm(!showConfirm)}
               >
                 {showConfirm ? (
