@@ -457,8 +457,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     verse?: string | number
   ) => {
     try {
-      setLoadingDeepStudy(true);
-
       const key = verse
         ? `${bookId}-${chapter}-${verse}`
         : `${bookId}-${chapter}`;
@@ -472,9 +470,11 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
             [context]: deepStudyCache.current[key][context]
           }
         }));
-        setLoadingDeepStudy(false);
+        // Do NOT set loading to true if we have data
         return;
       }
+
+      setLoadingDeepStudy(true);
 
       const baseUrl = verse
         ? `/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}`

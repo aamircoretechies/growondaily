@@ -1,6 +1,7 @@
 import { useSettingEdit } from "@/pages/settings/Provider/SettingeEditProvider";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const DeleteAccountPopUp = ({ onClose }: any) => {
   const { deleteAccount } = useSettingEdit();
@@ -19,6 +20,7 @@ const DeleteAccountPopUp = ({ onClose }: any) => {
         localStorage.clear();
         sessionStorage.clear();
 
+        toast.success("Account deleted successfully!");
         // Close popup
         onClose();
 
