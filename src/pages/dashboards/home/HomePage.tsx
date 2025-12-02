@@ -655,7 +655,7 @@ const HomePage = () => {
 
 
                 </div>
-                <div className="flex gap-2 sm:gap-3 justify-end">
+                {/* <div className="flex gap-2 sm:gap-3 justify-end">
                   <button
                     onClick={handleAudioPlay}
                     className="w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white hover:text-sand transition-colors"
@@ -668,7 +668,30 @@ const HomePage = () => {
                   >
                     <LucideBook className='text-white hover:text-sand text-sm sm:text-base transition-colors' />
                   </button>
+                </div> */}
+
+                <div className="flex gap-2 sm:gap-3 justify-end">
+                  {/* Audio Button */}
+                  <button
+                    onClick={handleAudioPlay}
+                    className="group w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                  >
+                    <LucideVolume2
+                      className="text-white text-sm sm:text-base transition-colors group-hover:text-sand"
+                    />
+                  </button>
+
+                  {/* Read More Button */}
+                  <button
+                    onClick={handleReadDailyWord}
+                    className="group w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                  >
+                    <LucideBook
+                      className="text-white text-sm sm:text-base transition-colors group-hover:text-sand"
+                    />
+                  </button>
                 </div>
+
               </div>
             </div>
           </div>

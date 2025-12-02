@@ -119,7 +119,8 @@ const ReflectionsPage = () => {
   const handleDeleteBookmark = async (entry: any) => {
     try {
       await toggleVerseBookmark(entry.book, Number(entry.chapter), Number(entry.verse), entry.version || "KJV");
-      setBookmarks((prev: any[]) => prev.filter((b) => b.bookmark_id !== entry.bookmark_id));
+      // fetchBookmarks will be called via the bookmark-updated event, which will show the loader
+      await fetchBookmarks();
       console.log("Bookmark deleted:", entry.reference || entry.verse_text);
     } catch (err) {
       console.error("Error deleting bookmark:", err);
@@ -128,6 +129,7 @@ const ReflectionsPage = () => {
 
   useEffect(() => {
     fetchAllNotes();
+    fetchBookmarks();
   }, [currentLanguage.code]);
 
   // open notes (similar to bookmarks)
@@ -420,9 +422,7 @@ const ReflectionsPage = () => {
 
             <div className="space-y-4">
               {bmLoading ? (
-                <div className="text-sm text-gray-500">
-                  <FormattedMessage id="COMMON.LOADING_BOOKMARKS" />
-                </div>
+                <Loader />
               ) : bookmarks && bookmarks.length > 0 ? (
                 // show top 2 bookmarks
                 bookmarks.slice(0, 2).map((entry: any) => (

@@ -17,6 +17,12 @@ const BookmarksPage = () => {
 
   const { dailyReflection, loading, error, bookmarks, bmLoading, fetchBookmarks, setBookmarks } = useReflection();
 
+  const Loader = () => (
+    <div className="flex justify-center items-center py-6">
+      <div className="w-6 h-6 border-2 border-gray-400 border-t-primary rounded-full animate-spin"></div>
+    </div>
+  );
+
 
   const handleOpenBookmark = (entry: any) => {
     const { book, chapter, verse, version } = entry;
@@ -41,8 +47,8 @@ const BookmarksPage = () => {
   const handleDeleteBookmark = async (entry: any) => {
   try {
     await toggleVerseBookmark(entry.book, Number(entry.chapter), Number(entry.verse), entry.version || "KJV");
-    setBookmarks((prev: any[]) => prev.filter((b) => b.bookmark_id !== entry.bookmark_id));
-
+    // fetchBookmarks will be called via the bookmark-updated event, which will show the loader
+    await fetchBookmarks();
     console.log("Bookmark deleted successfully:", entry.reference);
   } catch (err) {
     console.error("Error deleting bookmark:", err);
@@ -57,6 +63,9 @@ const BookmarksPage = () => {
   const visibleBookmarks = filtered.slice(0, visibleCount);
   const showLoadMore = filtered.length >= 6;
 
+  useEffect(() => {
+    fetchBookmarks();
+  }, []);
 
   return (
     <Container>
@@ -112,10 +121,8 @@ const BookmarksPage = () => {
         </div>
 
         {/* Bookmarks Grid */}
-        {loading ? (
-          <p className="text-gray-500 italic">
-            <FormattedMessage id="COMMON.LOADING_BOOKMARKS" />
-          </p>
+        {bmLoading ? (
+          <Loader />
         ) : filtered.length === 0 ? (
           <p className="text-gray-500 italic">
             <FormattedMessage id="COMMON.NO_BOOKMARKS" />
@@ -168,7 +175,7 @@ const BookmarksPage = () => {
             </div>
 
             {/*  Fixed Load More Button */}
-            {!loading && showLoadMore && (
+            {!bmLoading && showLoadMore && (
               <div className="mt-8 text-center">
                 <button
                   onClick={() => setVisibleCount(filtered.length)} // show all bookmarks
