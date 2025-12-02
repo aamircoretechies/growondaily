@@ -10,7 +10,7 @@ interface Props {
 export default function EditNotePopup({ note, onClose }: Props) {
   const [content, setContent] = useState(note.content || "");
   const [selectedTags, setSelectedTags] = useState(
-    note.emotion_tags || note.tags || []
+    note.emotion_tags || note.tags || note.original_tags || []
   );
 
   const { updateNote } = useReflection();
@@ -153,8 +153,8 @@ export default function EditNotePopup({ note, onClose }: Props) {
                 key={tag}
                 onClick={() => toggleTag(tag)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition ${selectedTags.includes(tag)
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 dark:bg-gray-300 text-gray-700 hover:bg-gray-200"
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 dark:bg-gray-300 text-gray-700 hover:bg-gray-200"
                   }`}
               >
                 {tag}

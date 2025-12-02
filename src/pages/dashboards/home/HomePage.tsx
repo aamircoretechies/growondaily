@@ -674,7 +674,8 @@ const HomePage = () => {
                   {/* Audio Button */}
                   <button
                     onClick={handleAudioPlay}
-                    className="group w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                    className="group w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center 
+               hover:bg-white transition-colors"
                   >
                     <LucideVolume2
                       className="text-white text-sm sm:text-base transition-colors group-hover:text-sand"
@@ -684,7 +685,8 @@ const HomePage = () => {
                   {/* Read More Button */}
                   <button
                     onClick={handleReadDailyWord}
-                    className="group w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                    className="group w-8 h-8 sm:w-10 sm:h-10 bg-sand rounded-full flex items-center justify-center 
+               hover:bg-white transition-colors"
                   >
                     <LucideBook
                       className="text-white text-sm sm:text-base transition-colors group-hover:text-sand"

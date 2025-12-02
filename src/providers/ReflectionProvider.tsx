@@ -264,7 +264,7 @@ export const ReflectionProvider = ({ children }: any) => {
   const updateNote = useCallback(async (noteId: string, updatedContent: string, updatedTags?: string[]) => {
     try {
       const payload: any = { content: updatedContent };
-      if (updatedTags) payload.tags = updatedTags;
+      if (updatedTags) payload.emotion_tags = updatedTags;
 
       const res = await axios.put(`/api/reflections/notes/${noteId}`, payload, {
         withCredentials: true,
