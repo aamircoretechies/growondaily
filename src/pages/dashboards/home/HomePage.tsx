@@ -693,7 +693,7 @@ const HomePage = () => {
                     </div>
                     <button
                       onClick={handleResume}
-                      className="w-full sm:w-auto bg-sand dark:bg-gray-200 dark:hover:bg-sand-300 text-primary dark:text-primary px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-transparent dark:border-gray-400"
+                      className="w-full sm:w-auto bg-sand dark:bg-gray-200 dark:hover:bg-sand-300 text-primary dark:text-primary px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border border-transparent dark:border-gray-400 dark:hover:text-white"
                     >
                       <FormattedMessage id="HOME.RESUME" />
                     </button>

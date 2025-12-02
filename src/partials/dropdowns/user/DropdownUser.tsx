@@ -203,7 +203,7 @@
 
 
 
-import { ChangeEvent, Fragment, useRef } from 'react';
+import { ChangeEvent, Fragment, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { useAuthContext } from '@/auth';
@@ -224,6 +224,19 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
   const { logout, currentUser, updateProfileImage } = useAuthContext();
   const { isRTL } = useLanguage();
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (menuItemRef.current && menuItemRef.current.hide) {
+        menuItemRef.current.hide();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [menuItemRef]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
