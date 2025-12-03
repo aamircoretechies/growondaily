@@ -259,8 +259,8 @@ const ResetPasswordChange = () => {
         setStatus("Reset token missing in URL");
         return;
       }
-
       const tokenData = await verifyResetToken(token);
+
 
       if (!tokenData.success) {
         setHasErrors(true);
@@ -276,14 +276,19 @@ const ResetPasswordChange = () => {
       }
 
       try {
-        await changePassword(email, token, values.newPassword, values.confirmPassword);
+
+        // await changePassword(email, token, values.newPassword, values.confirmPassword);
+        await changePassword(token, values.newPassword, values.confirmPassword);
+
         setHasErrors(false);
 
-        navigate(
-          currentLayout?.name === "auth-branded"
-            ? "/auth/login"
-            : "/auth/classic/login"
-        );
+        // navigate(
+        //   currentLayout?.name === "auth-branded"
+        //     ? "/auth/login"
+        //     : "/auth/classic/login"
+        // );
+        navigate("/auth/login");
+
       } catch (error) {
         if (error instanceof AxiosError && error.response) {
           setStatus(error.response.data.message);

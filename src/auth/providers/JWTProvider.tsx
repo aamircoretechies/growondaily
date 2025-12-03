@@ -32,7 +32,6 @@ interface AuthContextProps {
   register: (email: string, password: string, password_confirmation: string) => Promise<{ success: boolean; data?: any }>;
   requestPasswordResetLink: (email: string) => Promise<any>;
   changePassword: (
-    email: string,
     token: string,
     password: string,
     password_confirmation: string
@@ -48,13 +47,15 @@ interface AuthContextProps {
   refreshDashboard: () => Promise<void>;
   updateProfileImage: (file: File) => Promise<UserModel | null>;
 
-    changeLanguage: (langCode: string) => Promise<any>;
-    verifyResetToken: (token: string) => Promise<any>;
+  changeLanguage: (langCode: string) => Promise<any>;
+  verifyResetToken: (token: string) => Promise<any>;
 
 
 }
 
-const AuthContext = createContext<AuthContextProps | null>(null);
+// const AuthContext = createContext<AuthContextProps | null>(null);
+const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
+
 
 const AuthProvider = ({ children }: PropsWithChildren) => {
   const [loading, setLoading] = useState(true);
@@ -206,19 +207,49 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  // const changePassword = async (
+  //   email: string,
+  //   token: string,
+  //   password: string,
+  //   password_confirmation: string
+  // ) => {
+  //   await axios.post(RESET_PASSWORD_URL, {
+  //     email,
+  //     token,
+  //     password,
+  //     password_confirmation
+  //   });
+  // };
+
   const changePassword = async (
-    email: string,
     token: string,
-    password: string,
-    password_confirmation: string
-  ) => {
-    await axios.post(RESET_PASSWORD_URL, {
-      email,
-      token,
-      password,
-      password_confirmation
-    });
+    newPassword: string,
+    confirmPassword: string
+  ): Promise<void> => {
+
+    // console.log("Sending payload to reset-password API:", {
+    //   token,
+    //   new_password: newPassword,
+    //   confirm_password: confirmPassword
+    // });
+
+    const response = await axios.post(
+      RESET_PASSWORD_URL,
+      {
+        token: token,
+        new_password: newPassword,
+        confirm_password: confirmPassword
+      },
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
   };
+
+
+
 
   const getUser = async (tokenFromLogin?: string): Promise<UserModel> => {
     const token = tokenFromLogin || auth?.access_token || auth?.api_token;
@@ -447,8 +478,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       setCurrentUser(refreshedUser);
       localStorage.setItem("growondaily_currentUser", JSON.stringify(refreshedUser));
 
-
-
       setProfileProgress(calculateProfileProgress(refreshedUser));
       try {
         localStorage.setItem("growondaily_currentUser", JSON.stringify(refreshedUser));
@@ -644,31 +673,25 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
 
   const verifyResetToken = async (token: string) => {
-    
+    try {
+      const response = await axios.get(`/api/auth/verify-reset-token/${token}`);
+      return {
+        success: response.data?.status === 1,
+        message: response.data?.message,
+        data: response.data?.data
+      };
 
-    console.log("this is rest token", token);
-  try {
-    console.log("API is calling");
-    const response = await axios.get(`/api/auth/verify-reset-token/${token}`);
 
-    console.log("APi responce 2345673456",response);
-    return {
-      success: response.data?.status === 1,
-      message: response.data?.message,
-      data: response.data?.data
-    };
 
-   
+    } catch (error: any) {
+      console.error("verifyResetToken ERROR:", error.response?.data || error);
 
-  } catch (error: any) {
-    console.error("Verify reset token error:", error.response_?.data || error);
-
-    return {
-      success: false,
-      message: error.response?.data?.message || "Invalid or expired reset token"
-    };
-  }
-};
+      return {
+        success: false,
+        message: error.response?.data?.message || "Invalid or expired reset token"
+      };
+    }
+  };
 
 
 
@@ -682,7 +705,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       value={{
         loading, setLoading, auth, saveAuth, currentUser, setCurrentUser, login, register, requestPasswordResetLink, changePassword,
         getUser, saveUserPreferences, updateUserPreferences, saveOrUpdateUserPreferences, updateProfileImage, loginWithGoogle, logout,
-        verify, profileProgress, setProfileProgress, refreshDashboard,changeLanguage,verifyResetToken,
+        verify, profileProgress, setProfileProgress, refreshDashboard, changeLanguage, verifyResetToken,
 
 
       }}
