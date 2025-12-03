@@ -282,28 +282,42 @@ const VerseStudy = () => {
 
 
 
-  // const currentDate = new Date().toLocaleDateString();
-
-  // const handleReportSubmit = () => {
+  // const handleReportSubmit = async () => {
   //   if (!reportIssue.trim() || !reportCategory) {
-  //     alert('Please fill in all required fields.');
+  //     toast.error("Please fill all fields");
   //     return;
   //   }
 
-  //   console.log('Report submitted:', {
-  //     verse: `${book} ${chapter}:${verse}`,
-  //     issue: reportIssue,
-  //     category: reportCategory,
-  //     timestamp: new Date().toISOString(),
-  //   });
+  //   const payload = {
+  //     book: book.charAt(0).toUpperCase() + book.slice(1),
+  //     chapter: Number(chapter),
+  //     verse: Number(verse),
+  //     version: "KJV",
+  //     description: reportIssue,
+  //     tags: [reportCategory.toLowerCase()]
+  //   };
 
-  //   setReportIssue('');
-  //   setReportCategory('');
-  //   setShowReportModal(false);
-  //   alert('Report submitted successfully!');
+  //   const response = await submitReport(payload);
+
+  //   if (response.success) {
+  //     toast.success("Report submitted successfully!");
+
+  //     setReportIssue("");
+  //     setReportCategory("");
+  //     setShowReportModal(false);
+  //   } else {
+  //     toast.error("Something went wrong, please try again.");
+  //   }
   // };
 
   const handleReportSubmit = async () => {
+    // Word limit check (200 words max)
+    const wordCount = reportIssue.trim().split(/\s+/).length;
+    if (wordCount > 200) {
+      toast.error("Word limit exceeded (maximum 200 words)");
+      return;
+    }
+
     if (!reportIssue.trim() || !reportCategory) {
       toast.error("Please fill all fields");
       return;
@@ -330,7 +344,6 @@ const VerseStudy = () => {
       toast.error("Something went wrong, please try again.");
     }
   };
-
 
 
   return (

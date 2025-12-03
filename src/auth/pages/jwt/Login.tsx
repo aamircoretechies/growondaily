@@ -18,7 +18,7 @@ const loginSchema = Yup.object().shape({
   //   .required('Email is required'),
   email: Yup.string()
     // .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{3,}$/i, 'Please enter a valid email address.')
-    .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,'Please enter a valid email address.')
+    .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Please enter a valid email address.')
     .required('Email is required'),
 
   // password: Yup.string()
@@ -192,9 +192,13 @@ const Login = () => {
           <label className="form-label text-gray-900">Email</label>
           <label className="input">
             <input
-              placeholder="Enter username"
+              placeholder="Enter email"
               autoComplete="off"
               {...formik.getFieldProps('email')}
+              onChange={(e) => {
+                formik.handleChange(e);
+                formik.setStatus("");
+              }}
               className={clsx('form-control', {
                 'is-invalid': formik.touched.email && formik.errors.email
               })}
@@ -227,6 +231,10 @@ const Login = () => {
               placeholder="Enter Password"
               autoComplete="off"
               {...formik.getFieldProps('password')}
+              onChange={(e) => {
+                formik.handleChange(e);
+                formik.setStatus("");
+              }}
               className={clsx('form-control', {
                 'is-invalid': formik.touched.password && formik.errors.password
               })}

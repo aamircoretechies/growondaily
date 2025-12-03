@@ -42,11 +42,32 @@ const ResetPassword = () => {
         }
         const response = await requestPasswordResetLink(values.email);
 
-        if (response?.success) {
-          setHasErrors(false);
+        // if (response?.success) {
+        //   setHasErrors(false);
+        //   setLoading(false);
+        //   const params = new URLSearchParams();
+        //   params.append('email', values.email);
+        //   navigate({
+        //     pathname:
+        //       currentLayout?.name === 'auth-branded'
+        //         ? '/auth/reset-password/check-email'
+        //         : '/auth/classic/reset-password/check-email',
+        //     search: params.toString()
+        //   });
+        // } else {
+        //   setStatus(response?.message || 'Invalid email. No account found with this email address.');
+        //   setHasErrors(true);
+        //   setLoading(false);
+        // }
+
+
+        if (response?.status === 1) {
+          setHasErrors(false);   // show green alert
           setLoading(false);
+
           const params = new URLSearchParams();
           params.append('email', values.email);
+
           navigate({
             pathname:
               currentLayout?.name === 'auth-branded'
@@ -55,10 +76,11 @@ const ResetPassword = () => {
             search: params.toString()
           });
         } else {
-          setStatus(response?.message || 'Invalid email. No account found with this email address.');
-          setHasErrors(true);
+          setStatus(response?.message || 'Invalid email. No account found');
+          setHasErrors(true);   
           setLoading(false);
         }
+
       } catch (error) {
         if (error instanceof AxiosError && error.response) {
           setStatus(error.response.data.message || 'Invalid email address');
@@ -85,13 +107,28 @@ const ResetPassword = () => {
           </span>
         </div>
 
-        {hasErrors && <Alert variant="danger">{formik.status}</Alert>}
+        {/* {hasErrors && <Alert variant="danger">{formik.status}</Alert>}
 
         {hasErrors === false && (
           <Alert variant="success">
             Password reset link sent. Please check your email to proceed
           </Alert>
+        )} */}
+
+        {hasErrors && <Alert variant="danger">{formik.status}</Alert>}
+
+        {hasErrors === false && (
+          <div className="alert bg-[#E8F5E9] border border-[#4CAF50] text-[#256029] rounded-lg p-4 flex items-start gap-3">
+            <KeenIcon
+              icon="check"
+              className="text-[#4CAF50] text-xl mt-0.5"
+            />
+            <span className="text-sm">
+              Password reset link sent. Please check your email to proceed
+            </span>
+          </div>
         )}
+
 
         <div className="flex flex-col gap-1">
           <label className="form-label text-gray-900">Email</label>

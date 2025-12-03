@@ -34,6 +34,11 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
   };
 
   const handleSave = async () => {
+    if (!noteText.trim()) {
+      toast.error("Please write something !.");
+      return;
+    }
+
     if (!selectedBookId) {
       alert("Please select a book before saving a note.");
       return;
@@ -111,11 +116,10 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
               <button
                 key={tag}
                 onClick={() => handleTagClick(tag)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                  selectedTags.includes(tag)
+                className={`px-4 py-2 rounded-full text-sm font-medium transition ${selectedTags.includes(tag)
                     ? 'bg-primary text-white'
                     : 'bg-gray-100 dark:bg-gray-300 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {tag}
               </button>

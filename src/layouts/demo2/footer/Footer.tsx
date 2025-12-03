@@ -25,7 +25,16 @@ const Footer = () => {
             <a href={generalSettings.purchaseLink} target="_blank" className="hover:text-primary">
               Purchase
             </a> */}
-            <a  href="http://growondaily.com" target="_blank" className="hover:text-primary">
+            <a
+              href="https://growondaily.com/privacy-policy/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary"
+            >
+              Privacy & Policy
+            </a>
+
+            <a href="http://growondaily.com" target="_blank" className="hover:text-primary">
               FAQ
             </a>
             <a href="http://growondaily.com" target="_blank" className="hover:text-primary">

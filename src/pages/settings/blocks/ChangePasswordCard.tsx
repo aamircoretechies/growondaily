@@ -69,12 +69,30 @@ const ChangePasswordCard = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
 
+
   // const handlePasswordChange = async () => {
+
+  //   if (!currentPassword.trim()) {
+  //     setMessage("Current password is required");
+  //     return;
+  //   }
+
+  //   if (newPassword.length > 16) {
+  //     setMessage("Password cannot be more than 16 characters");
+  //     return;
+  //   }
+
+  //   if (confirmPassword.length > 16) {
+  //     setMessage("Confirm password cannot be more than 16 characters");
+  //     return;
+  //   }
+
   //   if (newPassword !== confirmPassword) {
   //     setMessage("New passwords do not match");
   //     return;
@@ -85,52 +103,73 @@ const ChangePasswordCard = () => {
   //     new_password: newPassword,
   //     confirm_password: confirmPassword,
   //   });
+  //   console.log("FULL PASSWORD API RESPONSE =>", res);
+  //   console.log("ERRORS =>", res.errors);
 
-  //   setMessage(res.message);
-  //   if (res.success) {
-  //     setCurrentPassword('');
-  //     setNewPassword('');
-  //     setConfirmPassword('');
-  //     setTimeout(() => setMessage(''), 3000);
+
+
+  //   if (!res || res.success === false || res.status === 0) {
+  //     setMessage(res.message || "Current password is incorrect");
+  //     return;
   //   }
+  //   setMessage(res.message);
+
+  //   if (res.success) {
+  //     setCurrentPassword("");
+  //     setNewPassword("");
+  //     setConfirmPassword("");
+
+  //     setTimeout(() => setMessage(""), 3000);
+  //   }
+  //   console.log("PASSWORD API RESPONSE:", res);
+
   // };
 
   const handlePasswordChange = async () => {
 
+    // --- FRONTEND VALIDATIONS ---
     if (!currentPassword.trim()) {
+      setIsError(true);
       setMessage("Current password is required");
       return;
     }
 
     if (newPassword.length > 16) {
+      setIsError(true);
       setMessage("Password cannot be more than 16 characters");
       return;
     }
 
     if (confirmPassword.length > 16) {
+      setIsError(true);
       setMessage("Confirm password cannot be more than 16 characters");
       return;
     }
 
     if (newPassword !== confirmPassword) {
+      setIsError(true);
       setMessage("New passwords do not match");
       return;
     }
 
+    // --- API CALL ---
     const res = await changePassword({
       current_password: currentPassword,
       new_password: newPassword,
       confirm_password: confirmPassword,
     });
+
     console.log("FULL PASSWORD API RESPONSE =>", res);
-    console.log("ERRORS =>", res.errors);
 
-
-
+    // --- API ERROR ---
     if (!res || res.success === false || res.status === 0) {
+      setIsError(true);
       setMessage(res.message || "Current password is incorrect");
       return;
     }
+
+    // --- SUCCESS ---
+    setIsError(false);
     setMessage(res.message);
 
     if (res.success) {
@@ -140,9 +179,9 @@ const ChangePasswordCard = () => {
 
       setTimeout(() => setMessage(""), 3000);
     }
-    console.log("PASSWORD API RESPONSE:", res);
-
   };
+
+
 
   return (
     <Card id="change_password" className='bg-white/40 dark:bg-gray-100'>
@@ -301,9 +340,15 @@ const ChangePasswordCard = () => {
           </div>
         </div>
 
-        {message && (
+        {/* {message && (
           <p className="text-sm text-green-600">{message}</p>
+        )} */}
+        {message && (
+          <p className={`text-sm ${isError ? "text-red-600" : "text-green-600"}`}>
+            {message}
+          </p>
         )}
+
 
         <div className="pt-2">
           <Button onClick={handlePasswordChange} disabled={passwordLoading}>

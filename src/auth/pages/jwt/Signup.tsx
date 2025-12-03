@@ -392,44 +392,44 @@ const signupSchema = Yup.object().shape({
   // .email('Please enter a valid email address.')
   // .required('Email is required'),
 
- email: Yup.string()
-  .email('Please enter a valid email address.')
-  .test("valid-domain", "Please enter a valid email address", (value) => {
-    if (!value) return false;
+  email: Yup.string()
+    .email('Please enter a valid email address.')
+    .test("valid-domain", "Please enter a valid email address", (value) => {
+      if (!value) return false;
 
-    const allowedDomains = [
-      "gmail.com",
-      "yahoo.com",
-      "yahoo.in",
-      "yahoo.co.in",
-      "outlook.com",
-      "hotmail.com",
-      "live.com",
-      "msn.com",
-      "icloud.com",
-      "me.com",
-      "mac.com",
-      "rediffmail.com",
-      "rediff.com",
-      "mail.ru",
-      "proton.me",
-      "zoho.com",
-      "fastmail.com",
-      "mycompany.com",
-      "business.org",
-      "mywebsite.net",
-      "startup.io",
-      "school.edu",
-      "company.co.in"
-    ];
+      const allowedDomains = [
+        "gmail.com",
+        "yahoo.com",
+        "yahoo.in",
+        "yahoo.co.in",
+        "outlook.com",
+        "hotmail.com",
+        "live.com",
+        "msn.com",
+        "icloud.com",
+        "me.com",
+        "mac.com",
+        "rediffmail.com",
+        "rediff.com",
+        "mail.ru",
+        "proton.me",
+        "zoho.com",
+        "fastmail.com",
+        "mycompany.com",
+        "business.org",
+        "mywebsite.net",
+        "startup.io",
+        "school.edu",
+        "company.co.in"
+      ];
 
-    // extract domain from email
-    const domain = value.split("@")[1]?.toLowerCase();
+      // extract domain from email
+      const domain = value.split("@")[1]?.toLowerCase();
 
-    // allow only if matches allowed domain list
-    return allowedDomains.includes(domain);
-  })
-  .required('Email is required'),
+      // allow only if matches allowed domain list
+      return allowedDomains.includes(domain);
+    })
+    .required('Email is required'),
 
 
 
@@ -457,6 +457,7 @@ const Signup = () => {
   const formik = useFormik({
     initialValues,
     validationSchema: signupSchema,
+
     // onSubmit: async (values, { setStatus, setSubmitting }) => {
     //   setLoading(true);
     //   try {
@@ -473,37 +474,91 @@ const Signup = () => {
     //   }
     // }
 
+    // onSubmit: async (values, { setStatus, setSubmitting }) => {
+    //   setLoading(true);
+    //   try {
+    //     if (!register) throw new Error('JWTProvider is required for this form.');
+
+    //     const response = await register(values.email, values.password, values.changepassword);
+
+    //     if (response?.success) {
+    //       toast.success("Registered successfully!");
+    //       navigate('/auth/login', { replace: true });
+    //       return;
+    //     } else {
+    //       setStatus("please enter valid Email or password");
+    //     }
+    //   } catch (error: any) {
+    //     console.error(error);
+
+    //     let message = error?.message || "Registration failed, please try again";
+
+    //     if (
+    //       message.toLowerCase().includes("invalid") ||
+    //       message.toLowerCase().includes("exists")
+    //     ) {
+    //       message = "Please enter valid details";
+    //     }
+
+    //     setStatus(message);
+    //   } finally {
+    //     setSubmitting(false); 
+    //     setLoading(false); 
+    //   }
+    // }
+
+
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
 
       try {
         if (!register) throw new Error('JWTProvider is required for this form.');
 
-        const response = await register(values.email, values.password, values.changepassword);
+        const response = await register(
+          values.email.toLowerCase(),
+          values.password,
+          values.changepassword
+        );
 
-        if (response?.success) {
+        console.log("REGISTER RESPONSE:", response);
+
+        const backendStatus = response?.data?.status;
+        const backendMessage = response?.data?.message || "";
+
+        // SUCCESS → status 1 hua karega
+        if (backendStatus === 1) {
           toast.success("Registered successfully!");
           navigate('/auth/login', { replace: true });
           return;
-        } else {
-          setStatus("Iplease enter valid Email or password");
         }
+
+        // EMAIL EXISTS
+        if (backendMessage.toLowerCase().includes("exists")) {
+          setStatus("This email is already registered.");
+          return;
+        }
+
+        setStatus(backendMessage || "Registration failed");
+
       } catch (error: any) {
-        console.error(error);
+        console.error("REGISTER ERROR:", error);
 
-        let message = error?.message || "Registration failed, please try again";
+        const msg =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Registration failed";
 
-        if (
-          message.toLowerCase().includes("invalid") ||
-          message.toLowerCase().includes("exists")
-        ) {
-          message = "Please enter valid details";
+        if (msg.toLowerCase().includes("exists")) {
+          setStatus("This email is already registered.");
+          return;
         }
 
-        setStatus(message);
+        setStatus(msg);
+
       } finally {
-        setSubmitting(false); // << important
-        setLoading(false); // << important
+        setSubmitting(false);
+        setLoading(false);
       }
     }
 
@@ -593,6 +648,10 @@ const Signup = () => {
               type="text"
               autoComplete="off"
               {...formik.getFieldProps('email')}
+              onChange={(e) => {
+                formik.handleChange(e);
+                formik.setStatus("");
+              }}
               className={clsx(
                 'form-control bg-transparent',
                 { 'is-invalid': formik.touched.email && formik.errors.email },
@@ -617,6 +676,10 @@ const Signup = () => {
               placeholder="Enter Password"
               autoComplete="off"
               {...formik.getFieldProps('password')}
+              onChange={(e) => {
+                formik.handleChange(e);
+                formik.setStatus("");
+              }}
               className={clsx(
                 'form-control bg-transparent',
                 {
@@ -650,6 +713,11 @@ const Signup = () => {
               placeholder="Re-enter Password"
               autoComplete="off"
               {...formik.getFieldProps('changepassword')}
+
+              onChange={(e) => {
+                formik.handleChange(e);
+                formik.setStatus("");
+              }}
               className={clsx(
                 'form-control bg-transparent',
                 {
@@ -686,9 +754,18 @@ const Signup = () => {
           />
           <span className="checkbox-label">
             I accept{' '}
-            <Link to="#" className="text-2sm link">
+            {/* <Link to="#" className="text-2sm link">
               Terms & Conditions
-            </Link>
+            </Link> */}
+            <a
+              href="https://growondaily.com/terms/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-2sm link"
+            >
+              Terms & Conditions
+            </a>
+
           </span>
         </label>
 

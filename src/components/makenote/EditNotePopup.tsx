@@ -9,9 +9,19 @@ interface Props {
 
 export default function EditNotePopup({ note, onClose }: Props) {
   const [content, setContent] = useState(note.content || "");
-  const [selectedTags, setSelectedTags] = useState(
-    note.emotion_tags || note.tags || note.original_tags || []
-  );
+  // const [selectedTags, setSelectedTags] = useState(
+  //   note.emotion_tags || note.tags || note.original_tags || []
+  // );
+
+    const initialTags =
+  note.tags ||
+  note.emotion_tags ||
+  note.updated_tags || 
+  note.original_tags ||
+  [];
+
+const [selectedTags, setSelectedTags] = useState([...initialTags]);
+
 
   const { updateNote } = useReflection();
 
@@ -38,6 +48,12 @@ export default function EditNotePopup({ note, onClose }: Props) {
 
 
   const handleSave = async () => {
+
+    if (!content.trim()) {
+    toast.error("Please write something !.");
+    return;
+  }
+
     const payload = {
       content,
       tags: selectedTags,
@@ -148,7 +164,7 @@ export default function EditNotePopup({ note, onClose }: Props) {
           <p className="text-primary font-medium mb-3">Emotion Tags</p>
 
           <div className="flex flex-wrap gap-2">
-            {["Faith", "Trust", "Peace", "kingdom"].map((tag) => (
+            {["Faith", "Trust", "Peace", "Kingdom"].map((tag) => (
               <button
                 key={tag}
                 onClick={() => toggleTag(tag)}
@@ -174,7 +190,7 @@ export default function EditNotePopup({ note, onClose }: Props) {
 
           <button
             onClick={handleSave}
-            className="bg-primary text-white px-6 py-2 rounded-xl font-medium hover:bg-primary/90 transition"
+            className="bg-sand hover:bg-primary text-white px-6 py-2 rounded-xl font-medium hover:bg-primary/90 transition"
           >
             Save
           </button>

@@ -227,11 +227,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     confirmPassword: string
   ): Promise<void> => {
 
-    // console.log("Sending payload to reset-password API:", {
-    //   token,
-    //   new_password: newPassword,
-    //   confirm_password: confirmPassword
-    // });
 
     const response = await axios.post(
       RESET_PASSWORD_URL,
@@ -247,8 +242,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       }
     );
   };
-
-
 
 
   const getUser = async (tokenFromLogin?: string): Promise<UserModel> => {

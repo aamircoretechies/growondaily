@@ -87,7 +87,21 @@ const EditProfileCard = () => {
   );
 
 
+  // const [message, setMessage] = useState('');
+  // const handleUpdate = async () => {
+  //   const res = await updateProfile({
+  //     first_name: firstName,
+  //     last_name: lastName,
+  //     email: email,
+  //   });
+
+  //   setMessage(res.message);
+  //   if (res.success) {
+  //     setTimeout(() => setMessage(''), 3000);
+  //   }
+  // };
   const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
 
   const handleUpdate = async () => {
     const res = await updateProfile({
@@ -97,11 +111,15 @@ const EditProfileCard = () => {
     });
 
     setMessage(res.message);
+
     if (res.success) {
-      // Optional success UI feedback
+      setIsError(false);
       setTimeout(() => setMessage(''), 3000);
+    } else {
+      setIsError(true);
     }
   };
+
 
   useEffect(() => {
     if (currentUser) {
@@ -163,9 +181,15 @@ const EditProfileCard = () => {
           </div>
         </div>
 
-        {message && (
+        {/* {message && (
           <p className="text-sm text-green-600">{message}</p>
+        )} */}
+        {message && (
+          <p className={`text-sm ${isError ? "text-red-600" : "text-green-600"}`}>
+            {message}
+          </p>
         )}
+
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
           <Button onClick={handleUpdate} disabled={profileLoading} className="w-full sm:w-auto">

@@ -19,46 +19,41 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const { auth, currentUser } = useAuthContext();
   const { currentLanguage } = useLanguage(); // Get current language to refetch on change
-
-  const fetchDashboardData = useCallback(async () => {
-    console.log("Fetching dashboard data...");
-    if (!auth?.access_token) return;
-    try {
-      setLoading(true);
-      setError(null);
-
-      const token = localStorage.getItem("token");
-      // const res = await axios.post("https://api.growondaily.com/api/dashboard",
-      //   {},
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${token}`,
-      //     },
-      //   }
-      // );
-      const res = await axios.post("/api/dashboard",
-        {},
-        {
-          headers: {
-            // Authorization: `Bearer ${token}`,
-            Authorization: `Bearer ${auth.access_token}`,
-          },
-        }
-      );
+  const didFetch = React.useRef(false);
 
 
-      if (res.data.status === 1) {
-        setDashboardData(res.data.data);
-      } else {
-        setError("Failed to fetch dashboard data");
-      }
-    } catch (err: any) {
-      console.error("Dashboard API Error:", err);
-      setError("Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  }, [auth?.access_token]);
+    // const fetchDashboardData = useCallback(async () => {
+  //   console.log("Fetching dashboard data...");
+  //   if (!auth?.access_token) return;
+  //   try {
+  //     setLoading(true);
+  //     setError(null);
+
+  //     const token = localStorage.getItem("token");
+  //     const res = await axios.post("/api/dashboard",
+  //       {},
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${auth.access_token}`,
+  //         },
+  //       }
+  //     );
+
+
+  //     if (res.data.status === 1) {
+  //       setDashboardData(res.data.data);
+  //     } else {
+  //       setError("Failed to fetch dashboard data");
+  //     }
+  //   } catch (err: any) {
+  //     console.error("Dashboard API Error:", err);
+  //     setError("Something went wrong");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [auth?.access_token]);
+
+
 
   // useEffect(() => {
   //   fetchDashboardData();
@@ -70,11 +65,46 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //   }
   // }, []);
 
+  // useEffect(() => {
+  //   if (auth?.access_token && currentUser) {
+  //     fetchDashboardData();
+  //   }
+  // }, [currentUser, currentLanguage.code, fetchDashboardData]); 
+
+  const fetchDashboardData = useCallback(async () => {
+  if (!auth?.access_token) return;
+
+  try {
+    setLoading(true);
+    const res = await axios.post("/api/dashboard", {}, {
+      headers: { Authorization: `Bearer ${auth.access_token}` }
+    });
+
+    if (res.data.status === 1) {
+      setDashboardData(res.data.data);
+    } else setError("Failed to fetch dashboard data");
+
+  } catch (err) {
+    setError("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+
+}, [auth?.access_token]);
+
+
+
   useEffect(() => {
-    if (auth?.access_token && currentUser) {
-      fetchDashboardData();
-    }
-  }, [currentUser, currentLanguage.code, fetchDashboardData]); // Refetch when language changes
+    if (!auth?.access_token || !currentUser) return;
+
+    // Prevent double API calls (StrictMode fix)
+    if (didFetch.current) return;
+    didFetch.current = true;
+
+    fetchDashboardData();
+
+  }, [auth?.access_token, currentUser, currentLanguage.code]);
+
 
 
 
