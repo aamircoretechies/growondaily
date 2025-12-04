@@ -6,6 +6,8 @@ import { useBible } from '@/providers/BibleProvider';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import SharePopUp from "@/components/share/SharePopUp";
 import { FormattedMessage, useIntl } from 'react-intl';
+import { toast } from "sonner";
+
 
 
 interface IDashboardDropdownItem {
@@ -334,7 +336,10 @@ const SidebarMenuDashboard = () => {
       </div>
 
       {loadingBooks ? (
-        <div className="px-3 py-2 text-sm text-gray-500">Loading books...</div>
+        // <div className="px-3 py-2 text-sm text-gray-500">Loading books...</div>
+        <div className="px-3 py-2 flex justify-center">
+          <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+        </div>
       ) : error ? (
         <div className="px-3 py-2 text-sm text-red-500">{error}</div>
       ) : (
@@ -573,10 +578,13 @@ const SidebarMenuDashboard = () => {
                   // } else 
 
                   if (item.action === 'bookmark') {
+
                     if (!selectedBookName || !selectedVerse) {
                       console.warn("No verse selected for bookmark");
+                      toast.error("Please select a verse to bookmark");
                       return;
                     }
+
                     toggleVerseBookmark(
                       selectedBookName,
                       selectedVerse.chapter,

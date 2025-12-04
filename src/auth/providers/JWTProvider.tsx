@@ -139,38 +139,86 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     return Math.round((completed / total) * 100);
   };
 
+  // const login = async (email: string, password: string) => {
+  //   try {
+  //     const response = await axios.post(LOGIN_URL,
+  //       { email, password },
+  //       { withCredentials: true }
+  //     );
+
+  //     const authData = response.data.data;
+  //     if (!authData?.token) throw new Error("Please Enter Valid email or password");
+
+  //     const authObj: AuthModel = {
+  //       access_token: authData.token,
+  //       api_token: authData.token,
+  //       refreshToken: undefined
+  //     };
+  //     saveAuth(authObj);
+
+  //     // fetch authoritative user and set
+  //     const user = await getUser(authData.token);
+  //     setProfileProgress(calculateProfileProgress(user));
+  //     localStorage.removeItem("profileProgress");
+  //     setCurrentUser(user);
+  //   } catch (error: any) {
+  //     console.error("LOGIN ERROR:", error);
+  //     saveAuth(undefined);
+  //     // throw new Error(`Error ${error}`);
+  //     let msg =
+  //       error?.response?.data?.message ||
+  //       error?.message || "Invalid email or password";
+  //     throw new Error(msg);
+  //   }
+  // };
+
   const login = async (email: string, password: string) => {
-    try {
-      const response = await axios.post(LOGIN_URL,
-        { email, password },
-        { withCredentials: true }
-      );
+  try {
+    const response = await axios.post(
+      LOGIN_URL,
+      { email, password },
+      { withCredentials: true }
+    );
 
-      const authData = response.data.data;
-      if (!authData?.token) throw new Error("Please Enter Valid email or password");
+    const authData = response.data.data;
+    if (!authData?.token) throw new Error("Please Enter Valid email or password");
 
-      const authObj: AuthModel = {
-        access_token: authData.token,
-        api_token: authData.token,
-        refreshToken: undefined
-      };
-      saveAuth(authObj);
+    const authObj: AuthModel = {
+      access_token: authData.token,
+      api_token: authData.token,
+      refreshToken: undefined
+    };
 
-      // fetch authoritative user and set
-      const user = await getUser(authData.token);
-      setProfileProgress(calculateProfileProgress(user));
-      localStorage.removeItem("profileProgress");
-      setCurrentUser(user);
-    } catch (error: any) {
-      console.error("LOGIN ERROR:", error);
-      saveAuth(undefined);
-      // throw new Error(`Error ${error}`);
-      let msg =
-        error?.response?.data?.message ||
-        error?.message || "Invalid email or password";
-      throw new Error(msg);
+    saveAuth(authObj);
+
+    // const user = await getUser(authData.token);
+    // setProfileProgress(calculateProfileProgress(user));
+    // localStorage.removeItem("profileProgress");
+    // setCurrentUser(user);
+
+  } catch (error: any) {
+    console.error("LOGIN ERROR:", error);
+    saveAuth(undefined);
+    if (
+      error?.response?.status === 502 ||
+      error?.response?.status === 503 ||
+      error?.response?.status === 504
+    ) {
+      throw new Error("Please wait… establishing a secure connection.");
     }
-  };
+
+    if (error.message === "Network Error") {
+      throw new Error("Please wait… establishing a secure connection.");
+    }
+
+    let msg =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Invalid email or password";
+
+    throw new Error(msg);
+  }
+};
 
   const register = async (email: string, password: string, password_confirmation: string) => {
     try {

@@ -336,9 +336,10 @@ const ReflectionsPage = () => {
 
             <div className="bg-white/40 dark:bg-gray-200 backdrop-blur-sm rounded-2xl p-8">
               {loading ? (
-                <p className="text-gray-600">
-                  <FormattedMessage id="COMMON.LOADING_REFLECTION" />
-                </p>
+                // <p className="text-gray-600">
+                //   <FormattedMessage id="COMMON.LOADING_REFLECTION" />
+                // </p>
+                <Loader />
               ) : error ? (
                 <p className="text-red-500">{error}</p>
               ) : dailyReflection ? (

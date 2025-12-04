@@ -203,7 +203,7 @@
 
 
 
-import { ChangeEvent, Fragment, useRef, useEffect } from 'react';
+import { ChangeEvent, Fragment, useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { useAuthContext } from '@/auth';
@@ -223,6 +223,12 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
   const { settings, storeSettings } = useSettings();
   const { logout, currentUser, updateProfileImage } = useAuthContext();
   const { isRTL } = useLanguage();
+  const [refresh, setRefresh] = useState(0);
+
+  useEffect(() => {
+    // Force re-render when profile picture changes
+    setRefresh(prev => prev + 1);
+  }, [currentUser?.profile_picture]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -269,12 +275,8 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
 
   const buildHeader = () => {
     const imageURL =
-      // currentUser?.profile_picture
-      //   ? `/uploads/profile-pictures/${currentUser.profile_picture}`
-      //   : toAbsoluteUrl("/media/avatars/300-2.png");
-
       currentUser?.profile_picture
-        ? `/uploads/profile-pictures/${currentUser.profile_picture}?v=${Date.now()}`
+        ? `${currentUser.profile_picture.startsWith('/') ? '' : '/uploads/profile-pictures/'}${currentUser.profile_picture}?v=${Date.now()}`
         : toAbsoluteUrl("/media/avatars/300-2.png");
 
 
@@ -285,6 +287,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
 
           {/* CLICKABLE IMAGE (Upload trigger) */}
           <img
+            key={refresh}
             onClick={() => fileInputRef.current?.click()}
             className="size-9 rounded-full border-2 border-success cursor-pointer"
             src={imageURL}

@@ -125,7 +125,7 @@ const SettingsSidebarContent = () => {
 
         <ContentAiConfig /> */}
 
-        <NotificationsEmail />
+        {/* <NotificationsEmail /> */}
 
   {/*       <NotificationsSystemAlerts /> */}
 

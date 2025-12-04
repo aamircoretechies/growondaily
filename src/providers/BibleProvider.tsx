@@ -281,10 +281,15 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (err) {
         console.error("Bible Books Error:", err);
-        setError("Failed to load books");
+        // setError("Failed to load books");
+        setTimeout(fetchBooks, 3000);
+        return;
       } finally {
-        setLoadingBooks(false);
-        setIsInitialized(true);
+        // setLoadingBooks(false);
+        // setIsInitialized(true);
+        if (booksCache.current) {
+          setLoadingBooks(false);
+        }
       }
     };
     fetchBooks();

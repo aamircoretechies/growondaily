@@ -232,9 +232,9 @@ const ChangePasswordCard = () => {
                 onClick={() => setShowCurrent(!showCurrent)}
               >
                 {showCurrent ? (
-                  <KeenIcon icon="eye-slash" className="transition group-hover:text-primary dark:group-hover:text-white" />
-                ) : (
                   <KeenIcon icon="eye" className="transition group-hover:text-primary dark:group-hover:text-white" />
+                ) : (
+                  <KeenIcon icon="eye-slash" className="transition group-hover:text-primary dark:group-hover:text-white" />
                 )}
               </button>
 
@@ -281,9 +281,9 @@ const ChangePasswordCard = () => {
                 onClick={() => setShowNew(!showNew)}
               >
                 {showNew ? (
-                  <KeenIcon icon="eye-slash" className="transition group-hover:text-primary dark:group-hover:text-white" />
-                ) : (
                   <KeenIcon icon="eye" className="transition group-hover:text-primary dark:group-hover:text-white" />
+                ) : (
+                  <KeenIcon icon="eye-slash" className="transition group-hover:text-primary dark:group-hover:text-white" />
                 )}
               </button>
 
@@ -329,9 +329,9 @@ const ChangePasswordCard = () => {
                 onClick={() => setShowConfirm(!showConfirm)}
               >
                 {showConfirm ? (
-                  <KeenIcon icon="eye-slash" className="transition group-hover:text-primary dark:group-hover:text-white" />
-                ) : (
                   <KeenIcon icon="eye" className="transition group-hover:text-primary dark:group-hover:text-white" />
+                ) : (
+                  <KeenIcon icon="eye-slash" className="transition group-hover:text-primary dark:group-hover:text-white" />
                 )}
               </button>
 

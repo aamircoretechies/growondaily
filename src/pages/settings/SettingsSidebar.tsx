@@ -70,10 +70,11 @@ const SettingsSidebar = () => {
       ]
     }, */
   
-        {
-          title: formatMessage({ id: 'SETTINGS.NOTIFICATION_SETTINGS' }),
-          target: 'notifications_email'
-        },
+        // {
+        //   title: formatMessage({ id: 'SETTINGS.NOTIFICATION_SETTINGS' }),
+        //   target: 'notifications_email'
+        // },
+        
       /*   {
           title: 'System Alerts',
           target: 'notifications_system_alerts'

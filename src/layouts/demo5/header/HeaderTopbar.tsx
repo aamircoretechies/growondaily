@@ -157,7 +157,7 @@ const HeaderTopbar = () => {
               className="size-7 rounded-full justify-center border border-gray-500 shrink-0"
               src={
                 currentUser?.profile_picture
-                  ? `/uploads/profile-pictures/${currentUser.profile_picture}?v=${Date.now()}`
+                  ? `${currentUser.profile_picture.startsWith('/') ? '' : '/uploads/profile-pictures/'}${currentUser.profile_picture}?v=${Date.now()}`
                   : toAbsoluteUrl("/media/avatars/300-2.png")
               }
 

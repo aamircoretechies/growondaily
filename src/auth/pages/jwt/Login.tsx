@@ -268,7 +268,12 @@ const Login = () => {
           className="btn btn-primary flex justify-center grow"
           disabled={loading || formik.isSubmitting || !formik.isValid}
         >
-          {loading ? 'Please wait...' : 'Sign In'}
+          {/* {loading ? 'Please wait...' : 'Sign In'} */}
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            "Sign In"
+          )}
         </button>
       </form>
     </div>
