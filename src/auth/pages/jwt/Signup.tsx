@@ -381,62 +381,88 @@ const Signup = () => {
           )}
         </div>
 
-        {/* <label className="checkbox-group">
-          <span className="text-red-500 absolute -left-2 ">*</span>
-          <input
-            className="checkbox checkbox-sm"
-            type="checkbox"
-            {...formik.getFieldProps('acceptTerms')}
-          />
-          <span className="checkbox-label">
-            I accept{' '}
-            <a
-              href="https://growondaily.com/terms/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-2sm link"
-            >
-              Terms & Conditions
-            </a>
 
-          </span>
-        </label> */}
+        {/* 
+        <div className="flex flex-col gap-1">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              className="checkbox checkbox-sm"
+              checked={formik.values.acceptTerms}
+              onChange={(e) => formik.setFieldValue("acceptTerms", e.target.checked)}
+              onBlur={() => formik.setFieldTouched("acceptTerms", true)}
+            />
+
+            <span className="checkbox-label leading-tight">
+              I accept{" "}
+              <a
+                href="https://growondaily.com/terms/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-2sm link"
+              >
+                Terms & Conditions
+              </a>
+              <span className="text-red-500 ml-1">*</span>
+            </span>
+          </label>
+
+          {formik.touched.acceptTerms && formik.errors.acceptTerms && (
+            <span role="alert" className="text-danger text-xs ml-6">
+              {formik.errors.acceptTerms}
+            </span>
+          )}
+        </div> */}
 
         <div className="flex flex-col gap-1">
-  <label className="flex items-center gap-2">
-    <input
-      type="checkbox"
-      className="checkbox checkbox-sm"
-      checked={formik.values.acceptTerms}
-      onChange={(e) => formik.setFieldValue("acceptTerms", e.target.checked)}
-      onBlur={() => formik.setFieldTouched("acceptTerms", true)}
-    />
+          <div className="flex items-center gap-2">
 
-    <span className="checkbox-label leading-tight">
-      I accept{" "}
-      <a
-        href="https://growondaily.com/terms/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-2sm link"
-      >
-        Terms & Conditions
-      </a>
-      <span className="text-red-500 ml-1">*</span>
-    </span>
-  </label>
+            {/* Checkbox – ONLY this toggles */}
+            <input
+              type="checkbox"
+              className="checkbox checkbox-sm cursor-pointer"
+              checked={formik.values.acceptTerms}
+              onChange={() =>
+                formik.setFieldValue("acceptTerms", !formik.values.acceptTerms)
+              }
+              onBlur={() => formik.setFieldTouched("acceptTerms", true)}
+            />
 
-  {formik.touched.acceptTerms && formik.errors.acceptTerms && (
-    <span role="alert" className="text-danger text-xs ml-6">
-      {formik.errors.acceptTerms}
-    </span>
-  )}
-</div>
+            {/* Text – ONLY this toggles (not empty space) */}
+            <span
+              className="checkbox-label leading-tight cursor-pointer"
+              onClick={() =>
+                formik.setFieldValue("acceptTerms", !formik.values.acceptTerms)
+              }
+            >
+              I accept{" "}
+              <a
+                href="https://growondaily.com/terms/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-2sm link"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Terms & Conditions
+              </a>
+              <span className="text-red-500 ml-1">*</span>
+            </span>
+
+          </div>
+
+          {formik.touched.acceptTerms && formik.errors.acceptTerms && (
+            <span role="alert" className="text-danger text-xs ml-6">
+              {formik.errors.acceptTerms}
+            </span>
+          )}
+        </div>
+
+
 
         <button
           type="submit"
           className="btn btn-primary flex justify-center grow  disabled:cursor-pointer"
-          disabled={loading || formik.isSubmitting || !formik.isValid}
+          disabled={loading || formik.isSubmitting}
         >
           {/* {loading ? 'Please wait...' : 'Sign UP'} */}
           {loading ? (

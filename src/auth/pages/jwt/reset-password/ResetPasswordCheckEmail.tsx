@@ -53,7 +53,7 @@ const ResetPasswordCheckEmail = () => {
 
         <div className="flex items-center justify-center gap-1">
           <span className="text-xs text-gray-600">Didn’t receive an email?</span>
-          <Link
+          {/* <Link
             to={
               currentLayout?.name === 'auth-branded'
                 ? '/auth/reset-password/enter-email'
@@ -62,7 +62,18 @@ const ResetPasswordCheckEmail = () => {
             className="text-xs font-medium link"
           >
             Resend
+          </Link> */}
+          <Link
+            to={
+              currentLayout?.name === 'auth-branded'
+                ? '/auth/reset-password'
+                : '/auth/classic/reset-password'
+            }
+            className="text-xs font-medium link"
+          >
+            Resend
           </Link>
+
         </div>
       </div>
     </div>

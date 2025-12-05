@@ -272,14 +272,8 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
   };
 
 
-
   const buildHeader = () => {
-    const imageURL =
-      currentUser?.profile_picture
-        ? `${currentUser.profile_picture.startsWith('/') ? '' : '/uploads/profile-pictures/'}${currentUser.profile_picture}?v=${Date.now()}`
-        : toAbsoluteUrl("/media/avatars/300-2.png");
-
-
+    const imageURL = currentUser?.profile_picture;
 
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">

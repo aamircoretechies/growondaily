@@ -307,6 +307,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       const fullUser = { ...apiUser, preferences: apiPreferences } as UserModel;
 
       const progress = calculateProfileProgress(fullUser);
+      console.log("full user", fullUser);
       setProfileProgress(progress);
       try {
         localStorage.setItem("growondaily_currentUser", JSON.stringify(fullUser));

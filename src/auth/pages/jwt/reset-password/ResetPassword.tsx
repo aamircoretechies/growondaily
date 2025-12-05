@@ -77,7 +77,7 @@ const ResetPassword = () => {
           });
         } else {
           setStatus(response?.message || 'Invalid email. No account found');
-          setHasErrors(true);   
+          setHasErrors(true);
           setLoading(false);
         }
 
@@ -160,7 +160,13 @@ const ResetPassword = () => {
             className="btn btn-primary flex justify-center grow"
             disabled={loading || formik.isSubmitting}
           >
-            {loading ? 'Please wait...' : 'Continue'}
+            {/* {loading ? 'Please wait...' : 'Continue'} */}
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              "Continue"
+            )}
+
           </button>
 
           <Link

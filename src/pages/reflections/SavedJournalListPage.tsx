@@ -22,7 +22,11 @@ const SavedJournalListPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
 
-
+  const Loader = () => (
+    <div className="flex justify-center items-center py-6">
+      <div className="w-6 h-6 border-2 border-gray-400 border-t-primary rounded-full animate-spin"></div>
+    </div>
+  );
 
   const handleOpenNote = (entry: any) => {
     const { book, chapter, verse, version: noteVersion } = entry;
@@ -59,20 +63,11 @@ const SavedJournalListPage = () => {
     }
   };
 
-
-  // const handleEditReflection = (id: string) => {
-  //   console.log('Edit reflection:', id);
-  // };
-
   const handleEditReflection = (entry: any) => {
     setSelectedNote(entry);
     setIsEditPopupOpen(true);
   };
 
-
-  // const handleDeleteReflection = (id: string) => {
-  //   console.log('Delete reflection:', id);
-  // };
 
   const handleDeleteReflection = async (id: string) => {
     const success = await deleteNote(id);
@@ -86,14 +81,30 @@ const SavedJournalListPage = () => {
 
   const journalEntries = allNotes || [];
 
-  const filteredEntries = journalEntries.filter((entry: any) =>
-    entry.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    entry.book?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (entry.emotion_tags?.join(' ') || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // const filteredEntries = journalEntries.filter((entry: any) =>
+  //   entry.content?.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+  //   entry.book?.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+  //   (entry.emotion_tags?.join(' ') || '').toLowerCase().includes(searchQuery.trim().toLowerCase())
+  // );
+
+  const filteredEntries = journalEntries.filter((entry: any) => {
+    const reference = `${entry.book || ""} ${entry.chapter || ""}${entry.verse ? ":" + entry.verse : ""}`;
+    const tags = (entry.emotion_tags?.join(" ") || "").toLowerCase();
+
+    return (
+      reference.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+      entry.content?.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+      tags.includes(searchQuery.trim().toLowerCase())
+    );
+  });
+
+
 
   const visibleEntries = filteredEntries.slice(0, visibleCount);
 
+  useEffect(() => {
+    setVisibleCount(6);
+  }, [searchQuery]);
 
 
   useEffect(() => {
@@ -153,78 +164,83 @@ const SavedJournalListPage = () => {
           </h2>
         </div>
 
-        {/* Journal Entries Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {notesLoading ? (
+          <Loader />
+        ) : filteredEntries.length === 0 ? (
+          <p className="text-gray-500 italic">No journal entries found</p>
+        ) : (
 
-          {/* {journalEntries.slice(0, visibleCount).map((entry: any) => ( */}
-          {visibleEntries.map((entry: any) => (
-            <div key={entry.note_id} onClick={() => handleOpenNote(entry)} className="bg-white/80 dark:bg-transparent rounded-xl p-6 border border-transparent dark:border-gray-400 hover:shadow-lg transition-shadow cursor-pointer">
-              {/* Entry Header */}
-              <div className="flex items-center gap-2 mb-4">
-                <LucideCalendar className="text-amber-600 w-4 h-4" />
-                <span className="text-gray-600 text-sm font-medium">
-                  {new Date(entry.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </span>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-              {/* Verse */}
-              <div className="mb-4">
-                <h3 className="font-merriweather text-lg text-primary font-semibold">
-                  {entry.book && entry.chapter
-                    ? `${entry.book} ${entry.chapter}${entry.verse ? ':' + entry.verse : ''}`
-                    : '—'}
-                </h3>
-              </div>
-
-              {/* Entry Content */}
-              <p className="text-primary text-sm leading-relaxed mb-4 line-clamp-3 ">
-                {entry.content || 'No content'}
-              </p>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-4 ">
-                {(entry.emotion_tags !== undefined && entry.emotion_tags !== null
-                  ? entry.emotion_tags
-                  : entry.original_tags || []
-                ).map((tag: string, index: number) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-full font-medium "
-                  >
-                    {tag}
+            {visibleEntries.map((entry: any) => (
+              <div key={entry.note_id} onClick={() => handleOpenNote(entry)} className="bg-white/80 dark:bg-transparent rounded-xl p-6 border border-transparent dark:border-gray-400 hover:shadow-lg transition-shadow cursor-pointer">
+                {/* Entry Header */}
+                <div className="flex items-center gap-2 mb-4">
+                  <LucideCalendar className="text-amber-600 w-4 h-4" />
+                  <span className="text-gray-600 text-sm font-medium">
+                    {new Date(entry.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   </span>
-                ))}
+                </div>
+
+                {/* Verse */}
+                <div className="mb-4">
+                  <h3 className="font-merriweather text-lg text-primary font-semibold">
+                    {entry.book && entry.chapter
+                      ? `${entry.book} ${entry.chapter}${entry.verse ? ':' + entry.verse : ''}`
+                      : '—'}
+                  </h3>
+                </div>
+
+                {/* Entry Content */}
+                <p className="text-primary text-sm leading-relaxed mb-4 line-clamp-3 ">
+                  {entry.content || 'No content'}
+                </p>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-4 ">
+                  {(entry.emotion_tags !== undefined && entry.emotion_tags !== null
+                    ? entry.emotion_tags
+                    : entry.original_tags || []
+                  ).map((tag: string, index: number) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-full font-medium "
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-2">
+                  <button
+                    // onClick={() => handleEditReflection(entry.note_id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditReflection(entry);
+                    }}
+                    className="w-8 h-8 bg-sand rounded-full flex items-center justify-center hover:bg-primary transition-colors"
+                  >
+                    <LucidePencil className="text-white w-4 h-4" />
+                  </button>
+                  <button
+                    // onClick={() => handleDeleteReflection(entry.note_id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // handleEditReflection(entry);
+                      handleDeleteReflection(entry.note_id);
+                    }}
+                    className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center hover:bg-red-300 transition-colors"
+                  >
+                    <LucideTrash2 className="text-red-500 w-4 h-4" />
+                  </button>
+                </div>
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-2">
-                <button
-                  // onClick={() => handleEditReflection(entry.note_id)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEditReflection(entry);
-                  }}
-                  className="w-8 h-8 bg-sand rounded-full flex items-center justify-center hover:bg-primary transition-colors"
-                >
-                  <LucidePencil className="text-white w-4 h-4" />
-                </button>
-                <button
-                  // onClick={() => handleDeleteReflection(entry.note_id)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // handleEditReflection(entry);
-                    handleDeleteReflection(entry.note_id);
-                  }}
-                  className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center hover:bg-red-300 transition-colors"
-                >
-                  <LucideTrash2 className="text-red-500 w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
 
 
-        </div>
+          </div>
+        )}
 
         {/* Load More Button */}
         {/* <div className="mt-8 text-center">
