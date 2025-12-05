@@ -248,63 +248,65 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Profile Setup Progress Section */}
-        <div className="mb-6">
-          <div
-            className="bg-white/60 hover:bg-white/80 dark:bg-gray-300 hover:cursor-pointer dark:hover:bg-gray-400 rounded-2xl shadow-sm py-2 px-6"
-            onClick={() => setShowProfileSetup(true)}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h2 className="font-merriweather text-xl text-primary mb-2">
-                  <FormattedMessage id="HOME.COMPLETE_PROFILE_SETUP" />
-                </h2>
-                <p className="text-gray-600 dark:text-gray-700 text-sm">
-                  <FormattedMessage
-                    id="HOME.PROFILE_PROGRESS"
-                    values={{ progress: profileProgress, remaining: 100 - profileProgress }}
-                  />
-                </p>
-              </div>
-              <div className="flex-shrink-0 ml-4">
-                <div className="relative w-20 h-20">
-                  {/* Circular Progress Background */}
-                  <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 80 80">
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r="32"
-                      stroke="currentColor"
-                      strokeWidth="6"
-                      fill="none"
-                      className="text-gray-200 dark:text-gray-300"
+        {/* Profile Setup Progress Section - Only show when progress is less than 100% */}
+        {profileProgress < 100 && (
+          <div className="mb-6">
+            <div
+              className="bg-white/60 hover:bg-white/80 dark:bg-gray-300 hover:cursor-pointer dark:hover:bg-gray-400 rounded-2xl shadow-sm py-2 px-6"
+              onClick={() => setShowProfileSetup(true)}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h2 className="font-merriweather text-xl text-primary mb-2">
+                    <FormattedMessage id="HOME.COMPLETE_PROFILE_SETUP" />
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-700 text-sm">
+                    <FormattedMessage
+                      id="HOME.PROFILE_PROGRESS"
+                      values={{ progress: profileProgress, remaining: 100 - profileProgress }}
                     />
-                    {/* Progress Circle */}
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r="32"
-                      stroke="currentColor"
-                      strokeWidth="6"
-                      fill="none"
-                      strokeLinecap="round"
-                      className="text-sand transition-all duration-300"
-                      strokeDasharray={`${2 * Math.PI * 32}`}
-                      strokeDashoffset={`${2 * Math.PI * 32 * (1 - profileProgress / 100)}`}
-                    />
-                  </svg>
-                  {/* Progress Text */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-lg font-semibold text-primary">
-                      {/* {profileProgress}% */}
-                      {progress}%
-                    </span>
+                  </p>
+                </div>
+                <div className="flex-shrink-0 ml-4">
+                  <div className="relative w-20 h-20">
+                    {/* Circular Progress Background */}
+                    <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 80 80">
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="32"
+                        stroke="currentColor"
+                        strokeWidth="6"
+                        fill="none"
+                        className="text-gray-200 dark:text-gray-300"
+                      />
+                      {/* Progress Circle */}
+                      <circle
+                        cx="40"
+                        cy="40"
+                        r="32"
+                        stroke="currentColor"
+                        strokeWidth="6"
+                        fill="none"
+                        strokeLinecap="round"
+                        className="text-sand transition-all duration-300"
+                        strokeDasharray={`${2 * Math.PI * 32}`}
+                        strokeDashoffset={`${2 * Math.PI * 32 * (1 - profileProgress / 100)}`}
+                      />
+                    </svg>
+                    {/* Progress Text */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-lg font-semibold text-primary">
+                        {/* {profileProgress}% */}
+                        {progress}%
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
 

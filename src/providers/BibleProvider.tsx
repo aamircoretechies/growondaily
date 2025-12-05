@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useRef, useCallback } f
 import axios from "axios";
 import { toast } from "sonner";
 import debounce from "lodash/debounce";
+import { useDashboard } from "@/pages/dashboards/providers/DashboardProvider";
 
 interface BibleBook {
   book_id: string;
@@ -96,6 +97,7 @@ const BibleContext = createContext<BibleContextType>({
 });
 
 export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
+  const { isLoaded: dashboardLoaded } = useDashboard(); // Wait for dashboard to load
   const [books, setBooks] = useState<BibleBook[]>([]);
   const [chapters, setChapters] = useState<any[]>([]);
   const [verses, setVerses] = useState<Verse[]>([]);
@@ -178,6 +180,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   }, [getBookInfo]);
 
   useEffect(() => {
+    // Only fetch books after dashboard is loaded
+    if (!dashboardLoaded) return;
+
     const fetchBooks = async () => {
       try {
         setLoadingBooks(true);
@@ -293,7 +298,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
     fetchBooks();
-  }, []);
+  }, [dashboardLoaded]);
 
   const fetchChapters = async (bookId: string, version: string) => {
     try {

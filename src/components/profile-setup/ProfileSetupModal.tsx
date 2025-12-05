@@ -623,26 +623,27 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
             {['First Time', 'Occasional', 'Regular', 'Theological'].map((option) => {
               const translatedOption = option === 'First Time' ? formatMessage({ id: 'PROFILE_SETUP.EXPERIENCE_FIRST_TIME' }) :
                 option === 'Occasional' ? formatMessage({ id: 'PROFILE_SETUP.EXPERIENCE_OCCASIONAL' }) :
-                option === 'Regular' ? formatMessage({ id: 'PROFILE_SETUP.EXPERIENCE_REGULAR' }) :
-                formatMessage({ id: 'PROFILE_SETUP.EXPERIENCE_THEOLOGICAL' });
-              
+                  option === 'Regular' ? formatMessage({ id: 'PROFILE_SETUP.EXPERIENCE_REGULAR' }) :
+                    formatMessage({ id: 'PROFILE_SETUP.EXPERIENCE_THEOLOGICAL' });
+
               return (
-              <button
-                key={option}
-                onClick={() => setProfileData(prev => ({ ...prev, experience: option }))}
-                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.experience === option
-                  ? 'bg-sand dark:bg-gray-400 border-2 border-primary'
-                  : 'bg-white/60 dark:bg-gray-200 border-2 border-transparent hover:border-gray-300'
-                  }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-primary font-medium">{translatedOption}</span>
-                  {profileData.experience === option && (
-                    <KeenIcon icon="check" className="text-primary w-5 h-5" />
-                  )}
-                </div>
-              </button>
-            )})}
+                <button
+                  key={option}
+                  onClick={() => setProfileData(prev => ({ ...prev, experience: option }))}
+                  className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.experience === option
+                    ? 'bg-sand dark:bg-gray-400 border-2 border-primary'
+                    : 'bg-white/60 dark:bg-gray-200 border-2 border-transparent hover:border-gray-300'
+                    }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-primary font-medium">{translatedOption}</span>
+                    {profileData.experience === option && (
+                      <KeenIcon icon="check" className="text-primary w-5 h-5" />
+                    )}
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </div>
       )
@@ -970,9 +971,38 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     }
   };
 
+  // Restore state when modal opens
   useEffect(() => {
-    if (isOpen && currentUser) {
-      hydrateFromUser(currentUser);
+    if (isOpen) {
+      const savedState = localStorage.getItem("profileSetupWizardState");
+      if (savedState) {
+        try {
+          const parsed = JSON.parse(savedState);
+          setCurrentStep(parsed.step || 0);
+          setProfileData(parsed.data || {
+            firstName: '',
+            lastName: '',
+            experience: '',
+            brings: [],
+            engage: [],
+            explainStyle: '',
+            translations: [],
+            dailyPref: '',
+            depth: ''
+          });
+        } catch (e) {
+          console.error("Failed to parse saved wizard state", e);
+          // Fallback to user data if parse fails
+          if (currentUser) {
+            hydrateFromUser(currentUser);
+          }
+        }
+      } else {
+        // If no saved state, try to hydrate from user (e.g. first time or reset)
+        if (currentUser) {
+          hydrateFromUser(currentUser);
+        }
+      }
     }
   }, [isOpen, currentUser]);
 
@@ -1051,35 +1081,24 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
 
     if (currentStep === steps.length - 1) {
       // last step -> save
-      const progress = calculateProgress(profileData);
       try {
-        // set progress immediately in UI while request runs
-        setProfileProgress(progress);
-        const refreshedUser = await saveOrUpdateUserPreferences(profileData);
-        let authoritativeUser = refreshedUser;
-        if (!authoritativeUser) {
-          authoritativeUser = await getUser();
-        }
-        if (setCurrentUser && authoritativeUser) {
-          setCurrentUser(authoritativeUser);
-        }
+        await saveOrUpdateUserPreferences(profileData);
+
+        // Clear wizard state on completion
+        localStorage.removeItem("profileSetupWizardState");
+
+        // Set progress to 100%
+        setProfileProgress(100);
+        localStorage.setItem("profileProgress", "100");
+
+        toast.success(formatMessage({ id: 'PROFILE_SETUP.SETUP_COMPLETED' }));
+
+        // Refresh dashboard to ensure everything is up to date
         await refreshDashboard();
-
-        if (setProfileProgress && authoritativeUser) {
-          // compute locally if you want to force it
-          const savedDailyPref = authoritativeUser?.preferences?.receive_daily ? 'Daily' : (authoritativeUser?.preferences?.receive_daily === false ? 'Occasionally' : 'Daily');
-
-          const localProgress = calculateProgress({
-            firstName: authoritativeUser.first_name,
-            lastName: authoritativeUser.last_name,
-            dailyPref: savedDailyPref,
-          });
-          setProfileProgress(localProgress);
-        }
-        hydrateFromUser(authoritativeUser);
 
         onClose();
       } catch (err) {
+        toast.error(formatMessage({ id: 'PROFILE_SETUP.ERROR_SAVING' }));
         console.error('Profile save failed', err);
       }
 
@@ -1095,34 +1114,18 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     }
   };
 
-  const handleClose = async () => {
-    // Save partial progress before closing
-    try {
-      const progress = calculateProgress(profileData);
-      setProfileProgress(progress);
+  const handleClose = () => {
+    // Save current state to localStorage for resuming later
+    const wizardState = {
+      step: currentStep,
+      data: profileData
+    };
+    localStorage.setItem("profileSetupWizardState", JSON.stringify(wizardState));
 
-      // We save the current state of profileData to the backend
-      // This ensures that if they drop off at 50%, it is saved as 50%
-      await saveOrUpdateUserPreferences(profileData);
-
-      // Refresh user context to reflect changes
-      await refreshDashboard();
-    } catch (err) {
-      console.error("Failed to save partial progress on close", err);
-    }
-
-    setCurrentStep(0);
-    setProfileData({
-      firstName: '',
-      lastName: '',
-      experience: '',
-      brings: [] as string[],
-      engage: [] as string[],
-      explainStyle: '',
-      translations: [] as string[],
-      dailyPref: '',
-      depth: ''
-    });
+    // Calculate and save partial progress based on steps completed
+    const progress = Math.round(((currentStep + 1) / steps.length) * 100);
+    setProfileProgress(progress);
+    localStorage.setItem("profileProgress", String(progress));
 
     onClose();
   };
@@ -1160,9 +1163,9 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
           </div>
           <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
             <span>
-              <FormattedMessage 
-                id="PROFILE_SETUP.STEP_PROGRESS" 
-                values={{ current: currentStep + 1, total: steps.length }} 
+              <FormattedMessage
+                id="PROFILE_SETUP.STEP_PROGRESS"
+                values={{ current: currentStep + 1, total: steps.length }}
               />
             </span>
             <span>{Math.round(progress)}%</span>

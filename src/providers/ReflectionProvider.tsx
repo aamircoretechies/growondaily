@@ -146,6 +146,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useLanguage } from "@/providers/TranslationProvider";
+import { useDashboard } from "@/pages/dashboards/providers/DashboardProvider";
 import { I18N_LANGUAGES } from "@/i18n";
 import { toast } from "sonner";
 
@@ -163,6 +164,7 @@ const ReflectionContext = createContext<any>(null);
 
 export const ReflectionProvider = ({ children }: any) => {
   const { currentLanguage } = useLanguage();
+  const { isLoaded: dashboardLoaded } = useDashboard(); // Wait for dashboard to load
   const [dailyReflection, setDailyReflection] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -315,6 +317,9 @@ export const ReflectionProvider = ({ children }: any) => {
 
 
   useEffect(() => {
+    // Only fetch reflection data after dashboard is loaded
+    if (!dashboardLoaded) return;
+
     fetchDailyReflection();
     fetchBookmarks();
     fetchAllNotes();
@@ -330,7 +335,7 @@ export const ReflectionProvider = ({ children }: any) => {
     return () => {
       window.removeEventListener('bookmark-updated', handleBookmarkUpdate);
     };
-  }, [currentLanguage.code, fetchDailyReflection, fetchBookmarks, fetchAllNotes]);
+  }, [dashboardLoaded, currentLanguage.code, fetchDailyReflection, fetchBookmarks, fetchAllNotes]);
 
   return (
     <ReflectionContext.Provider

@@ -8,6 +8,7 @@ interface DashboardContextType {
   loading: boolean;
   error: string | null;
   refetch: () => void;
+  isLoaded: boolean; // Flag to indicate dashboard data has been loaded
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -16,6 +17,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false); // Track if dashboard has been loaded
 
   const { auth, currentUser } = useAuthContext();
   const { currentLanguage } = useLanguage(); // Get current language to refetch on change
@@ -72,45 +74,55 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // }, [currentUser, currentLanguage.code, fetchDashboardData]); 
 
   const fetchDashboardData = useCallback(async () => {
-  if (!auth?.access_token) return;
+  if (!auth?.access_token || !currentUser) return;
 
   try {
     setLoading(true);
+    setError(null);
     const res = await axios.post("/api/dashboard", {}, {
       headers: { Authorization: `Bearer ${auth.access_token}` }
     });
 
     if (res.data.status === 1) {
       setDashboardData(res.data.data);
-    } else setError("Failed to fetch dashboard data");
+      setIsLoaded(true); // Mark dashboard as loaded
+    } else {
+      setError("Failed to fetch dashboard data");
+      setIsLoaded(false);
+    }
 
   } catch (err) {
     setError("Something went wrong");
+    setIsLoaded(false);
   } finally {
     setLoading(false);
   }
 
-}, [auth?.access_token]);
+}, [auth?.access_token, currentUser]);
 
 
 
   useEffect(() => {
-    if (!auth?.access_token || !currentUser) return;
+    if (!auth?.access_token || !currentUser) {
+      setIsLoaded(false);
+      didFetch.current = false; // Reset when auth/user is missing
+      return;
+    }
 
     // Prevent double API calls (StrictMode fix)
     if (didFetch.current) return;
-    didFetch.current = true;
 
+    didFetch.current = true;
     fetchDashboardData();
 
-  }, [auth?.access_token, currentUser, currentLanguage.code]);
+  }, [auth?.access_token, currentUser, currentLanguage.code, fetchDashboardData]);
 
 
 
 
   return (
     <DashboardContext.Provider
-      value={{ dashboardData, loading, error, refetch: fetchDashboardData }}
+      value={{ dashboardData, loading, error, refetch: fetchDashboardData, isLoaded }}
     >
       {children}
     </DashboardContext.Provider>
