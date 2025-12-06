@@ -65,7 +65,7 @@ const signupSchema = Yup.object().shape({
 
 
   password: Yup.string()
-    .min(8, 'Password must be 8+ character with upper, lower, number & special charater')
+    .min(8, 'Password must be 8+ character with upper, lower, number & special character')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/, 'Password must be 8+ character with upper, lower, number & special character.')
     .required('Password is required'),
   changepassword: Yup.string()

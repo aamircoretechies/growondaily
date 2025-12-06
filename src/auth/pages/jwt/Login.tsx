@@ -27,10 +27,10 @@ const loginSchema = Yup.object().shape({
   //   .required('Password is required'),
   // remember: Yup.boolean()
   password: Yup.string()
-    .min(8, 'Password must be 8+ character with upper, lower, number & special charater')
+    .min(8, 'Password must be 8+ character with upper, lower, number & special character')
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Password must be 8+ character with upper, lower, number & special charater'
+      'Password must be 8+ character with upper, lower, number & special character'
     )
     .required('Password is required'),
 
