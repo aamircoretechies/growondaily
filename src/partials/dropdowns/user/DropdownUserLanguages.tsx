@@ -117,7 +117,7 @@ interface IDropdownUserLanguagesProps {
 
 const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => {
   const { currentLanguage, changeLanguage: changeFrontendLanguage, isRTL } = useLanguage();
-  const { changeLanguage: changeBackendLanguage } = useAuthContext(); 
+  const { changeLanguage: changeBackendLanguage } = useAuthContext();
   const { changeLanguageBackend } = useSettingEdit();
 
 
@@ -139,29 +139,57 @@ const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => 
   //   }
   // };
 
-    const handleLanguageChange = async (lang: TLanguage) => {
+  //     const handleLanguageChange = async (lang: TLanguage) => {
+  //   try {
+  //     changeFrontendLanguage(lang);
+
+  //     const result = await changeLanguageBackend(lang.code);
+
+  //     if (result.success) {
+  //       toast.success(`Language changed to ${lang.label}`);
+  //     } else {
+  //       toast.error(result.message);
+  //     }
+
+  //     if (menuItemRef.current) {
+  //       menuItemRef.current.hide();
+  //     }
+
+  //   } catch (error) {
+  //     console.error("Language change failed:", error);
+  //     toast.error("Failed to change language");
+  //   }
+  // };
+
+const handleLanguageChange = async (lang: TLanguage) => {
   try {
-    // Frontend language update
+    // console.log("🔄 Frontend language update to:", lang);
     changeFrontendLanguage(lang);
 
-    // Backend API call
+    // console.log("📡 Sending backend request with:", lang.code);
     const result = await changeLanguageBackend(lang.code);
 
-    if (result.success) {
-      toast.success(`Language changed to ${lang.label}`);
+    // console.log("📥 Backend response:", result);
+
+    if (result?.success) {
+      // console.log(" Language updated successfully in backend");
+      toast.success(result?.message || `Language changed to ${lang.label}`);
     } else {
-      toast.error(result.message);
+      // console.warn(" Backend language change FAILED:", result);
+      toast.error(result?.message || "Failed to change language");
     }
 
     if (menuItemRef.current) {
       menuItemRef.current.hide();
     }
-
   } catch (error) {
-    console.error("Language change failed:", error);
+    console.error(" Language change failed:", error);
     toast.error("Failed to change language");
   }
 };
+
+
+
 
 
 
