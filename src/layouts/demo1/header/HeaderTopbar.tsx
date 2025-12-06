@@ -11,6 +11,7 @@ import { useLanguage } from '@/i18n';
 import { useAuthContext } from "@/auth";
 
 
+
 const HeaderTopbar = () => {
   const { isRTL } = useLanguage();
   const itemChatRef = useRef<any>(null);
@@ -29,6 +30,7 @@ const HeaderTopbar = () => {
   const handleClose = () => {
     setSearchModalOpen(false);
   };
+  const imageURL = `${import.meta.env.VITE_APP_API_URL}${currentUser?.profile_picture}`;
 
   return (
     <div className="flex items-center gap-2 lg:gap-3.5  ml-auto">
@@ -146,7 +148,7 @@ const HeaderTopbar = () => {
               //     ? `/uploads/profile-pictures/${currentUser.profile_picture}`
               //     : toAbsoluteUrl("/media/avatars/300-2.png")
               // }
-              src={currentUser?.profile_picture}
+              src= {imageURL}
               alt=""
             />
 

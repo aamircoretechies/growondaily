@@ -273,7 +273,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
 
 
   const buildHeader = () => {
-    const imageURL = currentUser?.profile_picture;
+    const imageURL = `${import.meta.env.VITE_APP_API_URL}${currentUser?.profile_picture}`;
 
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">

@@ -139,6 +139,8 @@ const HeaderTopbar = () => {
     setRefresh(prev => prev + 1);
   }, [currentUser?.profile_picture]);
 
+  const imageURL = `${import.meta.env.VITE_APP_API_URL}${currentUser?.profile_picture}`;
+
   return (
     <div className="flex items-center gap-2 lg:gap-3.5">
 
@@ -155,11 +157,12 @@ const HeaderTopbar = () => {
             <img
               key={refresh} // image refresh force hoga
               className="size-7 rounded-full justify-center border border-gray-500 shrink-0"
-              src={
-                currentUser?.profile_picture
-                  ? `${currentUser.profile_picture.startsWith('/') ? '' : '/uploads/profile-pictures/'}${currentUser.profile_picture}?v=${Date.now()}`
-                  : toAbsoluteUrl("/media/avatars/300-2.png")
-              }
+              // src={
+              //   currentUser?.profile_picture
+              //     ? `${currentUser.profile_picture.startsWith('/') ? '' : '/uploads/profile-pictures/'}${currentUser.profile_picture}?v=${Date.now()}`
+              //     : toAbsoluteUrl("/media/avatars/300-2.png")
+              // }
+              src={imageURL}
 
               alt="user"
             />
