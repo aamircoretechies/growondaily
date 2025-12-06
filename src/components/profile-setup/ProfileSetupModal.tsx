@@ -512,6 +512,7 @@ import { KeenIcon } from '@/components';
 import { useAuthContext } from "@/auth";
 import { toast } from "sonner";
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
 
 interface ProfileSetupModalProps {
   isOpen: boolean;
@@ -549,6 +550,9 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     setProfileProgress,
     refreshDashboard
   } = useAuthContext();
+
+  // Get dashboard refetcher for instant updates
+  const { refetch: dashboardRefetch } = useDashboard();
 
   const isUpdating = Boolean(currentUser?.is_preference_setup_done);
 
@@ -1018,13 +1022,19 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     return Math.round((filled / fields.length) * 100);
   };
 
-  // Update profile progress in real-time as user edits fields
+  // Update profile progress in real-time based on STEPS completed
+  // This satisfies the requirement: "11% -> 50-60% -> 89% -> 100%" based on steps.
   useEffect(() => {
     if (isOpen) {
-      const progress = calculateProgress(profileData);
+      // Formula: (Current Step Index + 1) / Total Steps * 100
+      // Step 0 (1st step) = 1/9 = 11%
+      // Step 8 (9th step) = 9/9 = 100%
+      const progress = Math.round(((currentStep + 1) / steps.length) * 100);
       setProfileProgress(progress);
+      // Persist to local storage so it shows on Home Page even after reload
+      localStorage.setItem("profileProgress", String(progress));
     }
-  }, [profileData, isOpen]);
+  }, [currentStep, isOpen]);
 
   const handleNext = async () => {
     // Validation Logic
@@ -1093,8 +1103,15 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
 
         toast.success(formatMessage({ id: 'PROFILE_SETUP.SETUP_COMPLETED' }));
 
-        // Refresh dashboard to ensure everything is up to date
+        // Refresh dashboard to ensure everything is up to date (USER data)
         await refreshDashboard();
+
+        // Also refresh DASHBOARD data (Daily Word etc) immediately
+        // We can't access useDashboard here directly inside this function easily if it's not closed over?
+        // Wait, we can use the hook at top level.
+        if (profileData.dailyPref === 'Daily' && dashboardRefetch) {
+          dashboardRefetch();
+        }
 
         onClose();
       } catch (err) {

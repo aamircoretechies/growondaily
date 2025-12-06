@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import axios, { AxiosResponse } from 'axios';
-import { createContext, type Dispatch, type PropsWithChildren, type SetStateAction, useEffect, useState, useRef } from 'react';
+import { createContext, type Dispatch, type PropsWithChildren, type SetStateAction, useEffect, useState } from 'react';
 
 import * as authHelper from '../_helpers';
 import { type AuthModel, type UserModel } from '@/auth';
@@ -62,10 +62,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   const [auth, setAuth] = useState<AuthModel | undefined>(authHelper.getAuth());
   const [currentUser, setCurrentUser] = useState<UserModel | undefined>();
   const [profileProgress, setProfileProgress] = useState(Number(localStorage.getItem("profileProgress") || 0));
-  // Flag to prevent Settings page from updating profile progress
-  const skipProgressUpdateRef = useRef(false);
-  // Track if initial load/verification is complete - only update progress during initial load
-  const initialLoadCompleteRef = useRef(false);
 
   const refreshDashboard = async () => {
     try {
@@ -90,16 +86,11 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   const verify = async () => {
     if (auth) {
       try {
-        // During initial verification, allow progress update ONCE
-        initialLoadCompleteRef.current = false;
         const user = await getUser();
         setCurrentUser(user);
-        // getUser() will set initialLoadCompleteRef.current = true after updating progress
-        // This ensures no subsequent calls (from Settings, etc.) can update progress
       } catch {
         saveAuth(undefined);
         setCurrentUser(undefined);
-        initialLoadCompleteRef.current = true; // Mark complete even on error
       }
     }
   };
@@ -117,8 +108,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     const init = async () => {
       try {
         if (auth) {
-          // Reset initial load flag for fresh verification
-          initialLoadCompleteRef.current = false;
           await verify();
         }
       } finally {
@@ -317,27 +306,18 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       const apiPreferences = response.data?.data?.preferences;
       const fullUser = { ...apiUser, preferences: apiPreferences } as UserModel;
 
-      // NEVER update profile progress from getUser() - only ProfileSetupModal should control it
-      // This prevents Settings page and any other code from affecting profile completion percentage
-      // ProfileSetupModal controls progress via its own calculateProgress function and setProfileProgress
-      // Only allow progress update during initial verification (when verify() is running)
-      if (!skipProgressUpdateRef.current && !initialLoadCompleteRef.current) {
-        // Check if we already have a progress stored locally (from previous partial completion)
-        const localProgress = localStorage.getItem("profileProgress");
+      console.log("full user", fullUser);
 
-        if (localProgress) {
-          // If we have local progress, use it instead of recalculating
-          setProfileProgress(Number(localProgress));
-        } else {
-          // Only calculate if no local progress exists (first time or reset)
-          const progress = calculateProfileProgress(fullUser);
-          setProfileProgress(progress);
-        }
-
-        // Immediately mark as complete to prevent any subsequent calls from updating
-        initialLoadCompleteRef.current = true;
+      // FIX: Prefer step-based progress from localStorage if available, 
+      // otherwise fall back to field-based calculation.
+      const savedProgress = localStorage.getItem("profileProgress");
+      if (savedProgress) {
+        setProfileProgress(Number(savedProgress));
+      } else {
+        const progress = calculateProfileProgress(fullUser);
+        setProfileProgress(progress);
       }
-      // All other calls to getUser() (from Settings, etc.) will skip progress update
+
       try {
         localStorage.setItem("growondaily_currentUser", JSON.stringify(fullUser));
       } catch (err) {
@@ -430,12 +410,9 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       );
 
       // fetch refreshed user and update context
-      // Skip profile progress update when called from Settings
-      skipProgressUpdateRef.current = true;
       const updatedUser = await getUser(token);
-      skipProgressUpdateRef.current = false;
       setCurrentUser(updatedUser);
-      // Do NOT update profile progress here - only ProfileSetupModal should control it
+      setProfileProgress(calculateProfileProgress(updatedUser));
       try {
         localStorage.setItem("growondaily_currentUser", JSON.stringify(updatedUser));
       } catch (err) { }
@@ -542,10 +519,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       // const refreshedUser = await getUser(token);
       // setCurrentUser(refreshedUser);
 
-      // Skip profile progress update when called from Settings
-      skipProgressUpdateRef.current = true;
       let refreshedUser = await getUser(token);
-      skipProgressUpdateRef.current = false;
       refreshedUser = {
         ...refreshedUser,
         first_name: preferencesData?.firstName !== undefined ? preferencesData.firstName : refreshedUser.first_name,
@@ -555,7 +529,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       setCurrentUser(refreshedUser);
       localStorage.setItem("growondaily_currentUser", JSON.stringify(refreshedUser));
 
-      // Do NOT update profile progress here - only ProfileSetupModal should control it
+      setProfileProgress(calculateProfileProgress(refreshedUser));
       try {
         localStorage.setItem("growondaily_currentUser", JSON.stringify(refreshedUser));
       } catch (err) { }
@@ -636,20 +610,14 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
       const userProfile: UserModel = responseData.user;
       setCurrentUser(userProfile);
-      // Set initial progress for Google login, but mark as complete immediately
-      // Only ProfileSetupModal should control progress after initial load
       const progress = calculateProfileProgress(userProfile);
       setProfileProgress(progress);
-      initialLoadCompleteRef.current = true; // Prevent Settings from updating
       console.log(" User profile set:", userProfile);
 
       try {
-        // Skip progress update - initial load already set it above
-        skipProgressUpdateRef.current = true;
         const fullUser = await getUser(token);
-        skipProgressUpdateRef.current = false;
         setCurrentUser(fullUser);
-        // Do NOT update progress - only ProfileSetupModal should control it
+        setProfileProgress(calculateProfileProgress(fullUser));
       } catch (err) {
         console.warn("Could not fetch full user profile, using data from login response");
       }

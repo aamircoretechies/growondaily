@@ -24,7 +24,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const didFetch = React.useRef(false);
 
 
-    // const fetchDashboardData = useCallback(async () => {
+  // const fetchDashboardData = useCallback(async () => {
   //   console.log("Fetching dashboard data...");
   //   if (!auth?.access_token) return;
   //   try {
@@ -73,49 +73,54 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   //   }
   // }, [currentUser, currentLanguage.code, fetchDashboardData]); 
 
+  /* 
+     FIX: We only check for auth.access_token. We do NOT want to depend on 'currentUser'.
+     Why? Because 'currentUser' updates on every keystroke in ProfileSetupModal (for real-time sync).
+     If we depend on it, we re-fetch dashboard data 10 times a second while typing, causing blinking.
+  */
   const fetchDashboardData = useCallback(async () => {
-  if (!auth?.access_token || !currentUser) return;
+    if (!auth?.access_token) return;
 
-  try {
-    setLoading(true);
-    setError(null);
-    const res = await axios.post("/api/dashboard", {}, {
-      headers: { Authorization: `Bearer ${auth.access_token}` }
-    });
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await axios.post("/api/dashboard", {}, {
+        headers: { Authorization: `Bearer ${auth.access_token}` }
+      });
 
-    if (res.data.status === 1) {
-      setDashboardData(res.data.data);
-      setIsLoaded(true); // Mark dashboard as loaded
-    } else {
-      setError("Failed to fetch dashboard data");
+      if (res.data.status === 1) {
+        setDashboardData(res.data.data);
+        setIsLoaded(true); // Mark dashboard as loaded
+      } else {
+        setError("Failed to fetch dashboard data");
+        setIsLoaded(false);
+      }
+
+    } catch (err) {
+      setError("Something went wrong");
       setIsLoaded(false);
+    } finally {
+      setLoading(false);
     }
 
-  } catch (err) {
-    setError("Something went wrong");
-    setIsLoaded(false);
-  } finally {
-    setLoading(false);
-  }
-
-}, [auth?.access_token, currentUser]);
+  }, [auth?.access_token]);
 
 
 
   useEffect(() => {
-    if (!auth?.access_token || !currentUser) {
+    if (!auth?.access_token) {
       setIsLoaded(false);
       didFetch.current = false; // Reset when auth/user is missing
       return;
     }
 
     // Prevent double API calls (StrictMode fix)
-    if (didFetch.current) return;
+    // if (didFetch.current) return;
 
-    didFetch.current = true;
+    // didFetch.current = true;
     fetchDashboardData();
 
-  }, [auth?.access_token, currentUser, currentLanguage.code, fetchDashboardData]);
+  }, [auth?.access_token, currentLanguage.code, fetchDashboardData]);
 
 
 
