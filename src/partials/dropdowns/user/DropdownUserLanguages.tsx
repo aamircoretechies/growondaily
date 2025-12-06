@@ -121,24 +121,6 @@ const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => 
   const { changeLanguageBackend } = useSettingEdit();
 
 
-  // const handleLanguageChange = async (lang: TLanguage) => {
-  //   try {
-  //     changeFrontendLanguage(lang);
-
-  //     await changeBackendLanguage(lang.code);
-
-  //     toast.success(`Language changed to ${lang.label}`);
-
-  //     if (menuItemRef.current) {
-  //       menuItemRef.current.hide();
-  //     }
-
-  //   } catch (error) {
-  //     console.error("Language change failed:", error);
-  //     toast.error("Failed to change language");
-  //   }
-  // };
-
   //     const handleLanguageChange = async (lang: TLanguage) => {
   //   try {
   //     changeFrontendLanguage(lang);
@@ -163,13 +145,13 @@ const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => 
 
 const handleLanguageChange = async (lang: TLanguage) => {
   try {
-    // console.log("🔄 Frontend language update to:", lang);
+    // console.log("Frontend language update to:", lang);
     changeFrontendLanguage(lang);
 
-    // console.log("📡 Sending backend request with:", lang.code);
+    // console.log("Sending backend request with:", lang.code);
     const result = await changeLanguageBackend(lang.code);
 
-    // console.log("📥 Backend response:", result);
+    // console.log("Backend response:", result);
 
     if (result?.success) {
       // console.log(" Language updated successfully in backend");
