@@ -117,27 +117,27 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     init();
   }, []);
 
-  const calculateProfileProgress = (user: UserModel): number => {
-    if (!user) return 0;
-    const prefs = user.preferences || {};
+  // const calculateProfileProgress = (user: UserModel): number => {
+  //   if (!user) return 0;
+  //   const prefs = user.preferences || {};
 
-    const checks = [
-      user.first_name,
-      user.last_name,
-      prefs.experience_with_bible?.length,
-      prefs.what_brings_you,
-      prefs.engagement_preference?.length,
-      prefs.explanation_style,
-      prefs.bible_version,
-      prefs.receive_daily !== undefined,
-      prefs.depth_level,
-    ];
+  //   const checks = [
+  //     user.first_name,
+  //     user.last_name,
+  //     prefs.experience_with_bible?.length,
+  //     prefs.what_brings_you,
+  //     prefs.engagement_preference?.length,
+  //     prefs.explanation_style,
+  //     prefs.bible_version,
+  //     prefs.receive_daily !== undefined,
+  //     prefs.depth_level,
+  //   ];
 
-    const completed = checks.filter(Boolean).length;
-    const total = checks.length;
+  //   const completed = checks.filter(Boolean).length;
+  //   const total = checks.length;
 
-    return Math.round((completed / total) * 100);
-  };
+  //   return Math.round((completed / total) * 100);
+  // };
 
   // const login = async (email: string, password: string) => {
   //   try {
@@ -310,12 +310,21 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
       // FIX: Prefer step-based progress from localStorage if available, 
       // otherwise fall back to field-based calculation.
+      // FIX: Prefer step-based progress from localStorage or check if setup is fully done.
+      // We DO NOT calculate based on fields anymore as that causes "settings" updates to affect "setup" progress.
       const savedProgress = localStorage.getItem("profileProgress");
+
       if (savedProgress) {
         setProfileProgress(Number(savedProgress));
       } else {
-        const progress = calculateProfileProgress(fullUser);
-        setProfileProgress(progress);
+        // Fallback: If no local progress, check if user is famously done
+        if (fullUser.is_preference_setup_done) {
+          setProfileProgress(100);
+        } else {
+          // Default to 0 if nothing is saved and not done. 
+          // We explicitly do NOT calculate based on partial fields.
+          setProfileProgress(0);
+        }
       }
 
       try {
@@ -412,7 +421,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       // fetch refreshed user and update context
       const updatedUser = await getUser(token);
       setCurrentUser(updatedUser);
-      setProfileProgress(calculateProfileProgress(updatedUser));
+      // setProfileProgress(calculateProfileProgress(updatedUser)); // REMOVED: Do not auto-update progress on save
       try {
         localStorage.setItem("growondaily_currentUser", JSON.stringify(updatedUser));
       } catch (err) { }
@@ -529,7 +538,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       setCurrentUser(refreshedUser);
       localStorage.setItem("growondaily_currentUser", JSON.stringify(refreshedUser));
 
-      setProfileProgress(calculateProfileProgress(refreshedUser));
+      // setProfileProgress(calculateProfileProgress(refreshedUser)); // REMOVED: Do not auto-update progress on save
       try {
         localStorage.setItem("growondaily_currentUser", JSON.stringify(refreshedUser));
       } catch (err) { }
@@ -610,14 +619,14 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
       const userProfile: UserModel = responseData.user;
       setCurrentUser(userProfile);
-      const progress = calculateProfileProgress(userProfile);
-      setProfileProgress(progress);
+      // const progress = calculateProfileProgress(userProfile); // REMOVED
+      // setProfileProgress(progress); // REMOVED
       console.log(" User profile set:", userProfile);
 
       try {
         const fullUser = await getUser(token);
         setCurrentUser(fullUser);
-        setProfileProgress(calculateProfileProgress(fullUser));
+        // setProfileProgress(calculateProfileProgress(fullUser)); // REMOVED
       } catch (err) {
         console.warn("Could not fetch full user profile, using data from login response");
       }

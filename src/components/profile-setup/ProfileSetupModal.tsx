@@ -939,72 +939,48 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
   const hydrateFromUser = (u: any) => {
     if (!u) return;
 
+    // Always hydrate from the latest user object to ensure sync with PersonalizationCard
     // Default dailyPref to 'Daily' if not set, or use the saved value
     const savedDailyPref = u?.preferences?.receive_daily ? 'Daily' : (u?.preferences?.receive_daily === false ? 'Occasionally' : 'Daily');
 
-    // If preference setup is already done (100%), we want to RESET fields for editing
-    // except for Name and Daily Preference.
-    if (u.is_preference_setup_done) {
-      setProfileData(prev => ({
-        ...prev,
-        firstName: u.first_name || '',
-        lastName: u.last_name || '',
-        // Reset other fields to force re-entry
-        experience: '',
-        brings: [],
-        engage: [],
-        explainStyle: '',
-        translations: [],
-        dailyPref: savedDailyPref, // Persist daily preference
-        depth: ''
-      }));
-    } else {
-      // Resume from where they left off
-      setProfileData(prev => ({
-        ...prev,
-        firstName: u.first_name || '',
-        lastName: u.last_name || '',
-        experience: u?.preferences?.experience_with_bible?.[0] || '',
-        brings: u?.preferences?.what_brings_you ? (typeof u.preferences.what_brings_you === 'string' ? u.preferences.what_brings_you.split(',').map((s: string) => s.trim()) : u.preferences.what_brings_you) : [],
-        engage: u?.preferences?.engagement_preference || [],
-        explainStyle: u?.preferences?.explanation_style || '',
-        translations: u?.preferences?.bible_version ? [u.preferences.bible_version] : [],
-        dailyPref: savedDailyPref,
-        depth: u?.preferences?.depth_level || '',
-      }));
-    }
+    setProfileData(prev => ({
+      ...prev,
+      firstName: u.first_name || '',
+      lastName: u.last_name || '',
+      experience: u?.preferences?.experience_with_bible?.[0] || '',
+      brings: u?.preferences?.what_brings_you ? (typeof u.preferences.what_brings_you === 'string' ? u.preferences.what_brings_you.split(',').map((s: string) => s.trim()) : u.preferences.what_brings_you) : [],
+      engage: u?.preferences?.engagement_preference || [],
+      explainStyle: u?.preferences?.explanation_style || '',
+      translations: u?.preferences?.bible_version ? [u.preferences.bible_version] : [],
+      dailyPref: savedDailyPref,
+      depth: u?.preferences?.depth_level || '',
+    }));
   };
 
   // Restore state when modal opens
   useEffect(() => {
     if (isOpen) {
+      // Priority: 1. Current User (so we get updates from PersonalizationCard)
+      // 2. Saved Wizard State (if strictly needed, but for "Sync" we probably want fresh data)
+
+      // To satisfy "Changes made in either place must immediately reflect", we MUST prefer currentUser.
+      // However, we also want to remember the "Step" the user was on.
+
+      if (currentUser) {
+        hydrateFromUser(currentUser);
+      }
+
+      // Only load STEP from local storage, data should come from User to be safe/synced.
       const savedState = localStorage.getItem("profileSetupWizardState");
       if (savedState) {
         try {
           const parsed = JSON.parse(savedState);
           setCurrentStep(parsed.step || 0);
-          setProfileData(parsed.data || {
-            firstName: '',
-            lastName: '',
-            experience: '',
-            brings: [],
-            engage: [],
-            explainStyle: '',
-            translations: [],
-            dailyPref: '',
-            depth: ''
-          });
+          // If we really want to support offline-ish resume where they typed but didn't save, we'd use parsed.data
+          // But strict sync requirement implies we want what the backend has if it exists.
+          // Let's stick to hydrating from User for the data fields.
         } catch (e) {
           console.error("Failed to parse saved wizard state", e);
-          // Fallback to user data if parse fails
-          if (currentUser) {
-            hydrateFromUser(currentUser);
-          }
-        }
-      } else {
-        // If no saved state, try to hydrate from user (e.g. first time or reset)
-        if (currentUser) {
-          hydrateFromUser(currentUser);
         }
       }
     }
@@ -1089,11 +1065,26 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
       return;
     }
 
-    if (currentStep === steps.length - 1) {
-      // last step -> save
-      try {
-        await saveOrUpdateUserPreferences(profileData);
+    // Save on EVERY step to ensure sync
+    try {
+      await saveOrUpdateUserPreferences(profileData);
 
+      // Update local storage state as well
+      const wizardState = {
+        step: currentStep + 1, // Store the NEXT step
+        data: profileData
+      };
+      localStorage.setItem("profileSetupWizardState", JSON.stringify(wizardState));
+
+    } catch (err) {
+      console.error('Failed to save step progress', err);
+      // Optional: block progress if save fails? usually better to let them proceed but warn?
+      // For now, let's proceed but maybe show a subtle toast if needed, or just log.
+    }
+
+    if (currentStep === steps.length - 1) {
+      // last step -> Complete
+      try {
         // Clear wizard state on completion
         localStorage.removeItem("profileSetupWizardState");
 
@@ -1106,9 +1097,6 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
         // Refresh dashboard to ensure everything is up to date (USER data)
         await refreshDashboard();
 
-        // Also refresh DASHBOARD data (Daily Word etc) immediately
-        // We can't access useDashboard here directly inside this function easily if it's not closed over?
-        // Wait, we can use the hook at top level.
         if (profileData.dailyPref === 'Daily' && dashboardRefetch) {
           dashboardRefetch();
         }
@@ -1131,7 +1119,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
     // Save current state to localStorage for resuming later
     const wizardState = {
       step: currentStep,
@@ -1143,6 +1131,13 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     const progress = Math.round(((currentStep + 1) / steps.length) * 100);
     setProfileProgress(progress);
     localStorage.setItem("profileProgress", String(progress));
+
+    // Also save to backend to ensure partial data is synced
+    try {
+      await saveOrUpdateUserPreferences(profileData);
+    } catch (e) {
+      console.error("Failed to save on close", e);
+    }
 
     onClose();
   };

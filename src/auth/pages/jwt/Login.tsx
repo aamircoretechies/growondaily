@@ -42,6 +42,7 @@ const initialValues = {
   remember: false
 };
 
+
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login, loginWithGoogle } = useAuthContext();
@@ -119,6 +120,11 @@ const Login = () => {
     event.preventDefault();
     setShowPassword(!showPassword);
   };
+
+  const toggleRemember = () => {
+    formik.setFieldValue("remember", !formik.values.remember);
+  };
+
 
   return (
     <div className="card max-w-[390px] w-full">
@@ -254,14 +260,31 @@ const Login = () => {
           )}
         </div>
 
-        <label className="checkbox-group">
+        {/* <label className="checkbox-group">
           <input
             className="checkbox checkbox-sm"
             type="checkbox"
             {...formik.getFieldProps('remember')}
           />
           <span className="checkbox-label">Remember me</span>
-        </label>
+        </label> */}
+
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              name="remember"
+              className="checkbox checkbox-sm"
+              checked={formik.values.remember}
+              onChange={(e) => {
+                formik.setFieldValue("remember", e.target.checked);
+              }}
+            />
+            <span className="checkbox-label">Remember me</span>
+          </label>
+        </div>
+
+
 
         <button
           type="submit"
