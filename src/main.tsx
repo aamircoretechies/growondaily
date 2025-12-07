@@ -13,8 +13,8 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { ScreenLoader } from '@/components/loaders';
 
-import { useAuthContext } from './auth/useAuthContext'; 
-// axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL;
+import { useAuthContext } from './auth/useAuthContext';
+axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL;
 // axios.defaults.withCredentials = false;
 
 

@@ -654,7 +654,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
 
       // Update local storage state as well
       const wizardState = {
-        step: currentStep + 1, // Store the NEXT step
+        step: currentStep + 1, 
         data: profileData
       };
       localStorage.setItem("profileSetupWizardState", JSON.stringify(wizardState));

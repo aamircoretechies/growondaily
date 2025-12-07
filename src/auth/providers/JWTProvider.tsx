@@ -5,7 +5,7 @@ import { createContext, type Dispatch, type PropsWithChildren, type SetStateActi
 import * as authHelper from '../_helpers';
 import { type AuthModel, type UserModel } from '@/auth';
 
-const API_URL = import.meta.env.VITE_APP_API_URL;
+// const API_URL = import.meta.env.VITE_APP_API_URL;
 export const LOGIN_URL = `/api/auth/login`;
 export const REGISTER_URL = `/api/auth/create-account`;
 export const FORGOT_PASSWORD_URL = `/api/auth/forgot-password`;
