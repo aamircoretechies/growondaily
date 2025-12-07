@@ -96,7 +96,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Settings, Languages, Save, RefreshCw } from 'lucide-react';
-import { useSettingEdit } from "../Provider/SettingeEditProvider";
+import { useAuthContext } from "@/auth";
 import { useState, useEffect } from "react";
 import { useLanguage } from '@/providers/TranslationProvider';
 import { I18N_LANGUAGES } from '@/i18n';
@@ -104,7 +104,8 @@ import { FormattedMessage } from 'react-intl';
 import { toast } from "sonner";
 
 const GeneralSettings = ({ user }: { user: any }) => {
-  const { changeLanguageBackend, languageLoading } = useSettingEdit();
+  const { changeLanguage } = useAuthContext();
+  const [languageLoading, setLanguageLoading] = useState(false);
   const { currentLanguage } = useLanguage();
 
   const [language, setLanguage] = useState(currentLanguage.code);
@@ -115,15 +116,22 @@ const GeneralSettings = ({ user }: { user: any }) => {
   }, [currentLanguage.code]);
 
   const handleSave = async () => {
-    const res = await changeLanguageBackend(language);
+    try {
+      setLanguageLoading(true);
+      const res = await changeLanguage(language);
 
-    if (res.success) {
-      toast.success("Language updated");
-      setTimeout(() => {
-      window.location.reload();
-    }, 600);
-    } else {
-      toast.error("Failed: " + res.message);
+      if (res?.success) {
+        toast.success("Language updated");
+        setTimeout(() => {
+          window.location.reload();
+        }, 600);
+      } else {
+        toast.error("Failed: " + (res?.message || "Unknown error"));
+      }
+    } catch (e) {
+      toast.error("An error occurred");
+    } finally {
+      setLanguageLoading(false);
     }
   };
 
@@ -133,16 +141,23 @@ const GeneralSettings = ({ user }: { user: any }) => {
 
   const handleReset = async () => {
     setLanguage("en");
+    setLanguageLoading(true);
 
-    const res = await changeLanguageBackend("en");
+    try {
+      const res = await changeLanguage("en");
 
-    if (res.success) {
-      toast.success("Language reset to English");
-      setTimeout(() => {
-      window.location.reload();
-    }, 600);
-    } else {
-      toast.error(res.message);
+      if (res?.success) {
+        toast.success("Language reset to English");
+        setTimeout(() => {
+          window.location.reload();
+        }, 600);
+      } else {
+        toast.error(res?.message || "Failed to reset");
+      }
+    } catch (e) {
+      toast.error("An error occurred");
+    } finally {
+      setLanguageLoading(false);
     }
   };
 

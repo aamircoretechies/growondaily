@@ -164,50 +164,50 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
 
   const login = async (email: string, password: string) => {
-  try {
-    const response = await axios.post(
-      LOGIN_URL,
-      { email, password },
-      { withCredentials: true }
-    );
+    try {
+      const response = await axios.post(
+        LOGIN_URL,
+        { email, password },
+        { withCredentials: true }
+      );
 
-    const responseData = response.data;
-    if (responseData?.status === 0) {
-      throw new Error(responseData.message || "Login failed");
+      const responseData = response.data;
+      if (responseData?.status === 0) {
+        throw new Error(responseData.message || "Login failed");
+      }
+      const authData = responseData.data;
+      if (!authData?.token) {
+        throw new Error("Invalid login response from server");
+      }
+
+      const authObj: AuthModel = {
+        access_token: authData.token,
+        api_token: authData.token,
+        refreshToken: undefined,
+      };
+
+      saveAuth(authObj);
+    } catch (error: any) {
+      console.error("LOGIN ERROR:", error);
+      saveAuth(undefined);
+
+      if (
+        error?.response?.status === 502 ||
+        error?.response?.status === 503 ||
+        error?.response?.status === 504 ||
+        error?.message === "Network Error"
+      ) {
+        throw new Error("Please wait… establishing a secure connection.");
+      }
+
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Invalid email or password";
+
+      throw new Error(msg);
     }
-    const authData = responseData.data;
-    if (!authData?.token) {
-      throw new Error("Invalid login response from server");
-    }
-
-    const authObj: AuthModel = {
-      access_token: authData.token,
-      api_token: authData.token,
-      refreshToken: undefined,
-    };
-
-    saveAuth(authObj);
-  } catch (error: any) {
-    console.error("LOGIN ERROR:", error);
-    saveAuth(undefined);
-
-    if (
-      error?.response?.status === 502 ||
-      error?.response?.status === 503 ||
-      error?.response?.status === 504 ||
-      error?.message === "Network Error"
-    ) {
-      throw new Error("Please wait… establishing a secure connection.");
-    }
-
-    const msg =
-      error?.response?.data?.message ||
-      error?.message ||
-      "Invalid email or password";
-
-    throw new Error(msg);
-  }
-};
+  };
 
 
 
@@ -701,8 +701,13 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
       if (!token) throw new Error("No token available");
 
+      // Payload exactly as requested
+      const payload = {
+        language_code: langCode
+      };
+
       const response = await axios.post(`/api/auth/change-language`,
-        { language: langCode },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -711,14 +716,32 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         }
       );
 
-      // SUCCESSFUL
-      const updatedUser = await getUser(token);
-      setCurrentUser(updatedUser);
+      // Verify response status
+      if (response.data?.status === 1) {
+        // SUCCESSFUL
+        // Update user context with new language immediately if possible, 
+        // or re-fetch user to get latest state
+        const updatedUser = await getUser(token);
+        setCurrentUser(updatedUser);
 
-      return response.data;
+        return {
+          success: true,
+          message: response.data.message || "Language changed successfully",
+          data: response.data.data
+        };
+      } else {
+        return {
+          success: false,
+          message: response.data.message || "Failed to change language"
+        };
+      }
+
     } catch (error: any) {
       console.error("Language change error:", error.response?.data || error);
-      throw error;
+      return {
+        success: false,
+        message: error.response?.data?.message || "Something went wrong"
+      };
     }
   };
 

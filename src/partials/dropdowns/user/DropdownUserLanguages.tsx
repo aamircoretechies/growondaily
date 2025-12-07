@@ -108,7 +108,7 @@ import clsx from "clsx";
 import { I18N_LANGUAGES, TLanguage, useLanguage } from "@/i18n";
 import { useAuthContext } from "@/auth";
 import { toast } from "sonner";
-import { useSettingEdit } from "@/pages/settings/Provider/SettingeEditProvider";
+
 
 
 interface IDropdownUserLanguagesProps {
@@ -118,7 +118,7 @@ interface IDropdownUserLanguagesProps {
 const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => {
   const { currentLanguage, changeLanguage: changeFrontendLanguage, isRTL } = useLanguage();
   const { changeLanguage: changeBackendLanguage } = useAuthContext();
-  const { changeLanguageBackend } = useSettingEdit();
+
 
 
   //     const handleLanguageChange = async (lang: TLanguage) => {
@@ -143,32 +143,32 @@ const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => 
   //   }
   // };
 
-const handleLanguageChange = async (lang: TLanguage) => {
-  try {
-    // console.log("Frontend language update to:", lang);
-    changeFrontendLanguage(lang);
+  const handleLanguageChange = async (lang: TLanguage) => {
+    try {
+      // console.log("Frontend language update to:", lang);
+      changeFrontendLanguage(lang);
 
-    // console.log("Sending backend request with:", lang.code);
-    const result = await changeLanguageBackend(lang.code);
+      // console.log("Sending backend request with:", lang.code);
+      const result = await changeBackendLanguage(lang.code);
 
-    // console.log("Backend response:", result);
+      // console.log("Backend response:", result);
 
-    if (result?.success) {
-      // console.log(" Language updated successfully in backend");
-      toast.success(result?.message || `Language changed to ${lang.label}`);
-    } else {
-      // console.warn(" Backend language change FAILED:", result);
-      toast.error(result?.message || "Failed to change language");
+      if (result?.success) {
+        // console.log(" Language updated successfully in backend");
+        toast.success(result?.message || `Language changed to ${lang.label}`);
+      } else {
+        // console.warn(" Backend language change FAILED:", result);
+        toast.error(result?.message || "Failed to change language");
+      }
+
+      if (menuItemRef.current) {
+        menuItemRef.current.hide();
+      }
+    } catch (error) {
+      console.error(" Language change failed:", error);
+      toast.error("Failed to change language");
     }
-
-    if (menuItemRef.current) {
-      menuItemRef.current.hide();
-    }
-  } catch (error) {
-    console.error(" Language change failed:", error);
-    toast.error("Failed to change language");
-  }
-};
+  };
 
 
 

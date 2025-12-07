@@ -12,7 +12,6 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
-  const [languageLoading, setLanguageLoading] = useState(false);
   const [notificationLoading, setNotificationLoading] = useState(false);
 
   const { changeLanguage } = useLanguage();
@@ -162,97 +161,55 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
   //   }
   // };
 
-  const changeLanguageBackend = async (language_code: string) => {
-  try {
-    setLanguageLoading(true);
-    const token = localStorage.getItem("accessToken");
 
-    const response = await axios.post("/api/auth/change-language",
-      { language_code },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
-
-    if (response.data.status === 1) {
-
-      // Update user object
-      const updatedUser = { ...user, language_code };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-
-      // Update frontend language
-      const selectedLang = I18N_LANGUAGES.find((x) => x.code === language_code);
-      if (selectedLang) {
-        setData(I18N_CONFIG_KEY, selectedLang);
-        changeLanguage(selectedLang);
-      }
-
-      return { success: true, message: "Language changed successfully" };
-    }
-
-    return { success: false, message: response.data.message };
-
-  } catch (error: any) {
-    return {
-      success: false,
-      message: error.response?.data?.message || "Something went wrong"
-    };
-  } finally {
-    setLanguageLoading(false);
-  }
-};
 
 
   const deleteAccount = async () => {
-  try {
-    const token = localStorage.getItem("accessToken");
+    try {
+      const token = localStorage.getItem("accessToken");
 
-    const response = await axios.delete("/api/auth/delete-account", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      data: {
-        confirmation_code: "DELETE_MY_ACCOUNT"
-      }
-    });
-
-    console.log("DELETE RESPONSE =>", response.data); 
-
-    if (response.data.status === 1) {
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
-
-      return { success: true };
-    }
-
-    return { success: false, message: response.data.message, errors: response.data.errors };
-
-  } catch (error: any) {
-    const errorData = error?.response?.data;
-    console.log("DELETE ERROR =>", errorData);
-    if (errorData?.errors) {
-      console.log("Validation errors:", errorData.errors);
-      errorData.errors.forEach((err: any, index: number) => {
-        console.log(`Error ${index + 1}:`, err);
+      const response = await axios.delete("/api/auth/delete-account", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        data: {
+          confirmation_code: "DELETE_MY_ACCOUNT"
+        }
       });
+
+      console.log("DELETE RESPONSE =>", response.data);
+
+      if (response.data.status === 1) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("user");
+
+        return { success: true };
+      }
+
+      return { success: false, message: response.data.message, errors: response.data.errors };
+
+    } catch (error: any) {
+      const errorData = error?.response?.data;
+      console.log("DELETE ERROR =>", errorData);
+      if (errorData?.errors) {
+        console.log("Validation errors:", errorData.errors);
+        errorData.errors.forEach((err: any, index: number) => {
+          console.log(`Error ${index + 1}:`, err);
+        });
+      }
+      return {
+        success: false,
+        message: errorData?.message || "Failed to delete account",
+        errors: errorData?.errors || []
+      };
     }
-    return { 
-      success: false, 
-      message: errorData?.message || "Failed to delete account",
-      errors: errorData?.errors || []
-    };
-  }
-};
+  };
 
 
 
   return (
-    <SettingEditContext.Provider value={{ user, loading, profileLoading, passwordLoading, notificationLoading, updateProfile, languageLoading, changePassword, getNotificationPreferences, updateNotificationPreferences,deleteAccount,changeLanguageBackend,  }}>
+    <SettingEditContext.Provider value={{ user, loading, profileLoading, passwordLoading, notificationLoading, updateProfile, changePassword, getNotificationPreferences, updateNotificationPreferences, deleteAccount }}>
       {children}
     </SettingEditContext.Provider>
   );
