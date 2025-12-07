@@ -117,31 +117,12 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     init();
   }, []);
 
-  // const calculateProfileProgress = (user: UserModel): number => {
-  //   if (!user) return 0;
-  //   const prefs = user.preferences || {};
 
-  //   const checks = [
-  //     user.first_name,
-  //     user.last_name,
-  //     prefs.experience_with_bible?.length,
-  //     prefs.what_brings_you,
-  //     prefs.engagement_preference?.length,
-  //     prefs.explanation_style,
-  //     prefs.bible_version,
-  //     prefs.receive_daily !== undefined,
-  //     prefs.depth_level,
-  //   ];
-
-  //   const completed = checks.filter(Boolean).length;
-  //   const total = checks.length;
-
-  //   return Math.round((completed / total) * 100);
-  // };
 
   // const login = async (email: string, password: string) => {
   //   try {
-  //     const response = await axios.post(LOGIN_URL,
+  //     const response = await axios.post(
+  //       LOGIN_URL,
   //       { email, password },
   //       { withCredentials: true }
   //     );
@@ -154,71 +135,81 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   //       api_token: authData.token,
   //       refreshToken: undefined
   //     };
+
   //     saveAuth(authObj);
 
-  //     // fetch authoritative user and set
-  //     const user = await getUser(authData.token);
-  //     setProfileProgress(calculateProfileProgress(user));
-  //     localStorage.removeItem("profileProgress");
-  //     setCurrentUser(user);
   //   } catch (error: any) {
   //     console.error("LOGIN ERROR:", error);
   //     saveAuth(undefined);
-  //     // throw new Error(`Error ${error}`);
+  //     if (
+  //       error?.response?.status === 502 ||
+  //       error?.response?.status === 503 ||
+  //       error?.response?.status === 504
+  //     ) {
+  //       throw new Error("Please wait… establishing a secure connection.");
+  //     }
+
+  //     if (error.message === "Network Error") {
+  //       throw new Error("Please wait… establishing a secure connection.");
+  //     }
+
   //     let msg =
   //       error?.response?.data?.message ||
-  //       error?.message || "Invalid email or password";
+  //       error?.message ||
+  //       "Invalid email or password";
+
   //     throw new Error(msg);
   //   }
   // };
 
+
   const login = async (email: string, password: string) => {
-    try {
-      const response = await axios.post(
-        LOGIN_URL,
-        { email, password },
-        { withCredentials: true }
-      );
+  try {
+    const response = await axios.post(
+      LOGIN_URL,
+      { email, password },
+      { withCredentials: true }
+    );
 
-      const authData = response.data.data;
-      if (!authData?.token) throw new Error("Please Enter Valid email or password");
-
-      const authObj: AuthModel = {
-        access_token: authData.token,
-        api_token: authData.token,
-        refreshToken: undefined
-      };
-
-      saveAuth(authObj);
-
-      // const user = await getUser(authData.token);
-      // setProfileProgress(calculateProfileProgress(user));
-      // localStorage.removeItem("profileProgress");
-      // setCurrentUser(user);
-
-    } catch (error: any) {
-      console.error("LOGIN ERROR:", error);
-      saveAuth(undefined);
-      if (
-        error?.response?.status === 502 ||
-        error?.response?.status === 503 ||
-        error?.response?.status === 504
-      ) {
-        throw new Error("Please wait… establishing a secure connection.");
-      }
-
-      if (error.message === "Network Error") {
-        throw new Error("Please wait… establishing a secure connection.");
-      }
-
-      let msg =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Invalid email or password";
-
-      throw new Error(msg);
+    const responseData = response.data;
+    if (responseData?.status === 0) {
+      throw new Error(responseData.message || "Login failed");
     }
-  };
+    const authData = responseData.data;
+    if (!authData?.token) {
+      throw new Error("Invalid login response from server");
+    }
+
+    const authObj: AuthModel = {
+      access_token: authData.token,
+      api_token: authData.token,
+      refreshToken: undefined,
+    };
+
+    saveAuth(authObj);
+  } catch (error: any) {
+    console.error("LOGIN ERROR:", error);
+    saveAuth(undefined);
+
+    if (
+      error?.response?.status === 502 ||
+      error?.response?.status === 503 ||
+      error?.response?.status === 504 ||
+      error?.message === "Network Error"
+    ) {
+      throw new Error("Please wait… establishing a secure connection.");
+    }
+
+    const msg =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Invalid email or password";
+
+    throw new Error(msg);
+  }
+};
+
+
 
   const register = async (email: string, password: string, password_confirmation: string) => {
     try {

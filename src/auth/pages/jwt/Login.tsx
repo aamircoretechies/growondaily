@@ -96,16 +96,21 @@ const Login = () => {
       } catch (error: any) {
         console.error("Login error", error);
 
-        let msg = error?.message || "Invalid email or password";
+        // let msg = error?.message || "Invalid email or password";
 
-        if (
-          msg.toLowerCase().includes("token") ||
-          msg.toLowerCase().includes("invalid") ||
-          msg.toLowerCase().includes("not found")
-        ) {
-          msg = "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character";
-        }
+        // if (
+        //   msg.toLowerCase().includes("token") ||
+        //   msg.toLowerCase().includes("invalid") ||
+        //   msg.toLowerCase().includes("not found")
+        // ) {
+        //   msg = "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character";
+        // }
 
+        console.log(" LOGIN ERROR MESSAGE FROM BACKEND:",error?.response?.data?.message);
+         console.log("LOGIN ERROR DATA:",error?.response?.data?.data);
+
+        const msg =error?.response?.data?.message ||error?.message ||"Invalid email or password";
+        console.log(" ERROR SHOWN TO USER:", msg);
         setStatus(msg);
         setSubmitting(false);
       }
