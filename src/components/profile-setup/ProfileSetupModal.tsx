@@ -480,7 +480,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     if (!u) return;
 
     const backend = u.preferences || u.preference || u.user_preferences || u.settings?.preferences;
-    
+
     // Always hydrate from the latest user object to ensure sync with PersonalizationCard
     // Default dailyPref to 'Daily' if not set, or use the saved value
     const savedDailyPref = u?.preferences?.receive_daily ? 'Daily' : (u?.preferences?.receive_daily === false ? 'Occasionally' : 'Daily');
@@ -685,6 +685,10 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
         }
 
         onClose();
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+
       } catch (err) {
         toast.error(formatMessage({ id: 'PROFILE_SETUP.ERROR_SAVING' }));
         console.error('Profile save failed', err);
