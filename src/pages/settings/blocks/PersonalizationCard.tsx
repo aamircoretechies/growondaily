@@ -335,6 +335,11 @@ const PersonalizationCard = ({ user }: { user: any }) => {
       const updatedUser = await authContext?.getUser();
       authContext?.setCurrentUser(updatedUser);
       toast.success("Preferences saved successfully!")
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
+
     } catch (err) {
       console.error("Save failed:", err);
       toast.error("Preferences failed to save! ")
@@ -352,11 +357,11 @@ const PersonalizationCard = ({ user }: { user: any }) => {
       <CardContent className="space-y-3">
         <Row
           title={formatMessage({ id: 'PROFILE_SETUP.WHAT_EXPERIENCE' })}
-          subtitle={formatMessage({ 
+          subtitle={formatMessage({
             id: experience === 'First Time' ? 'PROFILE_SETUP.EXPERIENCE_FIRST_TIME' :
-                experience === 'Occasional' ? 'PROFILE_SETUP.EXPERIENCE_OCCASIONAL' :
+              experience === 'Occasional' ? 'PROFILE_SETUP.EXPERIENCE_OCCASIONAL' :
                 experience === 'Regular' ? 'PROFILE_SETUP.EXPERIENCE_REGULAR' :
-                'PROFILE_SETUP.EXPERIENCE_THEOLOGICAL'
+                  'PROFILE_SETUP.EXPERIENCE_THEOLOGICAL'
           })}
           onClick={() => setExperienceOpen(true)}
         />
@@ -385,11 +390,11 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         />
         <Row
           title={formatMessage({ id: 'PROFILE_SETUP.WHAT_EXPLANATION_STYLE' })}
-          subtitle={formatMessage({ 
+          subtitle={formatMessage({
             id: explain === 'Clear and simple language' ? 'PROFILE_SETUP.STYLE_SIMPLE' :
-                explain === 'A bit deeper with context' ? 'PROFILE_SETUP.STYLE_DEEPER' :
+              explain === 'A bit deeper with context' ? 'PROFILE_SETUP.STYLE_DEEPER' :
                 explain === 'Mixed depending on topic' ? 'PROFILE_SETUP.STYLE_MIXED' :
-                'PROFILE_SETUP.STYLE_DECIDE_LATER'
+                  'PROFILE_SETUP.STYLE_DECIDE_LATER'
           })}
           onClick={() => setExplainOpen(true)}
         />
@@ -405,9 +410,9 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         />
         <Row
           title={formatMessage({ id: 'PROFILE_SETUP.HOW_DEEP' })}
-          subtitle={formatMessage({ 
+          subtitle={formatMessage({
             id: depth === 'Short (1-2 min read)' ? 'PROFILE_SETUP.DEPTH_SHORT' :
-                depth === 'Medium (3-4 min read)' ? 'PROFILE_SETUP.DEPTH_MEDIUM' :
+              depth === 'Medium (3-4 min read)' ? 'PROFILE_SETUP.DEPTH_MEDIUM' :
                 'PROFILE_SETUP.DEPTH_DEEP'
           })}
           onClick={() => setDepthOpen(true)}
@@ -470,11 +475,11 @@ const PersonalizationCard = ({ user }: { user: any }) => {
             <DialogBody className="space-y-2">
               {(['First Time', 'Occasional', 'Regular', 'Theological'] as const).map((option) => {
                 const selected = experience === option;
-                const translatedOption = formatMessage({ 
+                const translatedOption = formatMessage({
                   id: option === 'First Time' ? 'PROFILE_SETUP.EXPERIENCE_FIRST_TIME' :
-                      option === 'Occasional' ? 'PROFILE_SETUP.EXPERIENCE_OCCASIONAL' :
+                    option === 'Occasional' ? 'PROFILE_SETUP.EXPERIENCE_OCCASIONAL' :
                       option === 'Regular' ? 'PROFILE_SETUP.EXPERIENCE_REGULAR' :
-                      'PROFILE_SETUP.EXPERIENCE_THEOLOGICAL'
+                        'PROFILE_SETUP.EXPERIENCE_THEOLOGICAL'
                 });
                 return (
                   <button
@@ -507,12 +512,12 @@ const PersonalizationCard = ({ user }: { user: any }) => {
             <DialogBody className="space-y-2">
               {bringsOptions.map((option) => {
                 const selected = brings.includes(option);
-                const translatedOption = formatMessage({ 
+                const translatedOption = formatMessage({
                   id: option === 'To better understand what I read' ? 'PROFILE_SETUP.BRINGS_UNDERSTAND' :
-                      option === 'To learn about faith and God' ? 'PROFILE_SETUP.BRINGS_LEARN' :
+                    option === 'To learn about faith and God' ? 'PROFILE_SETUP.BRINGS_LEARN' :
                       option === 'For daily inspiration or peace' ? 'PROFILE_SETUP.BRINGS_INSPIRATION' :
-                      option === 'For study or lesson preparation' ? 'PROFILE_SETUP.BRINGS_STUDY' :
-                      'PROFILE_SETUP.BRINGS_CURIOUS'
+                        option === 'For study or lesson preparation' ? 'PROFILE_SETUP.BRINGS_STUDY' :
+                          'PROFILE_SETUP.BRINGS_CURIOUS'
                 });
                 return (
                   <button
@@ -542,11 +547,11 @@ const PersonalizationCard = ({ user }: { user: any }) => {
             <DialogBody className="space-y-2">
               {engageOptions.map((option) => {
                 const selected = engage.includes(option);
-                const translatedOption = formatMessage({ 
+                const translatedOption = formatMessage({
                   id: option === 'Reading' ? 'PROFILE_SETUP.ENGAGE_READING' :
-                      option === 'Listening' ? 'PROFILE_SETUP.ENGAGE_LISTENING' :
+                    option === 'Listening' ? 'PROFILE_SETUP.ENGAGE_LISTENING' :
                       option === 'Speaking' ? 'PROFILE_SETUP.ENGAGE_SPEAKING' :
-                      'PROFILE_SETUP.ENGAGE_GUIDANCE'
+                        'PROFILE_SETUP.ENGAGE_GUIDANCE'
                 });
                 return (
                   <button
@@ -576,11 +581,11 @@ const PersonalizationCard = ({ user }: { user: any }) => {
             <DialogBody className="space-y-2">
               {explainOptions.map((option) => {
                 const selected = explain === option;
-                const translatedOption = formatMessage({ 
+                const translatedOption = formatMessage({
                   id: option === 'Clear and simple language' ? 'PROFILE_SETUP.STYLE_SIMPLE' :
-                      option === 'A bit deeper with context' ? 'PROFILE_SETUP.STYLE_DEEPER' :
+                    option === 'A bit deeper with context' ? 'PROFILE_SETUP.STYLE_DEEPER' :
                       option === 'Mixed depending on topic' ? 'PROFILE_SETUP.STYLE_MIXED' :
-                      'PROFILE_SETUP.STYLE_DECIDE_LATER'
+                        'PROFILE_SETUP.STYLE_DECIDE_LATER'
                 });
                 return (
                   <button
@@ -693,9 +698,9 @@ const PersonalizationCard = ({ user }: { user: any }) => {
             <DialogBody className="space-y-2">
               {depthOptions.map((option) => {
                 const selected = depth === option;
-                const translatedOption = formatMessage({ 
+                const translatedOption = formatMessage({
                   id: option === 'Short (1-2 min read)' ? 'PROFILE_SETUP.DEPTH_SHORT' :
-                      option === 'Medium (3-4 min read)' ? 'PROFILE_SETUP.DEPTH_MEDIUM' :
+                    option === 'Medium (3-4 min read)' ? 'PROFILE_SETUP.DEPTH_MEDIUM' :
                       'PROFILE_SETUP.DEPTH_DEEP'
                 });
                 return (

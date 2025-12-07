@@ -119,6 +119,9 @@ const GeneralSettings = ({ user }: { user: any }) => {
 
     if (res.success) {
       toast.success("Language updated");
+      setTimeout(() => {
+      window.location.reload();
+    }, 600);
     } else {
       toast.error("Failed: " + res.message);
     }
@@ -135,6 +138,9 @@ const GeneralSettings = ({ user }: { user: any }) => {
 
     if (res.success) {
       toast.success("Language reset to English");
+      setTimeout(() => {
+      window.location.reload();
+    }, 600);
     } else {
       toast.error(res.message);
     }
