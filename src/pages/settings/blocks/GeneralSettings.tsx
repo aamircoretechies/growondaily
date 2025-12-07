@@ -1,96 +1,3 @@
-// import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-// import { Input } from '@/components/ui/input';
-// import { Label } from '@/components/ui/label';
-// import { Button } from '@/components/ui/button';
-// import { Switch } from '@/components/ui/switch';
-// import { 
-//   Settings, 
-//   Globe, 
-//   Clock, 
-//   Languages,
-//   Save,
-//   RefreshCw
-// } from 'lucide-react';
-
-// const GeneralSettings = ({ user }: { user: any }) => {
-//   const defaultLanguage = user?.language || 'English';  // for API data
-//   return (
-//     <Card id="general_settings" className='bg-white/40 dark:bg-gray-100 '>
-//       <CardHeader>
-//         <CardTitle className="flex items-center gap-2">
-//           <Settings className="w-5 h-5" />
-//           General Settings
-//         </CardTitle>
-//       </CardHeader>
-//       <CardContent className="space-y-6">
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-//           <div className="space-y-2">
-//             <Label htmlFor="language">Default Language</Label>
-//             <div className="flex items-center gap-2">
-//               <Languages className="w-4 h-4 text-gray-400" />
-//               <Input 
-//                 id="language" 
-//                 placeholder="Select language"
-//                 defaultValue={defaultLanguage} // change for API data
-//               />
-//             </div>
-//           </div>
-
-//         </div>
-
-//         <div className="space-y-4">
-//           <div className="space-y-3">
-
-
-
-
-//             {/* Audio Mode - Hidden for now */}
-//             {/* <div className="flex items-center justify-between">
-//               <div>
-//                 <Label htmlFor="auto_backup">Audio Mode</Label>
-//                 <p className="text-sm text-gray-500">Enable/Disable audio mode</p>
-//               </div>
-//               <Switch id="auto_backup" defaultChecked />
-//             </div> */}
-
-
-//           </div>
-//         </div>
-
-//         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4">
-//           <Button className="flex items-center justify-center gap-2 w-full sm:w-auto">
-//             <Save className="w-4 h-4" />
-//             Save Settings
-//           </Button>
-//           <Button variant="outline" className="flex items-center justify-center gap-2 w-full sm:w-auto">
-//             <RefreshCw className="w-4 h-4" />
-//             Reset to Default
-//           </Button>
-//         </div>
-//       </CardContent>
-//     </Card>
-//   );
-// };
-
-// export { GeneralSettings };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -106,7 +13,7 @@ import { toast } from "sonner";
 const GeneralSettings = ({ user }: { user: any }) => {
   const { changeLanguage } = useAuthContext();
   const [languageLoading, setLanguageLoading] = useState(false);
-  const { currentLanguage } = useLanguage();
+  const { currentLanguage, changeLanguage: changeFrontendLanguage } = useLanguage();
 
   const [language, setLanguage] = useState(currentLanguage.code);
 
@@ -115,44 +22,53 @@ const GeneralSettings = ({ user }: { user: any }) => {
     setLanguage(currentLanguage.code);
   }, [currentLanguage.code]);
 
-  const handleSave = async () => {
-    try {
-      setLanguageLoading(true);
-      const res = await changeLanguage(language);
+  // const handleSave = async () => {
+  //   try {
+  //     setLanguageLoading(true);
+  //     const res = await changeLanguage(language);
 
-      if (res?.success) {
-        toast.success("Language updated");
-        setTimeout(() => {
-          window.location.reload();
-        }, 600);
-      } else {
-        toast.error("Failed: " + (res?.message || "Unknown error"));
-      }
-    } catch (e) {
-      toast.error("An error occurred");
-    } finally {
-      setLanguageLoading(false);
-    }
-  };
+  //     if (res?.success) {
+  //       toast.success("Language updated");
+  //       setTimeout(() => {
+  //         window.location.reload();
+  //       }, 600);
+  //     } else {
+  //       toast.error("Failed: " + (res?.message || "Unknown error"));
+  //     }
+  //   } catch (e) {
+  //     toast.error("An error occurred");
+  //   } finally {
+  //     setLanguageLoading(false);
+  //   }
+  // };
 
   // const handleReset = () => {
   //   setLanguage("en");
   // };
 
-  const handleReset = async () => {
-    setLanguage("en");
-    setLanguageLoading(true);
-
+  const handleSave = async () => {
     try {
-      const res = await changeLanguage("en");
+      setLanguageLoading(true);
+
+      // ✅ FRONTEND language update
+      const selectedLang = I18N_LANGUAGES.find(l => l.code === language);
+      if (selectedLang) {
+        changeFrontendLanguage(selectedLang);
+      }
+
+      // ✅ BACKEND update
+      const res = await changeLanguage(language);
 
       if (res?.success) {
-        toast.success("Language reset to English");
+        toast.success("Language updated");
+
+        // ✅ CONTROLLED REFRESH
         setTimeout(() => {
           window.location.reload();
-        }, 600);
+        }, 500);
+
       } else {
-        toast.error(res?.message || "Failed to reset");
+        toast.error(res?.message || "Failed to update language");
       }
     } catch (e) {
       toast.error("An error occurred");
@@ -160,6 +76,57 @@ const GeneralSettings = ({ user }: { user: any }) => {
       setLanguageLoading(false);
     }
   };
+
+
+  // const handleReset = async () => {
+  //   setLanguage("en");
+  //   setLanguageLoading(true);
+
+  //   try {
+  //     const res = await changeLanguage("en");
+
+  //     if (res?.success) {
+  //       toast.success("Language reset to English");
+  //       setTimeout(() => {
+  //         window.location.reload();
+  //       }, 600);
+  //     } else {
+  //       toast.error(res?.message || "Failed to reset");
+  //     }
+  //   } catch (e) {
+  //     toast.error("An error occurred");
+  //   } finally {
+  //     setLanguageLoading(false);
+  //   }
+  // };
+
+  const handleReset = async () => {
+  try {
+    setLanguage("en");
+    setLanguageLoading(true);
+
+    const englishLang = I18N_LANGUAGES.find(l => l.code === "en");
+    if (englishLang) {
+      changeFrontendLanguage(englishLang);
+    }
+
+    const res = await changeLanguage("en");
+
+    if (res?.success) {
+      toast.success("Language reset to English");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+
+    } else {
+      toast.error(res?.message || "Failed to reset");
+    }
+  } finally {
+    setLanguageLoading(false);
+  }
+};
+
 
 
   return (
