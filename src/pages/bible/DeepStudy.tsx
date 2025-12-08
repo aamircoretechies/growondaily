@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { KeenIcon } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
 
@@ -62,7 +62,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
     }
   }, []);
 
-  const allTabs: TabItem[] = [
+  const allTabs: TabItem[] = useMemo(() => [
     { id: 'original', title: 'Original', icon: 'document', content: '' },
     { id: 'explanations', title: 'Explanation', icon: 'book-open', content: '' },
     { id: 'historical', title: 'Historical Context', icon: 'calendar', content: '' },
@@ -76,9 +76,9 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
     { id: 'cross_reference', title: 'Cross Reference', icon: 'link', content: '' },
     { id: 'key_takeaways', title: 'Key Takeaways', icon: 'star', content: '' },
     { id: 'reflection', title: 'Reflection Prompts', icon: 'question', content: '' },
-  ];
+  ], []);
 
-  const tabs = allTabs.filter(t => enabledTabs.includes(t.id) || enabledTabs.length === 0);
+  const tabs = useMemo(() => allTabs.filter(t => enabledTabs.includes(t.id) || enabledTabs.length === 0), [allTabs, enabledTabs]);
 
   // Reset active tab if it becomes disabled
   useEffect(() => {
@@ -87,15 +87,15 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
     }
   }, [enabledTabs, activeTab, setActiveTab]);
 
-  const getTabContent = (tabId: string) => {
+  const getTabContent = useCallback((tabId: string) => {
     // if (loadingDeepStudy) return 'Loading deep study content...';
-    if (loadingDeepStudy) return <Loader />;
+    // if (loadingDeepStudy) return <Loader />; // Returned as JSX in render
     if (!deepStudyData) return 'No data available.';
     const currentKey = `${selectedBookId}-${selectedChapter}`;
     const ctx = deepStudyData?.[currentKey]?.[tabId];
     if (!ctx) return 'Content not available.';
     return (ctx.content || '').replace(/\*/g, '') || 'Content not available.';
-  };
+  }, [deepStudyData, selectedBookId, selectedChapter]);
 
   return (
     <div className="min-h-screen text-primary overflow-hidden">
@@ -159,7 +159,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                     {getTabContent(tab.id)}
                   </p> */}
                   <div className="font-merriweather text-base sm:text-lg leading-relaxed text-primary break-words whitespace-pre-line">
-                    {getTabContent(tab.id)}
+                    {loadingDeepStudy ? <Loader /> : getTabContent(tab.id)}
                   </div>
 
                 </div>

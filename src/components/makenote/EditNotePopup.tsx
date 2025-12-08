@@ -13,23 +13,48 @@ export default function EditNotePopup({ note, onClose }: Props) {
   //   note.emotion_tags || note.tags || note.original_tags || []
   // );
 
-    const initialTags =
-  note.tags ||
-  note.emotion_tags ||
-  note.updated_tags || 
-  note.original_tags ||
-  [];
+  //     const initialTags =
+  //   note.tags ||
+  //   note.emotion_tags ||
+  //   note.updated_tags || 
+  //   note.original_tags ||
+  //   [];
 
-const [selectedTags, setSelectedTags] = useState([...initialTags]);
+  // const [selectedTags, setSelectedTags] = useState([...initialTags]);
+
+  const normalizeTag = (tag: string) =>
+    tag.trim().toLowerCase();
+
+  const initialTags =
+    note.tags ||
+    note.emotion_tags ||
+    note.updated_tags ||
+    note.original_tags ||
+    [];
+
+  const [selectedTags, setSelectedTags] = useState(
+    initialTags.map((t: string) => normalizeTag(t))
+  );
+
 
 
   const { updateNote } = useReflection();
 
+  // const toggleTag = (tag: string) => {
+  //   if (selectedTags.includes(tag)) {
+  //     setSelectedTags(selectedTags.filter((t: string) => t !== tag));
+  //   } else {
+  //     setSelectedTags([...selectedTags, tag]);
+  //   }
+  // };
+
   const toggleTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter((t: string) => t !== tag));
+    const normalized = normalizeTag(tag);
+
+    if (selectedTags.includes(normalized)) {
+      setSelectedTags(selectedTags.filter((t: string) => t !== normalized));
     } else {
-      setSelectedTags([...selectedTags, tag]);
+      setSelectedTags([...selectedTags, normalized]);
     }
   };
 
@@ -47,25 +72,50 @@ const [selectedTags, setSelectedTags] = useState([...initialTags]);
   // };
 
 
+  // const handleSave = async () => {
+
+  //   if (!content.trim()) {
+  //     toast.error("Please write something !.");
+  //     return;
+  //   }
+
+  //   const payload = {
+  //     content,
+  //     tags: selectedTags,
+  //   };
+
+  //   const success = await updateNote(note.note_id, content, selectedTags);
+
+  //   if (success) {
+  //     toast.success("Note updated successfully");
+  //     onClose();
+  //   }
+  // };
+
+
   const handleSave = async () => {
-
     if (!content.trim()) {
-    toast.error("Please write something !.");
-    return;
-  }
+      toast.error("Please write something!");
+      return;
+    }
 
-    const payload = {
+    // Convert back to Title Case (optional)
+    const tagsForBackend = selectedTags.map(
+      (t: string) => t.charAt(0).toUpperCase() + t.slice(1)
+    );
+
+    const success = await updateNote(
+      note.note_id,
       content,
-      tags: selectedTags,
-    };
-
-    const success = await updateNote(note.note_id, content, selectedTags);
+      tagsForBackend
+    );
 
     if (success) {
       toast.success("Note updated successfully");
       onClose();
     }
   };
+
 
 
   //   return (
@@ -127,6 +177,8 @@ const [selectedTags, setSelectedTags] = useState([...initialTags]);
 
 
 
+
+
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white/90 dark:bg-[--tw-page-bg-dark] backdrop-blur-sm rounded-xl shadow-lg max-w-md w-full mx-4 p-6">
@@ -168,7 +220,7 @@ const [selectedTags, setSelectedTags] = useState([...initialTags]);
               <button
                 key={tag}
                 onClick={() => toggleTag(tag)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition ${selectedTags.includes(tag)
+                className={`px-4 py-2 rounded-full text-sm font-medium transition ${selectedTags.includes(normalizeTag(tag))
                   ? "bg-primary text-white"
                   : "bg-gray-100 dark:bg-gray-300 text-gray-700 hover:bg-gray-200"
                   }`}

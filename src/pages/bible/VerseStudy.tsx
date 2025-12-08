@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { KeenIcon } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
@@ -230,7 +230,7 @@ const VerseStudy = () => {
     }
   }, []);
 
-  const allTabs: TabItem[] = [
+  const allTabs: TabItem[] = useMemo(() => [
     { id: 'original', title: 'Original', icon: 'document' },
     { id: 'explanations', title: 'Explanation', icon: 'book-open' },
     { id: 'historical', title: 'Historical Context', icon: 'calendar' },
@@ -244,9 +244,9 @@ const VerseStudy = () => {
     { id: 'cross_reference', title: 'Cross Reference', icon: 'link' },
     { id: 'key_takeaways', title: 'Key Takeaways', icon: 'star' },
     { id: 'reflection', title: 'Reflection Prompts', icon: 'question' },
-  ];
+  ], []);
 
-  const tabs = allTabs.filter(t => enabledTabs.includes(t.id) || enabledTabs.length === 0);
+  const tabs = useMemo(() => allTabs.filter(t => enabledTabs.includes(t.id) || enabledTabs.length === 0), [allTabs, enabledTabs]);
 
   // Reset active tab if it becomes disabled
   useEffect(() => {
@@ -257,12 +257,12 @@ const VerseStudy = () => {
 
 
 
-  const getTabContent = (tabId: string) => {
+  const getTabContent = useCallback((tabId: string) => {
     // if (loadingDeepStudy) return 'Loading deep study content...';
-    if (loadingDeepStudy) return <Loader />;
+    // if (loadingDeepStudy) return <Loader />; // Rendered in JSX
     if (!deepStudyData) return 'No data available.';
 
-    // Find the correct bookId
+    // Find the correct bookId - optimizing this inside the callback to avoid complex dependency
     let bookId = book;
     if (books.length > 0 && book.length !== 36) {
       const found = books.find(
@@ -278,7 +278,7 @@ const VerseStudy = () => {
     if (!ctx) return 'Content not available.';
     const cleanText = (ctx.content || '').replace(/\*/g, '');
     return cleanText || 'Content not available.';
-  };
+  }, [deepStudyData, book, books, chapter, verse]);
 
 
   // const handleReportSubmit = async () => {
@@ -441,7 +441,7 @@ const VerseStudy = () => {
                   {getTabContent(tab.id)}
                 </p> */}
                 <div className="font-merriweather text-lg leading-relaxed text-primary whitespace-pre-line">
-                  {getTabContent(tab.id)}
+                  {loadingDeepStudy ? <Loader /> : getTabContent(tab.id)}
                 </div>
               </div>
 
