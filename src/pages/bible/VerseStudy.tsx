@@ -281,8 +281,13 @@ const VerseStudy = () => {
   };
 
 
-
   // const handleReportSubmit = async () => {
+  //   const wordCount = reportIssue.trim().split(/\s+/).length;
+  //   if (wordCount > 200) {
+  //     toast.error("Word limit exceeded (maximum 200 words)");
+  //     return;
+  //   }
+
   //   if (!reportIssue.trim() || !reportCategory) {
   //     toast.error("Please fill all fields");
   //     return;
@@ -297,7 +302,10 @@ const VerseStudy = () => {
   //     tags: [reportCategory.toLowerCase()]
   //   };
 
+  //   console.log("REPORT PAYLOAD:", payload);
+
   //   const response = await submitReport(payload);
+  //   console.log("REPORT RESPONSE:", response); 
 
   //   if (response.success) {
   //     toast.success("Report submitted successfully!");
@@ -306,20 +314,26 @@ const VerseStudy = () => {
   //     setReportCategory("");
   //     setShowReportModal(false);
   //   } else {
-  //     toast.error("Something went wrong, please try again.");
+  //     toast.error(response?.message || "Something went wrong, please try again.");
   //   }
   // };
 
   const handleReportSubmit = async () => {
-    // Word limit check (200 words max)
-    const wordCount = reportIssue.trim().split(/\s+/).length;
-    if (wordCount > 200) {
-      toast.error("Word limit exceeded (maximum 200 words)");
+    if (!reportIssue.trim() || !reportCategory) {
+      toast.error("Please fill all fields");
       return;
     }
 
-    if (!reportIssue.trim() || !reportCategory) {
-      toast.error("Please fill all fields");
+    // ✅ Strict sanitation
+    const cleanDescription = reportIssue
+      .replace(/\n+/g, " ")
+      .replace(/"/g, "")
+      .trim();
+
+    const wordCount = cleanDescription.split(/\s+/).length;
+
+    if (wordCount > 200) {
+      toast.error("Maximum 200 words allowed");
       return;
     }
 
@@ -328,20 +342,23 @@ const VerseStudy = () => {
       chapter: Number(chapter),
       verse: Number(verse),
       version: "KJV",
-      description: reportIssue,
+      description: cleanDescription,
       tags: [reportCategory.toLowerCase()]
     };
 
+    console.log("REPORT PAYLOAD:", payload);
+
     const response = await submitReport(payload);
 
-    if (response.success) {
-      toast.success("Report submitted successfully!");
+    console.log("REPORT RESPONSE:", response);
 
+    if (response?.success === true) {
+      toast.success("Report submitted successfully!");
       setReportIssue("");
       setReportCategory("");
       setShowReportModal(false);
     } else {
-      toast.error("Something went wrong, please try again.");
+      toast.error(response?.message || "Something went wrong");
     }
   };
 

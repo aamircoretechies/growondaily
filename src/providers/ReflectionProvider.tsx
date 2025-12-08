@@ -145,28 +145,54 @@ export const ReflectionProvider = ({ children }: any) => {
     }
   }, []);
 
+  // const submitReport = useCallback(async (payload: ReportPayload) => {
+  //   try {
+  //     const res = await axios.post(`/api/bible/report`,
+  //       payload,
+  //       { withCredentials: true }
+  //     );
+
+  //     if (res.data?.status === 1) {
+  //       // toast.success("Report submitted successfully!");
+  //       return { success: true, data: res.data.data };
+  //     } else {
+  //       // toast.error(res.data?.message || "Failed to submit report");
+  //       return { success: false };
+  //     }
+
+  //   } catch (error) {
+  //     console.log("REPORT ERROR:", error);
+  //     // toast.error("Something went wrong!");
+  //     return { success: false };
+  //   }
+  // }, []);
+
   const submitReport = useCallback(async (payload: ReportPayload) => {
     try {
-      const res = await axios.post(`/api/bible/report`,
-        payload,
-        { withCredentials: true }
-      );
+      const res = await axios.post(`/api/bible/report`, payload, {
+        withCredentials: true,
+      });
 
       if (res.data?.status === 1) {
-        // toast.success("Report submitted successfully!");
         return { success: true, data: res.data.data };
-      } else {
-        // toast.error(res.data?.message || "Failed to submit report");
-        return { success: false };
       }
 
-    } catch (error) {
-      console.log("REPORT ERROR:", error);
-      toast.error("Something went wrong!");
-      return { success: false };
+      return {
+        success: false,
+        message: res.data?.message || "Report failed",
+      };
+
+    } catch (error: any) {
+      console.log("REPORT ERROR:", error.response?.data || error.message);
+
+      return {
+        success: false,
+        message:
+          error?.response?.data?.message ||
+          "Something went wrong",
+      };
     }
   }, []);
-
 
 
 
