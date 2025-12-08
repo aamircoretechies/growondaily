@@ -483,7 +483,8 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
 
     // Always hydrate from the latest user object to ensure sync with PersonalizationCard
     // Default dailyPref to 'Daily' if not set, or use the saved value
-    const savedDailyPref = u?.preferences?.receive_daily ? 'Daily' : (u?.preferences?.receive_daily === false ? 'Occasionally' : 'Daily');
+      // const savedDailyPref = u?.preferences?.receive_daily ? 'Daily' : (u?.preferences?.receive_daily === false ? 'Occasionally' : 'Daily');
+      const savedDailyPref = u?.preferences?.receive_daily ? 'Daily' : (u?.preferences?.receive_daily === false ? 'Occasionally' : 'Occasionally');
 
     // Map depth_level from backend to UI format
     const depthLevel = (backend?.depth_level || '').toString().toLowerCase();

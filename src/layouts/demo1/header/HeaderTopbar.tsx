@@ -30,7 +30,36 @@ const HeaderTopbar = () => {
   const handleClose = () => {
     setSearchModalOpen(false);
   };
-  const imageURL = `${import.meta.env.VITE_APP_API_URL}${currentUser?.profile_picture}`;
+
+  // Reuse same image URL logic as demo5 header
+  const getImageURL = () => {
+    if (!currentUser?.profile_picture) {
+      return toAbsoluteUrl("/media/avatars/300-2.png");
+    }
+
+    const profilePic = currentUser.profile_picture;
+    console.log("HeaderTopbar profile_picture ->", profilePic);
+
+    // Full URL already
+    if (profilePic.startsWith("http://") || profilePic.startsWith("https://")) {
+      console.log("HeaderTopbar using full URL ->", profilePic);
+      return profilePic;
+    }
+
+    // Path starting with /
+    if (profilePic.startsWith("/")) {
+      const url = `${import.meta.env.VITE_APP_API_URL}${profilePic}`;
+      console.log("HeaderTopbar computed image URL (path) ->", url);
+      return url;
+    }
+
+    // Just filename
+    const url = `${import.meta.env.VITE_APP_API_URL}/uploads/profile-pictures/${profilePic}`;
+    console.log("HeaderTopbar computed image URL (filename) ->", url);
+    return url;
+  };
+
+  const imageURL = getImageURL();
 
   return (
     <div className="flex items-center gap-2 lg:gap-3.5  ml-auto">
@@ -148,8 +177,12 @@ const HeaderTopbar = () => {
               //     ? `/uploads/profile-pictures/${currentUser.profile_picture}`
               //     : toAbsoluteUrl("/media/avatars/300-2.png")
               // }
-              src= {imageURL}
+              src={imageURL}
               alt=""
+              onError={(e) => {
+                e.currentTarget.src = toAbsoluteUrl("/media/avatars/300-2.png");
+                e.currentTarget.onerror = null;
+              }}
             />
 
           </MenuToggle>

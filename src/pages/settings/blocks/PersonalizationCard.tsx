@@ -139,7 +139,8 @@ const PersonalizationCard = ({ user }: { user: any }) => {
     );
   };
   const [dailyOpen, setDailyOpen] = useState(false);
-  const [dailyPref, setDailyPref] = useState<'Daily' | 'Occasionally'>('Daily');
+  // const [dailyPref, setDailyPref] = useState<'Daily' | 'Occasionally'>('Daily');
+  const [dailyPref, setDailyPref] = useState<'Daily' | 'Occasionally'>('Occasionally');
   const [depthOpen, setDepthOpen] = useState(false);
   const depthOptions = [
     'Short (1-2 min read)',
