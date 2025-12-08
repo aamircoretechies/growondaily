@@ -676,7 +676,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
         setProfileProgress(100);
         localStorage.setItem("profileProgress", "100");
 
-        toast.success(formatMessage({ id: 'PROFILE_SETUP.SETUP_COMPLETED' }));
+        toast.success(formatMessage({ id: 'Profile setup completed!' }));
 
         // Refresh dashboard to ensure everything is up to date (USER data)
         await refreshDashboard();
@@ -691,7 +691,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
         }, 500);
 
       } catch (err) {
-        toast.error(formatMessage({ id: 'PROFILE_SETUP.ERROR_SAVING' }));
+        toast.error(formatMessage({ id: 'PROFILE SETUP.ERROR SAVING' }));
         console.error('Profile save failed', err);
       }
 

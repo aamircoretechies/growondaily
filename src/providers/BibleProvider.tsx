@@ -46,8 +46,8 @@ interface BibleContextType {
   setSelectedVerse: (v: Verse | null) => void;
   selectBook: (bookId: string, name: string, chapter?: number) => Promise<void>;
   selectChapter: (chapter: number) => Promise<void>;
-  fetchDeepStudy: (bookId: string, chapter: number, version: string, context?: string, verse?: string | number) => Promise<any>;
-  fetchDeepStudyForVerse: (bookId: string, chapter: number, verse: number, version: string, context?: string) => Promise<any>;
+  fetchDeepStudy: (bookId: string, chapter: number, version: string, context?: string, verse?: string | number, isBackground?: boolean) => Promise<any>;
+  fetchDeepStudyForVerse: (bookId: string, chapter: number, verse: number, version: string, context?: string, isBackground?: boolean) => Promise<any>;
   saveNote: (book_id: string, chapter: number, verse: number, content: string, emotion_tags: string[]) => Promise<void>;
   toggleVerseBookmark: (book: string, chapter: number, verse: number, version: string) => Promise<void>;
   showDeepStudy: boolean;
@@ -464,7 +464,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     chapter: number,
     version: string,
     context: string = 'original', // Default to original if not specified
-    verse?: string | number
+    verse?: string | number,
+    isBackground: boolean = false
   ) => {
     try {
       const key = verse
@@ -484,7 +485,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      setLoadingDeepStudy(true);
+      if (!isBackground) {
+        setLoadingDeepStudy(true);
+      }
 
       const baseUrl = verse
         ? `/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}`
@@ -530,7 +533,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Deep Study Fetch Error:", error);
       // Don't clear deep study data on error, just keep old data
     } finally {
-      setLoadingDeepStudy(false);
+      if (!isBackground) {
+        setLoadingDeepStudy(false);
+      }
     }
   };
 
@@ -539,9 +544,10 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     chapter: number,
     verse: number,
     version: string,
-    context: string = 'original'
+    context: string = 'original',
+    isBackground: boolean = false
   ) => {
-    return fetchDeepStudy(bookId, chapter, version, context, verse);
+    return fetchDeepStudy(bookId, chapter, version, context, verse, isBackground);
   };
 
   const saveNote = async (
