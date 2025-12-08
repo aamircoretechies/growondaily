@@ -46,23 +46,45 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
     storeSettings({ themeMode: newThemeMode });
   };
 
-  // const handleProfilePicChange = async (event: ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
+
+
+  // const handleProfilePicChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
   //   if (!file) return;
 
-  //   await updateProfileImage(file);
+  //   const updatedUser = await updateProfileImage(file);
+
+  //   if (updatedUser) {
+  //     toast.success("Profile picture updated!");
+  //   } else {
+  //     toast.error("Failed to update profile picture");
+  //   }
   // };
 
   const handleProfilePicChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const updatedUser = await updateProfileImage(file);
+    try {
+      await updateProfileImage(file);
+      toast.success("Profile picture updated ");
+    } catch (err: any) {
+      const msg = err?.message;
 
-    if (updatedUser) {
-      toast.success("Profile picture updated!");
-    } else {
-      toast.error("Failed to update profile picture");
+      if (msg?.startsWith("IMAGE_TOO_LARGE")) {
+        toast.error("Image size must be under 1.5 MB");
+      }
+      else if (msg === "BACKEND_IMAGE_TOO_LARGE") {
+        toast.error("Image too large (server limit exceeded)");
+      }
+      else if (msg === "NETWORK_ERROR") {
+        toast.error("Network error. Please try again");
+      }
+      else {
+        toast.error("Failed to upload profile picture");
+      }
+
+      e.target.value = ""; 
     }
   };
 

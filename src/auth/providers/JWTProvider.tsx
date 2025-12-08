@@ -643,53 +643,112 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   };
 
 
-  const updateProfileImage = async (file: File): Promise<UserModel | null> => {
-    try {
-      const token =
-        auth?.access_token ||
-        auth?.api_token ||
-        authHelper.getAuth()?.access_token ||
-        authHelper.getAuth()?.api_token;
+  // const updateProfileImage = async (file: File): Promise<UserModel | null> => {
+  //   try {
+  //     const token =
+  //       auth?.access_token ||
+  //       auth?.api_token ||
+  //       authHelper.getAuth()?.access_token ||
+  //       authHelper.getAuth()?.api_token;
 
-      const formData = new FormData();
-      formData.append("profile_picture", file);
-      console.log(import.meta.env.VITE_APP_API_URL);
+  //     const formData = new FormData();
+  //     formData.append("profile_picture", file);
+  //     console.log(import.meta.env.VITE_APP_API_URL);
 
 
-      const response = await axios.put(`/api/auth/profile-picture`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+  //     const response = await axios.put(`/api/auth/profile-picture`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "multipart/form-data",
+  //         },
+  //       }
+  //     );
 
-      console.log("Backend:", response.data);
+  //     console.log("Backend:", response.data);
 
-      // Smart handling
-      const newProfile =
-        response?.data?.data?.user?.profile_picture ||
-        response?.data?.data?.profile_picture ||
-        response?.data?.data?.file_info?.filename;
+  //     const newProfile =
+  //       response?.data?.data?.user?.profile_picture ||
+  //       response?.data?.data?.profile_picture ||
+  //       response?.data?.data?.file_info?.filename;
 
-      console.log("NEW PROFILE PIC:", newProfile);
+  //     console.log("NEW PROFILE PIC:", newProfile);
 
-      if (!newProfile) {
-        console.error("Backend did not return correct profile_picture");
-        return null;
+  //     if (!newProfile) {
+  //       console.error("Backend did not return correct profile_picture");
+  //       return null;
+  //     }
+
+  //     const updatedUser = await getUser(token);
+  //     setCurrentUser(updatedUser);
+
+  //     return updatedUser;
+  //   } catch (error: any) {
+  //     console.error("Update error:", error.response?.data || error);
+  //     return null;
+  //   }
+  // };
+   
+ const MAX_MB = 1.5;
+
+const updateProfileImage = async (file: File): Promise<UserModel> => {
+  const sizeMB = file.size / (1024 * 1024);
+
+  console.log("Selected file:", {
+    name: file.name,
+    size_mb: sizeMB.toFixed(2),
+    type: file.type,
+  });
+
+  if (sizeMB > MAX_MB) {
+    throw new Error(`IMAGE_TOO_LARGE_${MAX_MB}`);
+  }
+
+  const token =
+    auth?.access_token ||
+    auth?.api_token ||
+    authHelper.getAuth()?.access_token ||
+    authHelper.getAuth()?.api_token;
+
+  if (!token) throw new Error("AUTH_REQUIRED");
+
+  const formData = new FormData();
+  formData.append("profile_picture", file);
+
+  try {
+    const response = await axios.put(
+      `/api/auth/profile-picture`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
 
-      const updatedUser = await getUser(token);
-      setCurrentUser(updatedUser);
+    console.log("Upload success:", response.data);
 
-      return updatedUser;
-    } catch (error: any) {
-      console.error("Update error:", error.response?.data || error);
-      return null;
+    const updatedUser = await getUser(token);
+    setCurrentUser(updatedUser);
+    return updatedUser;
+
+  } catch (error: any) {
+    const status = error?.response?.status;
+
+    if (status === 413) {
+      throw new Error("BACKEND_IMAGE_TOO_LARGE");
     }
-  };
+
+    if (error?.message === "Network Error") {
+      throw new Error("NETWORK_ERROR");
+    }
+
+    throw new Error("UPLOAD_FAILED");
+  }
+};
+
+
 
 
   const changeLanguage = async (langCode: string) => {
