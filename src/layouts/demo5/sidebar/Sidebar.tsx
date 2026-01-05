@@ -53,7 +53,10 @@ const Sidebar = () => {
           <div
             className="scrollable-y-auto"
             style={{
-              ...(desktopMode && scrollableHeight > 0 && { height: `${scrollableHeight}px` })
+              ...(desktopMode && scrollableHeight > 0 && { height: `${scrollableHeight}px` }),
+              WebkitOverflowScrolling: 'touch',
+              overscrollBehavior: 'contain',
+              touchAction: 'pan-y'
             }}
           >
             {pathname === '/bible' ? <SidebarMenuDashboard /> : <SidebarMenuDefault />}
@@ -79,6 +82,11 @@ const Sidebar = () => {
           forceMount={true}
           side="left"
           close={false}
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+            touchAction: 'pan-y'
+          }}
         >
           <SheetHeader className="sr-only">
             <SheetTitle>Mobile Menu</SheetTitle>

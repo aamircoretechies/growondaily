@@ -1,5 +1,6 @@
 import { Menu, MenuItem, MenuLink, MenuTitle, MenuToggle, KeenIcon, MenuSub, MenuIcon } from '@/components';
 import { useLanguage } from '@/i18n';
+import { useResponsive } from '@/hooks';
 import { useState, useMemo, useEffect } from 'react';
 import { MakeNote } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
@@ -48,7 +49,10 @@ const SidebarMenuDashboard = () => {
   const navigate = useNavigate();
   const [showSharePopup, setShowSharePopup] = useState(false);
   const isVerseView = searchParams.get('bible') && searchParams.get('chapter') && searchParams.get('verse');
+
   const isChapterView = searchParams.get('bible') && searchParams.get('chapter') && !searchParams.get('verse');
+  const isDesktop = useResponsive('up', 'lg');
+  const trigger = isDesktop ? 'hover' : 'click';
 
   useEffect(() => {
     const bookSlug = searchParams.get('bible');
@@ -347,8 +351,11 @@ const SidebarMenuDashboard = () => {
           <MenuItem
             className="w-full"
             toggle="dropdown"
-            trigger="hover"
+
+            // trigger="hover"
+            trigger={trigger}
             dropdownProps={{
+              disablePortal: !isDesktop,
               placement: isRTL() ? 'bottom-start' : 'bottom-end',
               modifiers: [{ name: 'offset', options: { offset: [0, 0] } }],
             }}
@@ -360,9 +367,9 @@ const SidebarMenuDashboard = () => {
               </span>
             </MenuToggle>
 
-            <MenuSub className="menu-default w-[250px] py-2">
+            <MenuSub className="menu-default w-[190px] py-2">
               {/* Search Input */}
-              <div className="px-3 py-2 border-b border-gray-200">
+              <div className="px-3 py-2 border-b border-gray-200" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
                 <input
                   type="text"
                   placeholder="Search books..."
@@ -374,9 +381,18 @@ const SidebarMenuDashboard = () => {
               </div>
 
 
-              <div
+              {/* <div
                 onClick={() => console.log("Outer div clicked")}
                 className="max-h-60 overflow-y-auto"
+              > */}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("Outer div clicked");
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="max-h-60 overflow-y-auto"
+                style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y' }}
               >
                 {filteredDropdownItems.length > 0 ? (
                   filteredDropdownItems.map((item, index) => (
@@ -408,8 +424,11 @@ const SidebarMenuDashboard = () => {
       </div>
       {/* Chapters Dropdown */}
       <Menu highlight={true} className="menu-default w-full p-0">
-        <MenuItem className="w-full" toggle="dropdown" trigger="hover"
+        <MenuItem className="w-full" toggle="dropdown"
+          // trigger="hover"
+          trigger={trigger}
           dropdownProps={{
+            disablePortal: !isDesktop,
             placement: isRTL() ? 'bottom-start' : 'bottom-end',
             modifiers: [
               {
@@ -431,9 +450,9 @@ const SidebarMenuDashboard = () => {
             </span>
           </MenuToggle>
 
-          <MenuSub className="menu-default w-[250px] py-2">
+          <MenuSub className="menu-default w-[190px] py-2">
             {/* Search Input */}
-            <div className="px-3 py-2 border-b border-gray-200">
+            <div className="px-3 py-2 border-b border-gray-200" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
               <input
                 type="text"
                 placeholder="Search chapters..."
@@ -445,7 +464,15 @@ const SidebarMenuDashboard = () => {
             </div>
 
             {/* Filtered Results */}
-            <div className="max-h-60 overflow-y-auto">
+            {/* <div className="max-h-60 overflow-y-auto"> */}
+            {/* <div className="max-h-60 overflow-y-auto"> */}
+            {/* <div className="max-h-60 overflow-y-auto"> */}
+            <div
+              className="max-h-60 overflow-y-auto"
+              style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y' }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            >
               {loadingChapters ? (
                 <div className="px-3 py-2 text-sm text-gray-500">Loading chapters...</div>
               ) : filteredChapters.length > 0 ? (
@@ -482,8 +509,10 @@ const SidebarMenuDashboard = () => {
         <MenuItem
           className="w-full"
           toggle="dropdown"
-          trigger="hover"
+          // trigger="hover"
+          trigger={trigger}
           dropdownProps={{
+            disablePortal: !isDesktop,
             placement: isRTL() ? 'bottom-start' : 'bottom-end',
             modifiers: [{ name: 'offset', options: { offset: [0, 0] } }],
           }}
@@ -498,9 +527,9 @@ const SidebarMenuDashboard = () => {
             </span>
           </MenuToggle>
 
-          <MenuSub className="menu-default w-[250px] py-2">
+          <MenuSub className="menu-default w-[190px] py-2">
             {/* Search Input */}
-            <div className="px-3 py-2 border-b border-gray-200">
+            <div className="px-3 py-2 border-b border-gray-200" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
               <input
                 type="text"
                 placeholder="Search verses..."
@@ -512,7 +541,15 @@ const SidebarMenuDashboard = () => {
             </div>
 
             {/* Filtered Verse List */}
-            <div className="max-h-60 overflow-y-auto">
+            {/* <div className="max-h-60 overflow-y-auto"> */}
+            {/* <div className="max-h-60 overflow-y-auto"> */}
+            {/* <div className="max-h-60 overflow-y-auto"> */}
+            <div
+              className="max-h-60 overflow-y-auto"
+              style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', touchAction: 'pan-y' }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            >
               {loadingVerses ? (
                 <div className="px-3 py-2 text-sm text-gray-500">Loading verses...</div>
               ) : filteredVerses.length > 0 ? (
