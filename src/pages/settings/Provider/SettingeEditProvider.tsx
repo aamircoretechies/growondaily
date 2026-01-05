@@ -162,8 +162,6 @@ export const SettingEditProvider = ({ children }: { children: React.ReactNode })
   // };
 
 
-
-
   const deleteAccount = async () => {
     try {
       const token = localStorage.getItem("accessToken");

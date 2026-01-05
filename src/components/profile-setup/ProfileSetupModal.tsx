@@ -308,12 +308,13 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
           <div className="space-y-3 max-h-64 overflow-y-auto">
             {[
               'KJV - King James Version',
-              'NKJV - New King James Version',
-              'NIV - New International Version',
-              'NLT - New Living Translation',
-              'ESV - English Standard Version',
-              'CSB - Christian Standard Bible',
-              'NASB - New American Standard Bible'
+              'SV - Statenvertaling',
+              // 'NKJV - New King James Version',
+              // 'NIV - New International Version',
+              // 'NLT - New Living Translation',
+              // 'ESV - English Standard Version',
+              // 'CSB - Christian Standard Bible',
+              // 'NASB - New American Standard Bible'
             ].map((option) => (
               <button
                 key={option}
@@ -458,11 +459,11 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     const versionOptions = [
       'KJV - King James Version',
       'NKJV - New King James Version',
-      'NIV - New International Version',
-      'NLT - New Living Translation',
-      'ESV - English Standard Version',
-      'CSB - Christian Standard Bible',
-      'NASB - New American Standard Bible'
+      // 'NIV - New International Version',
+      // 'NLT - New Living Translation',
+      // 'ESV - English Standard Version',
+      // 'CSB - Christian Standard Bible',
+      // 'NASB - New American Standard Bible'
     ];
     const c = (code || '').toUpperCase();
     const match = versionOptions.find((o) => o.startsWith(`${c} `));
