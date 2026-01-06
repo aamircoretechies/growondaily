@@ -110,12 +110,12 @@ const EditProfileCard = () => {
       email: email,
     });
 
-    setMessage(res.message);
-
     if (res.success) {
+      setMessage(formatMessage({ id: 'TOAST.PROFILE_UPDATED' }));
       setIsError(false);
       setTimeout(() => setMessage(''), 3000);
     } else {
+      setMessage(res.message || formatMessage({ id: 'TOAST.PROFILE_UPDATE_FAILED' }));
       setIsError(true);
     }
   };
@@ -199,8 +199,8 @@ const EditProfileCard = () => {
           <Button variant="ghost"
             onClick={() => setShowDeletePopup(true)}
             className="text-red-500 hover:text-red-600 w-full sm:w-auto text-sm">
-            <span className="hidden sm:inline">Delete account permanently</span>
-            <span className="sm:hidden">Delete account</span>
+            <span className="hidden sm:inline"><FormattedMessage id="PROFILE.DELETE_ACCOUNT_PERMANENTLY" /></span>
+            <span className="sm:hidden"><FormattedMessage id="PROFILE.DELETE_ACCOUNT" /></span>
           </Button>
         </div>
       </CardContent>

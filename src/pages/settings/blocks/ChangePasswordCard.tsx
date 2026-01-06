@@ -130,25 +130,25 @@ const ChangePasswordCard = () => {
     // --- FRONTEND VALIDATIONS ---
     if (!currentPassword.trim()) {
       setIsError(true);
-      setMessage("Current password is required");
+      setMessage(formatMessage({ id: 'PASSWORD.CURRENT_REQUIRED' }));
       return;
     }
 
     if (newPassword.length > 16) {
       setIsError(true);
-      setMessage("Password cannot be more than 16 characters");
+      setMessage(formatMessage({ id: 'VALIDATION.PASSWORD_MAX_LENGTH' }));
       return;
     }
 
     if (confirmPassword.length > 16) {
       setIsError(true);
-      setMessage("Confirm password cannot be more than 16 characters");
+      setMessage(formatMessage({ id: 'VALIDATION.PASSWORD_MAX_LENGTH' }));
       return;
     }
 
     if (newPassword !== confirmPassword) {
       setIsError(true);
-      setMessage("New passwords do not match");
+      setMessage(formatMessage({ id: 'PASSWORD.PASSWORDS_DONT_MATCH' }));
       return;
     }
 
@@ -164,13 +164,13 @@ const ChangePasswordCard = () => {
     // --- API ERROR ---
     if (!res || res.success === false || res.status === 0) {
       setIsError(true);
-      setMessage(res.message || "Current password is incorrect");
+      setMessage(res.message || formatMessage({ id: 'PASSWORD.CURRENT_MISMATCH' }));
       return;
     }
 
     // --- SUCCESS ---
     setIsError(false);
-    setMessage(res.message);
+    setMessage(formatMessage({ id: 'PASSWORD.UPDATE_SUCCESS' }));
 
     if (res.success) {
       setCurrentPassword("");

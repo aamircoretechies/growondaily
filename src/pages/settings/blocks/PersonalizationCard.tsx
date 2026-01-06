@@ -277,13 +277,37 @@ const PersonalizationCard = ({ user }: { user: any }) => {
 
       // engagement_preference: ['READING', 'LISTENING'] -> ['Reading', ...]
       const engageVal = backend.engagement_preference;
-      setEngage(
-        Array.isArray(engageVal)
-          ? engageVal.map((e: string) => toTitleCase((e || '').toString()))
-          : engageVal
-            ? [toTitleCase((engageVal || '').toString())]
-            : []
-      );
+
+      const ENGAGE_MAPPING: Record<string, string> = {
+        // English
+        'reading': 'Reading',
+        'listening': 'Listening',
+        'speaking': 'Speaking',
+        'step_by_step_guidance': 'Step-by-step guidance',
+        'step-by-step guidance': 'Step-by-step guidance',
+        'step by step guidance': 'Step-by-step guidance',
+        'guidance': 'Step-by-step guidance',
+
+        // Dutch
+        'lezen': 'Reading',
+        'luisteren': 'Listening',
+        'spreken': 'Speaking',
+        'stap-voor-stap begeleiding': 'Step-by-step guidance',
+        'stap voor stap begeleiding': 'Step-by-step guidance',
+        'stap-voor-stap': 'Step-by-step guidance'
+      };
+
+      const normalizeEngage = (e: string) => {
+        const key = (e || '').toString().toLowerCase().trim();
+        // If exact match in mapping, use it. Otherwise fallback to titlecase
+        return ENGAGE_MAPPING[key] || toTitleCase((e || '').toString());
+      };
+
+      const rawList = Array.isArray(engageVal) ? engageVal : (engageVal ? [engageVal] : []);
+      const normalized = rawList.map(normalizeEngage);
+      // Remove duplicates
+      const unique = Array.from(new Set(normalized)).filter(Boolean);
+      setEngage(unique);
 
       // explanation_style -> UI option
       const style = (backend.explanation_style || '').toString().toLowerCase();
@@ -334,7 +358,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
       }
       const updatedUser = await authContext?.getUser();
       authContext?.setCurrentUser(updatedUser);
-      toast.success("Preferences saved successfully!")
+      toast.success(formatMessage({ id: 'TOAST.PREFERENCES_SAVED' }));
 
       setTimeout(() => {
         window.location.reload();
@@ -342,7 +366,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
 
     } catch (err) {
       console.error("Save failed:", err);
-      toast.error("Preferences failed to save! ")
+      toast.error(formatMessage({ id: 'TOAST.PREFERENCES_FAILED' }));
     }
   };
 
@@ -441,14 +465,14 @@ const PersonalizationCard = ({ user }: { user: any }) => {
             </DialogHeader>
             <DialogBody className="space-y-4">
               {[
-                ['Historical Context', 'Background information and relevant...', 'historical'],
-                ['Ground Text Analysis', 'Insights from the original Hebrew..', 'ground_text'],
-                ['Special Insights', 'Surprising or lesser-known facts', 'special'],
-                ['Daily Life Application', 'Practical guidance for living out the..', 'daily_life'],
-                ['Cross-References', 'Related Bible verses for deeper study', 'cross_reference'],
-                ['Commentary Insights', 'Explanations or interpretations from..', 'commentary'],
-                ['Key Takeaways', "Points summarizing the passage’s...", 'key_takeaways'],
-                ['Reflection Prompts', 'Questions or prayer suggestions...', 'reflection']
+                [formatMessage({ id: 'DEEP_STUDY.TAB.HISTORICAL_CONTEXT' }), formatMessage({ id: 'PERSONALIZATION.DESC.HISTORICAL_CONTEXT' }), 'historical'],
+                [formatMessage({ id: 'DEEP_STUDY.TAB.GROUND_TEXT_ANALYSIS' }), formatMessage({ id: 'PERSONALIZATION.DESC.GROUND_TEXT_ANALYSIS' }), 'ground_text'],
+                [formatMessage({ id: 'DEEP_STUDY.TAB.SPECIAL_INSIGHTS' }), formatMessage({ id: 'PERSONALIZATION.DESC.SPECIAL_INSIGHTS' }), 'special'],
+                [formatMessage({ id: 'DEEP_STUDY.TAB.DAILY_LIFE_APPLICATION' }), formatMessage({ id: 'PERSONALIZATION.DESC.DAILY_LIFE_APPLICATION' }), 'daily_life'],
+                [formatMessage({ id: 'DEEP_STUDY.TAB.CROSS_REFERENCE' }), formatMessage({ id: 'PERSONALIZATION.DESC.CROSS_REFERENCES' }), 'cross_reference'],
+                [formatMessage({ id: 'DEEP_STUDY.TAB.COMMENTARY_INSIGHTS' }), formatMessage({ id: 'PERSONALIZATION.DESC.COMMENTARY_INSIGHTS' }), 'commentary'],
+                [formatMessage({ id: 'DEEP_STUDY.TAB.KEY_TAKEAWAYS' }), formatMessage({ id: 'PERSONALIZATION.DESC.KEY_TAKEAWAYS' }), 'key_takeaways'],
+                [formatMessage({ id: 'DEEP_STUDY.TAB.REFLECTION_PROMPTS' }), formatMessage({ id: 'PERSONALIZATION.DESC.REFLECTION_PROMPTS' }), 'reflection']
               ].map(([title, subtitle, id]) => (
                 <div key={id as string} className="flex items-center justify-between px-3 py-3 rounded-xl bg-white/80 dark:bg-[--tw-page-bg-dark]">
                   <div>

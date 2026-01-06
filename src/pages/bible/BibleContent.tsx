@@ -10,6 +10,8 @@ interface BibleContentProps {
   isDeepStudyActive?: boolean;
 }
 
+import { FormattedMessage } from 'react-intl';
+
 const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive }: BibleContentProps) => {
   const location = useLocation();
   const {
@@ -57,11 +59,11 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
             <div className="flex-1">
               <h1 className="font-merriweather text-2xl">
                 {/* Shepherd's Psalm */}
-                
+
                 {selectedBookName
                   ? `${selectedBookName} ${selectedChapter || ''}`
                   : 'Loading...'}
-                
+
               </h1>
               <p className="font-merriweather text-sm text-gray-600 dark:text-gray-400 mt-1">
                 (
@@ -81,7 +83,7 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
                   }`}
               >
                 <KeenIcon icon="book" className="w-4 h-4" />
-                {isDeepStudyActive ? 'Hide Deep Study' : 'Deep Study'}
+                {isDeepStudyActive ? <FormattedMessage id="BIBLE.HIDE_DEEP_STUDY" /> : <FormattedMessage id="BIBLE.DEEP_STUDY" />}
               </button>
             )}
           </div>

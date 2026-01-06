@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useReflection } from "@/providers/ReflectionProvider";
 import { toast } from "sonner";
+import { FormattedMessage, useIntl } from 'react-intl';
 
 interface Props {
   note: any;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export default function EditNotePopup({ note, onClose }: Props) {
+  const { formatMessage } = useIntl();
   const [content, setContent] = useState(note.content || "");
   // const [selectedTags, setSelectedTags] = useState(
   //   note.emotion_tags || note.tags || note.original_tags || []
@@ -22,8 +24,21 @@ export default function EditNotePopup({ note, onClose }: Props) {
 
   // const [selectedTags, setSelectedTags] = useState([...initialTags]);
 
-  const normalizeTag = (tag: string) =>
-    tag.trim().toLowerCase();
+  const TAG_MAPPING: Record<string, string> = {
+    'faith': 'Faith',
+    'geloof': 'Faith',
+    'trust': 'Trust',
+    'vertrouwen': 'Trust',
+    'peace': 'Peace',
+    'vrede': 'Peace',
+    'kingdom': 'Kingdom',
+    'koninkrijk': 'Kingdom'
+  };
+
+  const normalizeTag = (tag: string) => {
+    const lower = tag.trim().toLowerCase();
+    return TAG_MAPPING[lower] || tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+  };
 
   const initialTags =
     note.tags ||
@@ -32,7 +47,7 @@ export default function EditNotePopup({ note, onClose }: Props) {
     note.original_tags ||
     [];
 
-  const [selectedTags, setSelectedTags] = useState(
+  const [selectedTags, setSelectedTags] = useState<string[]>(
     initialTags.map((t: string) => normalizeTag(t))
   );
 
@@ -49,7 +64,8 @@ export default function EditNotePopup({ note, onClose }: Props) {
   // };
 
   const toggleTag = (tag: string) => {
-    const normalized = normalizeTag(tag);
+    // tag passed here is already "Faith", "Trust" etc from the loop
+    const normalized = normalizeTag(tag); // acts as identity for "Faith" -> "Faith"
 
     if (selectedTags.includes(normalized)) {
       setSelectedTags(selectedTags.filter((t: string) => t !== normalized));
@@ -58,51 +74,14 @@ export default function EditNotePopup({ note, onClose }: Props) {
     }
   };
 
-  // const handleSave = async () => {
-  //   const payload = {
-  //     content,
-  //     tags: selectedTags,
-  //   };
-
-  //   const success = await updateNote(note.note_id, content);
-
-  //   if (success) {
-  //     onClose();
-  //   }
-  // };
-
-
-  // const handleSave = async () => {
-
-  //   if (!content.trim()) {
-  //     toast.error("Please write something !.");
-  //     return;
-  //   }
-
-  //   const payload = {
-  //     content,
-  //     tags: selectedTags,
-  //   };
-
-  //   const success = await updateNote(note.note_id, content, selectedTags);
-
-  //   if (success) {
-  //     toast.success("Note updated successfully");
-  //     onClose();
-  //   }
-  // };
-
-
   const handleSave = async () => {
     if (!content.trim()) {
-      toast.error("Please write something!");
+      toast.error(formatMessage({ id: 'TOAST.WRITE_SOMETHING' }));
       return;
     }
 
-    // Convert back to Title Case (optional)
-    const tagsForBackend = selectedTags.map(
-      (t: string) => t.charAt(0).toUpperCase() + t.slice(1)
-    );
+    // items in selectedTags are already Title Case (Faith, Trust..)
+    const tagsForBackend = selectedTags;
 
     const success = await updateNote(
       note.note_id,
@@ -111,73 +90,10 @@ export default function EditNotePopup({ note, onClose }: Props) {
     );
 
     if (success) {
-      toast.success("Note updated successfully");
+      toast.success(formatMessage({ id: 'TOAST.NOTE_UPDATED' }));
       onClose();
     }
   };
-
-
-
-  //   return (
-  //     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-  //       <div className="bg-[#f5efe5] w-full max-w-md rounded-2xl p-6 shadow-xl">
-
-  //         <h2 className="font-merriweather text-2xl text-primary mb-1">
-  //           Edit Note
-  //         </h2>
-
-  //         <p className="text-gray-600 italic mb-4">
-  //           {note.book} {note.chapter}{note.verse ? ":" + note.verse : ""}
-  //         </p>
-
-  //         <textarea
-  //           value={content}
-  //           onChange={(e) => setContent(e.target.value)}
-  //           className="w-full h-40 p-4 bg-white rounded-lg border border-gray-300 text-primary focus:outline-none focus:ring-2 focus:ring-sand max-h-32 overflow-y-auto resize-none"
-  //         />
-
-  //         {/* Tags */}
-  //         <div className="mt-4">
-  //           <p className="text-primary font-medium mb-2">Emotion Tags</p>
-
-  //           <div className="flex gap-3">
-  //             {["Faith", "Trust", "Peace", "kingdom"].map((tag) => (
-  //               <button
-  //                 key={tag}
-  //                 onClick={() => toggleTag(tag)}
-  //                 className={`px-4 py-2 rounded-full border text-sm ${selectedTags.includes(tag)
-  //                     ? "bg-primary text-white"
-  //                     : "bg-gray-100 text-primary"
-  //                   }`}
-  //               >
-  //                 {tag}
-  //               </button>
-  //             ))}
-  //           </div>
-  //         </div>
-
-  //         {/* Buttons */}
-  //         <div className="mt-6 flex justify-end gap-4">
-  //           <button onClick={onClose} className="text-primary">
-  //             Cancel
-  //           </button>
-
-  //           <button
-  //             onClick={handleSave}
-  //             className="bg-primary text-white px-6 py-2 rounded-xl hover:bg-sand transition"
-  //           >
-  //             Save
-  //           </button>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-
-
-
-
 
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/60 flex items-center justify-center z-50 p-4">
@@ -220,12 +136,12 @@ export default function EditNotePopup({ note, onClose }: Props) {
               <button
                 key={tag}
                 onClick={() => toggleTag(tag)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition ${selectedTags.includes(normalizeTag(tag))
+                className={`px-4 py-2 rounded-full text-sm font-medium transition ${selectedTags.includes(tag)
                   ? "bg-primary text-white"
                   : "bg-gray-100 dark:bg-gray-300 text-gray-700 hover:bg-gray-200"
                   }`}
               >
-                {tag}
+                {formatMessage({ id: `EMOTION.${tag.toUpperCase()}` })}
               </button>
             ))}
           </div>

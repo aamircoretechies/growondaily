@@ -7,13 +7,14 @@ import { useReflection } from '@/providers/ReflectionProvider';
 import { useBible } from "@/providers/BibleProvider";
 import EditNotePopup from "@/components/makenote/EditNotePopup";
 import { toast } from "sonner";
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 
 
 
 
 const SavedJournalListPage = () => {
   const navigate = useNavigate();
+  const intl = useIntl();
   const { allNotes, fetchAllNotes, notesLoading, deleteNote } = useReflection();
   const { selectBook, selectChapter, fetchSingleVerse, books, version, fetchDeepStudy, fetchDeepStudyForVerse, setShowDeepStudy, setActiveTab, setVerseActiveTab } = useBible();
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
@@ -73,7 +74,7 @@ const SavedJournalListPage = () => {
     const success = await deleteNote(id);
 
     if (success) {
-      toast.success("Note deleted successfully");
+      toast.success(intl.formatMessage({ id: 'TOAST.NOTE_DELETED' }));
     } else {
       toast.error("Failed to delete note");
     }
@@ -130,10 +131,10 @@ const SavedJournalListPage = () => {
           </div>
 
           <h1 className="font-merriweather text-4xl text-primary mb-2">
-            Saved Journal List
+            <FormattedMessage id="REFLECTIONS.SAVED_JOURNAL_LIST" />
           </h1>
           <p className="text-gray-600 text-lg">
-            All your journal entries and reflections
+            <FormattedMessage id="REFLECTIONS.ALL_JOURNAL_ENTRIES" />
           </p>
         </div>
 
@@ -160,14 +161,19 @@ const SavedJournalListPage = () => {
         <div className="mb-6">
           <h2 className="font-merriweather text-lg text-gray-600">
             {/* Showing {journalEntries.length} Journal Entries */}
-            Showing {filteredEntries.length} Journal Entries
+            <FormattedMessage
+              id="REFLECTIONS.SHOWING_JOURNAL"
+              values={{ count: filteredEntries.length }}
+            />
           </h2>
         </div>
 
         {notesLoading ? (
           <Loader />
         ) : filteredEntries.length === 0 ? (
-          <p className="text-gray-500 italic">No journal entries found</p>
+          <p className="text-gray-500 italic">
+            <FormattedMessage id="REFLECTIONS.NO_JOURNAL_ENTRIES" />
+          </p>
         ) : (
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

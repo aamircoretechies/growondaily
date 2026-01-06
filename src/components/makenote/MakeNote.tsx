@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { KeenIcon, LinkVerse } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
 import { toast } from 'sonner';
+import { useIntl } from 'react-intl';
 
 interface MakeNoteProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface MakeNoteProps {
 }
 
 const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
+  const { formatMessage } = useIntl();
   const [noteText, setNoteText] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showLinkVerse, setShowLinkVerse] = useState(false);
@@ -35,7 +37,7 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
 
   const handleSave = async () => {
     if (!noteText.trim()) {
-      toast.error("Please write something !.");
+      toast.error(formatMessage({ id: 'TOAST.WRITE_SOMETHING' }));
       return;
     }
 
@@ -50,7 +52,7 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
     try {
       await saveNote(selectedBookId, chapterToSave, verseToSave, noteText, selectedTags);
 
-      toast.success("Note saved successfully!");
+      toast.success(formatMessage({ id: 'TOAST.NOTE_CREATED' }));
       onClose();
     } catch (err) {
       console.error("Failed to save note:", err);
@@ -117,11 +119,11 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
                 key={tag}
                 onClick={() => handleTagClick(tag)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition ${selectedTags.includes(tag)
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 dark:bg-gray-300 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100 dark:bg-gray-300 text-gray-700 hover:bg-gray-200'
                   }`}
               >
-                {tag}
+                {formatMessage({ id: `EMOTION.${tag.toUpperCase()}` })}
               </button>
             ))}
           </div>

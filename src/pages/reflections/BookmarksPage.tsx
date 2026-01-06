@@ -1,7 +1,7 @@
 import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react";
 import axios from "axios";
 import { Container } from "@/components/container";
-import {LucideSearch,LucideCalendar,LucideTrash2,LucideArrowLeft,} from "lucide-react";
+import { LucideSearch, LucideCalendar, LucideTrash2, LucideArrowLeft, } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useBible } from "@/providers/BibleProvider";
 import { useReflection } from "@/providers/ReflectionProvider";
@@ -13,7 +13,7 @@ const BookmarksPage = () => {
   const [visibleCount, setVisibleCount] = useState(6);
   // const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const { selectBook, selectChapter, fetchSingleVerse, books,toggleVerseBookmark } = useBible();
+  const { selectBook, selectChapter, fetchSingleVerse, books, toggleVerseBookmark } = useBible();
 
   const { dailyReflection, loading, error, bookmarks, bmLoading, fetchBookmarks, setBookmarks } = useReflection();
 
@@ -29,10 +29,10 @@ const BookmarksPage = () => {
     if (!book || !chapter || !verse) return;
 
     const bookSlug = book.trim().toLowerCase().replace(/\s+/g, "-");
-    
+
     // Navigate immediately - let BiblePage handle data fetching
     navigate(`/bible?bible=${bookSlug}&chapter=${chapter}&verse=${verse}`);
-    
+
     // Fetch data in background (non-blocking)
     const foundBook = books?.find(
       (b: any) => b.name.toLowerCase() === book.trim().toLowerCase()
@@ -45,15 +45,15 @@ const BookmarksPage = () => {
   };
 
   const handleDeleteBookmark = async (entry: any) => {
-  try {
-    await toggleVerseBookmark(entry.book, Number(entry.chapter), Number(entry.verse), entry.version || "KJV");
-    // fetchBookmarks will be called via the bookmark-updated event, which will show the loader
-    await fetchBookmarks();
-    console.log("Bookmark deleted successfully:", entry.reference);
-  } catch (err) {
-    console.error("Error deleting bookmark:", err);
-  }
-};
+    try {
+      await toggleVerseBookmark(entry.book, Number(entry.chapter), Number(entry.verse), entry.version || "KJV");
+      // fetchBookmarks will be called via the bookmark-updated event, which will show the loader
+      await fetchBookmarks();
+      console.log("Bookmark deleted successfully:", entry.reference);
+    } catch (err) {
+      console.error("Error deleting bookmark:", err);
+    }
+  };
   const filtered = bookmarks.filter(
     (b: { reference: string; verse_text: string; }) =>
       b.reference?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -88,7 +88,7 @@ const BookmarksPage = () => {
             Bookmarks
           </h1>
           <p className="text-gray-600 text-lg">
-            Your saved verses and reflections for quick access
+            <FormattedMessage id="REFLECTIONS.BOOKMARKS_SUBTITLE" />
           </p>
         </div>
 
@@ -113,9 +113,9 @@ const BookmarksPage = () => {
         {/* Results Count */}
         <div className="mb-6">
           <h2 className="font-merriweather text-lg text-gray-600">
-            <FormattedMessage 
-              id="REFLECTIONS.SHOWING_BOOKMARKS" 
-              values={{ count: filtered.length }} 
+            <FormattedMessage
+              id="REFLECTIONS.SHOWING_BOOKMARKS"
+              values={{ count: filtered.length }}
             />
           </h2>
         </div>

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import debounce from "lodash/debounce";
 import { useDashboard } from "@/pages/dashboards/providers/DashboardProvider";
 import { AuthContext } from "@/auth/providers/JWTProvider";
+import { useIntl } from 'react-intl';
 
 interface BibleBook {
   book_id: string;
@@ -98,6 +99,7 @@ const BibleContext = createContext<BibleContextType>({
 });
 
 export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
+  const intl = useIntl();
   const { isLoaded: dashboardLoaded } = useDashboard(); // Wait for dashboard to load
   const { currentUser, loading: authLoading } = useContext(AuthContext);
   const [books, setBooks] = useState<BibleBook[]>([]);
@@ -698,7 +700,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const toggleVerseBookmark = async (book: string, chapter: number, verse: number, version: string) => {
+  const toggleVerseBookmark = useCallback(async (book: string, chapter: number, verse: number, version: string) => {
     try {
       const res = await axios.post(`/api/bible/toggle-verse-bookmark`, {
         book, chapter, verse, version,
@@ -707,9 +709,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       const msg = res?.data?.message?.toLowerCase() || "";
 
       if (msg.includes("removed") || msg.includes("unbookmarked")) {
-        toast.success("Bookmark removed successfully");
+        toast.success(intl.formatMessage({ id: 'TOAST.BOOKMARK_REMOVED' }));
       } else if (msg.includes("added") || msg.includes("bookmarked")) {
-        toast.success("Bookmark added successfully");
+        toast.success(intl.formatMessage({ id: 'TOAST.BOOKMARK_ADDED' }));
       } else {
         toast.info(res?.data?.message || "Updated");
       }
@@ -720,7 +722,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("Bookmark toggle error:", err);
       toast.error("Something went wrong");
     }
-  };
+  }, [intl]);
 
   const toggleVerseStatus = async (book_id: string, chapter: number, verse: number, version: string) => {
     try {

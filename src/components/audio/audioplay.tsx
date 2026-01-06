@@ -163,6 +163,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { X, Play, Pause, SkipBack, SkipForward } from "lucide-react";
+import { FormattedMessage } from 'react-intl';
 
 interface AudioPlayProps {
   isOpen: boolean;
@@ -285,7 +286,7 @@ const AudioPlay: React.FC<AudioPlayProps> = ({
 
         {/* Header */}
         <p className="text-xs text-[#B08D6A] font-semibold tracking-wide mb-3">
-          AUDIO MODE
+          <FormattedMessage id="AUDIO.MODE" />
         </p>
 
         <h2 className="text-2xl font-merriweather text-[#234137] font-bold">

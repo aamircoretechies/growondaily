@@ -81,7 +81,7 @@ const ReflectionsPage = () => {
       const noteId = entry.note_id;
       await deleteNote(noteId);
 
-      toast.success("Note deleted successfully");
+      toast.success(formatMessage({ id: 'TOAST.NOTE_DELETED' }));
     } catch (err) {
       console.error("Error deleting note:", err);
       toast.error("Failed to delete note");
@@ -190,13 +190,14 @@ const ReflectionsPage = () => {
           <div className="lg:col-span-1">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-merriweather text-2xl text-primary">
-                Saved Journal List
+                <FormattedMessage id="REFLECTIONS.SAVED_JOURNAL_LIST" />
               </h3>
               <button
                 onClick={() => navigate('/reflections/journal')}
                 className="text-sm text-gray-600 hover:text-primary transition-colors"
               >
-                View All
+                {/* View All */}
+                <FormattedMessage id="REFLECTIONS.VIEW_ALL" />
               </button>
             </div>
 
@@ -215,12 +216,12 @@ const ReflectionsPage = () => {
 
             <h4 className="font-merriweather text-sm text-gray-600 mb-2">
               {/* Showing 2 Items */}
-              <FormattedMessage 
-                id="REFLECTIONS.SHOWING_ITEMS" 
-                values={{ 
-                  count: latestNotes.length, 
-                  plural: latestNotes.length !== 1 ? "s" : "" 
-                }} 
+              <FormattedMessage
+                id="REFLECTIONS.SHOWING_ITEMS"
+                values={{
+                  count: latestNotes.length,
+                  plural: latestNotes.length !== 1 ? "s" : ""
+                }}
               />
             </h4>
 
@@ -299,7 +300,7 @@ const ReflectionsPage = () => {
             {/* Header Section */}
             <div className="mb-8">
               <h1 className="font-merriweather text-2xl text-primary mb-2">
-                Today's Reflection
+                <FormattedMessage id="REFLECTIONS.TODAYS_REFLECTION" />
               </h1>
               <p className="text-gray-600 text-sm">
                 {getCurrentDate()}
@@ -412,12 +413,12 @@ const ReflectionsPage = () => {
 
             <h4 className="font-merriweather text-sm text-gray-600 mb-2">
               {/* Showing {bookmarks && bookmarks.length > 0 ? Math.min(2, bookmarks.length) : 2} Items */}
-              <FormattedMessage 
-                id="REFLECTIONS.SHOWING_ITEMS" 
-                values={{ 
-                  count: Math.min(2, bookmarks?.length || 0), 
-                  plural: Math.min(2, bookmarks?.length || 0) !== 1 ? "s" : "" 
-                }} 
+              <FormattedMessage
+                id="REFLECTIONS.SHOWING_ITEMS"
+                values={{
+                  count: Math.min(2, bookmarks?.length || 0),
+                  plural: Math.min(2, bookmarks?.length || 0) !== 1 ? "s" : ""
+                }}
               />
             </h4>
 

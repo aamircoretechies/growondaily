@@ -6,7 +6,7 @@ import { useBible } from '@/providers/BibleProvider';
 import { toast } from "sonner";
 import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
 import { useReflection } from "@/providers/ReflectionProvider";
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 
 
 
@@ -34,7 +34,7 @@ const VerseStudy = () => {
   const [note, setNote] = useState("");
   const [savedNote, setSavedNote] = useState("");
   const { submitReport } = useReflection();
-
+  const { formatMessage } = useIntl();
 
 
   const { books, loadingDeepStudy, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, verseActiveTab, setVerseActiveTab, version } = useBible();
@@ -231,20 +231,20 @@ const VerseStudy = () => {
   }, []);
 
   const allTabs: TabItem[] = useMemo(() => [
-    { id: 'original', title: 'Original', icon: 'document' },
-    { id: 'explanations', title: 'Explanation', icon: 'book-open' },
-    { id: 'historical', title: 'Historical Context', icon: 'calendar' },
-    { id: 'cultural', title: 'Cultural Context', icon: 'users' },
-    { id: 'theological', title: 'Theological Insights', icon: 'book' },
-    { id: 'practical', title: 'Practical Lessons', icon: 'check' },
-    { id: 'commentary', title: 'Commentary Insights', icon: 'users' },
-    { id: 'ground_text', title: 'Ground Text Analysis', icon: 'document' },
-    { id: 'special', title: 'Special Insights', icon: 'lightbulb' },
-    { id: 'daily_life', title: 'Daily Life Application', icon: 'home' },
-    { id: 'cross_reference', title: 'Cross Reference', icon: 'link' },
-    { id: 'key_takeaways', title: 'Key Takeaways', icon: 'star' },
-    { id: 'reflection', title: 'Reflection Prompts', icon: 'question' },
-  ], []);
+    { id: 'original', title: formatMessage({ id: 'DEEP_STUDY.TAB.ORIGINAL' }), icon: 'document' },
+    { id: 'explanations', title: formatMessage({ id: 'DEEP_STUDY.TAB.EXPLANATION' }), icon: 'book-open' },
+    { id: 'historical', title: formatMessage({ id: 'DEEP_STUDY.TAB.HISTORICAL_CONTEXT' }), icon: 'calendar' },
+    { id: 'cultural', title: formatMessage({ id: 'DEEP_STUDY.TAB.CULTURAL_CONTEXT' }), icon: 'users' },
+    { id: 'theological', title: formatMessage({ id: 'DEEP_STUDY.TAB.THEOLOGICAL_INSIGHTS' }), icon: 'book' },
+    { id: 'practical', title: formatMessage({ id: 'DEEP_STUDY.TAB.PRACTICAL_LESSONS' }), icon: 'check' },
+    { id: 'commentary', title: formatMessage({ id: 'DEEP_STUDY.TAB.COMMENTARY_INSIGHTS' }), icon: 'users' },
+    { id: 'ground_text', title: formatMessage({ id: 'DEEP_STUDY.TAB.GROUND_TEXT_ANALYSIS' }), icon: 'document' },
+    { id: 'special', title: formatMessage({ id: 'DEEP_STUDY.TAB.SPECIAL_INSIGHTS' }), icon: 'lightbulb' },
+    { id: 'daily_life', title: formatMessage({ id: 'DEEP_STUDY.TAB.DAILY_LIFE_APPLICATION' }), icon: 'home' },
+    { id: 'cross_reference', title: formatMessage({ id: 'DEEP_STUDY.TAB.CROSS_REFERENCE' }), icon: 'link' },
+    { id: 'key_takeaways', title: formatMessage({ id: 'DEEP_STUDY.TAB.KEY_TAKEAWAYS' }), icon: 'star' },
+    { id: 'reflection', title: formatMessage({ id: 'DEEP_STUDY.TAB.REFLECTION_PROMPTS' }), icon: 'question' },
+  ], [formatMessage]);
 
   const tabs = useMemo(() => allTabs.filter(t => enabledTabs.includes(t.id) || enabledTabs.length === 0), [allTabs, enabledTabs]);
 
@@ -335,7 +335,7 @@ const VerseStudy = () => {
     const wordCount = cleanDescription.split(/\s+/).length;
 
     if (wordCount > 200) {
-      toast.error("Maximum 200 words allowed");
+      toast.error(formatMessage({ id: 'TOAST.WORD_LIMIT' }));
       return;
     }
 
@@ -355,12 +355,12 @@ const VerseStudy = () => {
     console.log("REPORT RESPONSE:", response);
 
     if (response?.success === true) {
-      toast.success("Report submitted successfully!");
+      toast.success(formatMessage({ id: 'TOAST.REPORT_SUBMITTED' }));
       setReportIssue("");
       setReportCategory("");
       setShowReportModal(false);
     } else {
-      toast.error(response?.message || "Something went wrong");
+      toast.error(response?.message || formatMessage({ id: 'TOAST.REPORT_FAILED' }));
     }
   };
 
@@ -514,7 +514,9 @@ const VerseStudy = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white/40 dark:bg-gray-200 backdrop-blur-sm rounded-xl shadow-xl max-w-md w-full mx-4 border border-gray-200 dark:border-gray-400">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-400">
-              <h3 className="text-lg font-semibold text-primary">REPORT</h3>
+              <h3 className="text-lg font-semibold text-primary">
+                <FormattedMessage id="REPORT.TITLE" />
+              </h3>
               <button
                 onClick={() => setShowReportModal(false)}
                 className="text-gray-400 hover:text-primary transition-colors"
@@ -534,18 +536,18 @@ const VerseStudy = () => {
               <div className="bg-gray-50 dark:bg-gray-300 rounded-lg p-3 border border-gray-200 dark:border-gray-400">
                 <p className="text-sm text-primary">
                   {deepStudyData?.[verseActiveTab]?.emotion_tags?.join(', ') ||
-                    "I feel like I'm learning to rest more instead of stressing..."}
+                    formatMessage({ id: 'REPORT.PLACEHOLDER_TEXT' })}
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-primary mb-2">
-                  Describe the issue and share your thoughts
+                  <FormattedMessage id="REPORT.DESCRIBE_ISSUE" />
                 </label>
                 <textarea
                   value={reportIssue}
                   onChange={(e) => setReportIssue(e.target.value)}
-                  placeholder="Describe the issue and share your thoughts"
+                  placeholder={formatMessage({ id: 'REPORT.DESCRIBE_ISSUE' })}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white dark:bg-gray-100 text-primary placeholder-gray-400 max-h-32 overflow-y-auto resize-none"
                   rows={4}
                 />
@@ -553,7 +555,7 @@ const VerseStudy = () => {
 
               <div>
                 <label className="block text-sm font-medium text-primary mb-2">
-                  Category
+                  <FormattedMessage id="REPORT.CATEGORY" />
                 </label>
                 <div className="flex gap-2">
                   {['Content', 'Audio', 'Other'].map((category) => (
@@ -565,7 +567,7 @@ const VerseStudy = () => {
                         : 'bg-gray-200 dark:bg-gray-300 text-primary hover:bg-primary/10 dark:hover:bg-primary/20'
                         }`}
                     >
-                      {category}
+                      {formatMessage({ id: `REPORT.CATEGORY.${category.toUpperCase()}` })}
                     </button>
                   ))}
                 </div>
@@ -575,7 +577,7 @@ const VerseStudy = () => {
                 onClick={handleReportSubmit}
                 className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
-                Submit
+                <FormattedMessage id="REPORT.SUBMIT" />
               </button>
             </div>
           </div>

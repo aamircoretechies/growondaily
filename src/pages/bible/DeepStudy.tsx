@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { KeenIcon } from '@/components';
 import { useBible } from '@/providers/BibleProvider';
 
+import { FormattedMessage, useIntl } from 'react-intl';
+
 interface TabItem {
   id: string;
   title: string;
@@ -26,6 +28,7 @@ const Loader = () => {
 
 const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, }: DeepStudyProps) => {
   const { selectedBookId, selectedChapter, version, deepStudyData, fetchDeepStudy, selectedBookName, loadingDeepStudy, activeTab, setActiveTab } = useBible();
+  const { formatMessage } = useIntl();
 
   useEffect(() => {
     if (selectedBookId && selectedChapter && version) {
@@ -63,20 +66,20 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
   }, []);
 
   const allTabs: TabItem[] = useMemo(() => [
-    { id: 'original', title: 'Original', icon: 'document', content: '' },
-    { id: 'explanations', title: 'Explanation', icon: 'book-open', content: '' },
-    { id: 'historical', title: 'Historical Context', icon: 'calendar', content: '' },
-    { id: 'cultural', title: 'Cultural Context', icon: 'users', content: '' },
-    { id: 'theological', title: 'Theological Insights', icon: 'book', content: '' },
-    { id: 'practical', title: 'Practical Lessons', icon: 'check', content: '' },
-    { id: 'commentary', title: 'Commentary Insights', icon: 'users', content: '' },
-    { id: 'ground_text', title: 'Ground Text Analysis', icon: 'document', content: '' },
-    { id: 'special', title: 'Special Insights', icon: 'lightbulb', content: '' },
-    { id: 'daily_life', title: 'Daily Life Application', icon: 'home', content: '' },
-    { id: 'cross_reference', title: 'Cross Reference', icon: 'link', content: '' },
-    { id: 'key_takeaways', title: 'Key Takeaways', icon: 'star', content: '' },
-    { id: 'reflection', title: 'Reflection Prompts', icon: 'question', content: '' },
-  ], []);
+    { id: 'original', title: formatMessage({ id: 'DEEP_STUDY.TAB.ORIGINAL' }), icon: 'document', content: '' },
+    { id: 'explanations', title: formatMessage({ id: 'DEEP_STUDY.TAB.EXPLANATION' }), icon: 'book-open', content: '' },
+    { id: 'historical', title: formatMessage({ id: 'DEEP_STUDY.TAB.HISTORICAL_CONTEXT' }), icon: 'calendar', content: '' },
+    { id: 'cultural', title: formatMessage({ id: 'DEEP_STUDY.TAB.CULTURAL_CONTEXT' }), icon: 'users', content: '' },
+    { id: 'theological', title: formatMessage({ id: 'DEEP_STUDY.TAB.THEOLOGICAL_INSIGHTS' }), icon: 'book', content: '' },
+    { id: 'practical', title: formatMessage({ id: 'DEEP_STUDY.TAB.PRACTICAL_LESSONS' }), icon: 'check', content: '' },
+    { id: 'commentary', title: formatMessage({ id: 'DEEP_STUDY.TAB.COMMENTARY_INSIGHTS' }), icon: 'users', content: '' },
+    { id: 'ground_text', title: formatMessage({ id: 'DEEP_STUDY.TAB.GROUND_TEXT_ANALYSIS' }), icon: 'document', content: '' },
+    { id: 'special', title: formatMessage({ id: 'DEEP_STUDY.TAB.SPECIAL_INSIGHTS' }), icon: 'lightbulb', content: '' },
+    { id: 'daily_life', title: formatMessage({ id: 'DEEP_STUDY.TAB.DAILY_LIFE_APPLICATION' }), icon: 'home', content: '' },
+    { id: 'cross_reference', title: formatMessage({ id: 'DEEP_STUDY.TAB.CROSS_REFERENCE' }), icon: 'link', content: '' },
+    { id: 'key_takeaways', title: formatMessage({ id: 'DEEP_STUDY.TAB.KEY_TAKEAWAYS' }), icon: 'star', content: '' },
+    { id: 'reflection', title: formatMessage({ id: 'DEEP_STUDY.TAB.REFLECTION_PROMPTS' }), icon: 'question', content: '' },
+  ], [formatMessage]);
 
   const tabs = useMemo(() => allTabs.filter(t => enabledTabs.includes(t.id) || enabledTabs.length === 0), [allTabs, enabledTabs]);
 
@@ -122,7 +125,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                   }`}
               >
                 <KeenIcon icon="book" className="w-4 h-4" />
-                {isDeepStudyActive ? 'Hide Deep Study' : 'Deep Study'}
+                {isDeepStudyActive ? <FormattedMessage id="BIBLE.HIDE_DEEP_STUDY" /> : <FormattedMessage id="BIBLE.DEEP_STUDY" />}
               </button>
             )}
           </div>
