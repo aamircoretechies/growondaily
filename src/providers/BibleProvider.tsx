@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import debounce from "lodash/debounce";
 import { useDashboard } from "@/pages/dashboards/providers/DashboardProvider";
+import { AuthContext } from "@/auth/providers/JWTProvider";
 
 interface BibleBook {
   book_id: string;
@@ -98,6 +99,7 @@ const BibleContext = createContext<BibleContextType>({
 
 export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const { isLoaded: dashboardLoaded } = useDashboard(); // Wait for dashboard to load
+  const { currentUser, loading: authLoading } = useContext(AuthContext);
   const [books, setBooks] = useState<BibleBook[]>([]);
   const [chapters, setChapters] = useState<any[]>([]);
   const [verses, setVerses] = useState<Verse[]>([]);
@@ -105,7 +107,18 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedBookName, setSelectedBookName] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
   const [selectedVerse, setSelectedVerse] = useState<Verse | null>(null);
-  const [version, setVersion] = useState<string>("KJV");
+  const [version, setVersion] = useState<string>(currentUser?.preferences?.bible_version || "KJV");
+  const versionRef = useRef(version);
+
+  useEffect(() => {
+    if (currentUser?.preferences?.bible_version) {
+      setVersion(currentUser.preferences.bible_version);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    versionRef.current = version;
+  }, [version]);
 
   // Granular loading states
   const [loadingBooks, setLoadingBooks] = useState(true);
@@ -113,6 +126,18 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const [loadingVerses, setLoadingVerses] = useState(false);
   const [loadingDeepStudy, setLoadingDeepStudy] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // Refetch content when version changes or initialization completes
+  useEffect(() => {
+    if (selectedBookId && isInitialized) {
+      const currentVersion = versionRef.current; // Use ref to be sure, though state should be synced
+      fetchChapters(selectedBookId, currentVersion);
+      fetchVerses(selectedBookId, selectedChapter, currentVersion);
+      if (selectedVerse) {
+        fetchSingleVerse(selectedBookId, selectedChapter, selectedVerse.verse, currentVersion);
+      }
+    }
+  }, [version, isInitialized]); // Added isInitialized to dependencies
 
   const [error, setError] = useState<string | null>(null);
   const [deepStudyData, setDeepStudyData] = useState<Record<string, any> | null>(null);
@@ -180,12 +205,15 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   }, [getBookInfo]);
 
   useEffect(() => {
-    // Only fetch books after dashboard is loaded
-    if (!dashboardLoaded) return;
+    // Only fetch books after dashboard is loaded and auth is ready
+    if (!dashboardLoaded || authLoading) return;
 
     const fetchBooks = async () => {
       try {
         setLoadingBooks(true);
+
+        // Deterministic version: Prefer user preference, fallback to ref or "KJV"
+        const preferredVersion = currentUser?.preferences?.bible_version || versionRef.current || "KJV";
 
         // Check Cache
         if (booksCache.current) {
@@ -273,15 +301,18 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
           setSelectedBookName(targetBookName);
           setSelectedChapter(targetChapter);
 
+
+
+
           // Fetch chapters and verses in parallel
           await Promise.all([
-            fetchChapters(targetBookId, "KJV"),
-            fetchVerses(targetBookId, targetChapter, "KJV")
+            fetchChapters(targetBookId, preferredVersion),
+            fetchVerses(targetBookId, targetChapter, preferredVersion)
           ]);
 
           // If verse is in URL or localStorage, fetch it
           if (targetVerse && !isNaN(targetVerse)) {
-            await fetchSingleVerse(targetBookId, targetChapter, targetVerse, "KJV");
+            await fetchSingleVerse(targetBookId, targetChapter, targetVerse, preferredVersion);
           }
         }
       } catch (err) {
@@ -290,15 +321,14 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         setTimeout(fetchBooks, 3000);
         return;
       } finally {
-        // setLoadingBooks(false);
-        // setIsInitialized(true);
         if (booksCache.current) {
           setLoadingBooks(false);
+          setIsInitialized(true);
         }
       }
     };
     fetchBooks();
-  }, [dashboardLoaded]);
+  }, [dashboardLoaded, authLoading, currentUser]);
 
   const fetchChapters = async (bookId: string, version: string) => {
     try {
@@ -398,18 +428,18 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Parallel fetch for chapters and verses
       await Promise.all([
-        fetchChapters(bookId, "KJV"),
-        fetchVerses(bookId, chapter, "KJV"),
+        fetchChapters(bookId, version),
+        fetchVerses(bookId, chapter, version),
       ]);
 
       // Fetch deep study in background without blocking
       // Only fetch 'original' tab initially for lazy loading
-      fetchDeepStudyForVerse(bookId, chapter, 1, "KJV", "original");
+      fetchDeepStudyForVerse(bookId, chapter, 1, version, "original");
 
     } catch (err) {
       console.error("Error selecting book:", err);
     }
-  }, 300), []);
+  }, 300), [version]);
 
   const selectBook = async (bookId: string, name: string, chapter: number = 1) => {
     // Update state immediately for UI responsiveness
@@ -424,8 +454,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const debouncedSelectChapter = useCallback(debounce(async (chapter: number, bookId: string) => {
     // Reset verse to null when chapter changes (edge case)
     setSelectedVerse(null);
-    await fetchVerses(bookId, chapter, "KJV");
-  }, 300), []);
+    await fetchVerses(bookId, chapter, version);
+  }, 300), [version]);
 
   const selectChapter = async (chapter: number) => {
     if (!selectedBookId) return;
@@ -469,8 +499,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   ) => {
     try {
       const key = verse
-        ? `${bookId}-${chapter}-${verse}`
-        : `${bookId}-${chapter}`;
+        ? `${bookId}-${chapter}-${verse}-${version}`
+        : `${bookId}-${chapter}-${version}`;
 
       // Check Cache for specific context
       if (deepStudyCache.current[key] && deepStudyCache.current[key][context]) {
@@ -578,7 +608,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       // Instantly update UI (without waiting for refetch)
       setDeepStudyData((prev: any) => {
         const safePrev = prev || {};
-        const key = verse === 0 ? `${book_id}-${chapter}` : `${book_id}-${chapter}-${verse}`;
+        // Use versionRef.current to get the latest version without dependency issues
+        const currentVersion = versionRef.current || "KJV";
+        const key = verse === 0 ? `${book_id}-${chapter}-${currentVersion}` : `${book_id}-${chapter}-${verse}-${currentVersion}`;
         const prevData = safePrev[key] || {};
         const updated = { ...safePrev };
 

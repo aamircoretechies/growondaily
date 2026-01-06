@@ -91,11 +91,11 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
     // if (loadingDeepStudy) return 'Loading deep study content...';
     // if (loadingDeepStudy) return <Loader />; // Returned as JSX in render
     if (!deepStudyData) return 'No data available.';
-    const currentKey = `${selectedBookId}-${selectedChapter}`;
+    const currentKey = `${selectedBookId}-${selectedChapter}-${version}`;
     const ctx = deepStudyData?.[currentKey]?.[tabId];
     if (!ctx) return 'Content not available.';
     return (ctx.content || '').replace(/\*/g, '') || 'Content not available.';
-  }, [deepStudyData, selectedBookId, selectedChapter]);
+  }, [deepStudyData, selectedBookId, selectedChapter, version]);
 
   return (
     <div className="min-h-screen text-primary overflow-hidden">
@@ -173,7 +173,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                     />
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-700">
                       {(() => {
-                        const currentKey = `${selectedBookId}-${selectedChapter}`;
+                        const currentKey = `${selectedBookId}-${selectedChapter}-${version}`;
                         const ctx = deepStudyData?.[currentKey]?.[tab.id];
                         const date = ctx?.generated_at
                           ? new Date(ctx.generated_at).toLocaleDateString()
@@ -186,11 +186,11 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                   </div>
 
                   {/* User Notes Section - Only show in original tab */}
-                  {tab.id === "original" && deepStudyData?.[`${selectedBookId}-${selectedChapter}`]?.original
+                  {tab.id === "original" && deepStudyData?.[`${selectedBookId}-${selectedChapter}-${version}`]?.original
                     ?.notes?.length > 0 && (
                       <div className="mt-3 space-y-2">
                         <h3 className="text-sm font-semibold text-primary mb-2 ">Your Notes</h3>
-                        {deepStudyData[`${selectedBookId}-${selectedChapter}`].original.notes.map((note: any, idx: number) => (
+                        {deepStudyData[`${selectedBookId}-${selectedChapter}-${version}`].original.notes.map((note: any, idx: number) => (
                           <div
                             key={note.note_id || idx}
                             className="border border-gray-200 bg-white/80 dark:bg-gray-100 rounded-lg p-2 sm:p-3"

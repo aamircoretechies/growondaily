@@ -37,7 +37,7 @@ const VerseStudy = () => {
 
 
 
-  const { books, loadingDeepStudy, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, verseActiveTab, setVerseActiveTab } = useBible();
+  const { books, loadingDeepStudy, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, verseActiveTab, setVerseActiveTab, version } = useBible();
   const { refetch: refetchDashboard } = useDashboard();
 
   const book = searchParams.get('bible') || 'genesis';
@@ -94,7 +94,7 @@ const VerseStudy = () => {
       bookId,
       Number(chapter),
       Number(verse),
-      "KJV"
+      version || "KJV"
     );
 
     console.log("MARK AS READ RESPONSE:", response);
@@ -117,7 +117,7 @@ const VerseStudy = () => {
         book_slug: book,
         chapter: Number(chapter),
         verse: Number(verse),
-        version: "KJV",
+        version: version || "KJV",
         is_read: response.is_read,
         timestamp: new Date().toISOString()
       };
@@ -163,7 +163,7 @@ const VerseStudy = () => {
       }
 
       if (bookId) {
-        await fetchSingleVerse(bookId, Number(chapter), Number(verse), 'KJV');
+        await fetchSingleVerse(bookId, Number(chapter), Number(verse), version || 'KJV');
       }
     };
 
@@ -175,7 +175,7 @@ const VerseStudy = () => {
       setSavedNote("");
     }
     loadVerse();
-  }, [book, chapter, verse, books]);
+  }, [book, chapter, verse, books, version]);
 
   // Separate effect for lazy loading deep study content
   useEffect(() => {
@@ -191,11 +191,11 @@ const VerseStudy = () => {
       }
 
       if (bookId) {
-        await fetchDeepStudyForVerse(bookId, Number(chapter), Number(verse), 'KJV', verseActiveTab);
+        await fetchDeepStudyForVerse(bookId, Number(chapter), Number(verse), version || 'KJV', verseActiveTab);
       }
     };
     loadDeepStudy();
-  }, [book, chapter, verse, books, verseActiveTab]);
+  }, [book, chapter, verse, books, verseActiveTab, version]);
 
 
 
@@ -271,14 +271,14 @@ const VerseStudy = () => {
       if (found) bookId = found.book_id;
     }
 
-    const verseKey = `${bookId}-${chapter}-${verse}`;
+    const verseKey = `${bookId}-${chapter}-${verse}-${version || 'KJV'}`;
 
     const deepData = deepStudyData?.[verseKey];
     const ctx = deepData?.[tabId];
     if (!ctx) return 'Content not available.';
     const cleanText = (ctx.content || '').replace(/\*/g, '');
     return cleanText || 'Content not available.';
-  }, [deepStudyData, book, books, chapter, verse]);
+  }, [deepStudyData, book, books, chapter, verse, version]);
 
 
   // const handleReportSubmit = async () => {
@@ -341,7 +341,7 @@ const VerseStudy = () => {
       book: book.charAt(0).toUpperCase() + book.slice(1),
       chapter: Number(chapter),
       verse: Number(verse),
-      version: "KJV",
+      version: version || "KJV",
       description: cleanDescription,
       tags: [reportCategory.toLowerCase()]
     };
@@ -407,7 +407,7 @@ const VerseStudy = () => {
           </div>
         </div>
         <p className="font-merriweather text-xl text-gray-600 dark:text-gray-400">
-          ({book.charAt(0).toUpperCase() + book.slice(1)} {chapter}:{verse} KJV)
+          ({book.charAt(0).toUpperCase() + book.slice(1)} {chapter}:{verse} {version})
         </p>
       </div>
 
@@ -455,7 +455,7 @@ const VerseStudy = () => {
                   );
                   if (found) bookId = found.book_id;
                 }
-                const verseKey = `${bookId}-${chapter}-${verse}`;
+                const verseKey = `${bookId}-${chapter}-${verse}-${version || 'KJV'}`;
                 const verseNotes = deepStudyData?.[verseKey]?.original?.notes || [];
 
                 return (

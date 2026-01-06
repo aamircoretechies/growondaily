@@ -135,9 +135,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
   ] as const;
   const [translations, setTranslations] = useState<string[]>(['KJV - King James Version']);
   const toggleTranslation = (option: string) => {
-    setTranslations((prev) =>
-      prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]
-    );
+    setTranslations([option]);
   };
   const [dailyOpen, setDailyOpen] = useState(false);
   // const [dailyPref, setDailyPref] = useState<'Daily' | 'Occasionally'>('Daily');

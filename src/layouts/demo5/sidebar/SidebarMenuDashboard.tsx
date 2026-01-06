@@ -106,7 +106,7 @@ const SidebarMenuDashboard = () => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams.get('bible'), searchParams.get('chapter'), searchParams.get('verse'), books.length]);
+  }, [searchParams.get('bible'), searchParams.get('chapter'), searchParams.get('verse'), books.length, version, selectBook, selectChapter, fetchSingleVerse, selectedBookId, selectedChapter, selectedVerse]);
 
 
   const filteredDropdownItems = useMemo(() => {
@@ -173,7 +173,7 @@ const SidebarMenuDashboard = () => {
       const bookId = getBookIdFromSlug(bookSlug);
 
       if (bookId && chapter && verse) {
-        const verseKey = `${bookId}-${chapter}-${verse}`;
+        const verseKey = `${bookId}-${chapter}-${verse}-${version || 'KJV'}`;
         const tabData = deepStudyData?.[verseKey]?.[verseActiveTab];
         if (tabData?.content) {
           const content = tabData.content.replace(/\*/g, '').trim();
@@ -188,7 +188,7 @@ const SidebarMenuDashboard = () => {
     // Priority 2: If chapter-level deep study is active, share deep study tab content
     // This applies when viewing all verses of a chapter (not a specific verse) and Deep Study is open
     if (showDeepStudy && isChapterView && !isVerseView && selectedBookId && selectedChapter) {
-      const currentKey = `${selectedBookId}-${selectedChapter}`;
+      const currentKey = `${selectedBookId}-${selectedChapter}-${version || 'KJV'}`;
       const tabData = deepStudyData?.[currentKey]?.[activeTab];
       if (tabData?.content) {
         const content = tabData.content.replace(/\*/g, '').trim();
