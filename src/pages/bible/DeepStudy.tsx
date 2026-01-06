@@ -88,14 +88,16 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
   }, [enabledTabs, activeTab, setActiveTab]);
 
   const getTabContent = useCallback((tabId: string) => {
-    // if (loadingDeepStudy) return 'Loading deep study content...';
-    // if (loadingDeepStudy) return <Loader />; // Returned as JSX in render
+    if (loadingDeepStudy) return <Loader />;
     if (!deepStudyData) return 'No data available.';
     const currentKey = `${selectedBookId}-${selectedChapter}-${version}`;
     const ctx = deepStudyData?.[currentKey]?.[tabId];
+
+    if (ctx?.error) return <span className="text-red-500">{ctx.error}</span>;
+
     if (!ctx) return 'Content not available.';
     return (ctx.content || '').replace(/\*/g, '') || 'Content not available.';
-  }, [deepStudyData, selectedBookId, selectedChapter, version]);
+  }, [deepStudyData, selectedBookId, selectedChapter, version, loadingDeepStudy]);
 
   return (
     <div className="min-h-screen text-primary overflow-hidden">
@@ -159,7 +161,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                     {getTabContent(tab.id)}
                   </p> */}
                   <div className="font-merriweather text-base sm:text-lg leading-relaxed text-primary break-words whitespace-pre-line">
-                    {loadingDeepStudy ? <Loader /> : getTabContent(tab.id)}
+                    {getTabContent(tab.id)}
                   </div>
 
                 </div>

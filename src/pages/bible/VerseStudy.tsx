@@ -258,8 +258,7 @@ const VerseStudy = () => {
 
 
   const getTabContent = useCallback((tabId: string) => {
-    // if (loadingDeepStudy) return 'Loading deep study content...';
-    // if (loadingDeepStudy) return <Loader />; // Rendered in JSX
+    if (loadingDeepStudy) return <Loader />;
     if (!deepStudyData) return 'No data available.';
 
     // Find the correct bookId - optimizing this inside the callback to avoid complex dependency
@@ -275,10 +274,13 @@ const VerseStudy = () => {
 
     const deepData = deepStudyData?.[verseKey];
     const ctx = deepData?.[tabId];
+
+    if (ctx?.error) return <span className="text-red-500">{ctx.error}</span>;
+
     if (!ctx) return 'Content not available.';
     const cleanText = (ctx.content || '').replace(/\*/g, '');
     return cleanText || 'Content not available.';
-  }, [deepStudyData, book, books, chapter, verse, version]);
+  }, [deepStudyData, book, books, chapter, verse, version, loadingDeepStudy]);
 
 
   // const handleReportSubmit = async () => {

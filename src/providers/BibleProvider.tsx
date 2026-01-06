@@ -489,6 +489,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
 
+  // New ref for tracking active requests count
+  const activeDeepStudyRequests = useRef(0);
+
   const fetchDeepStudy = async (
     bookId: string,
     chapter: number,
@@ -498,6 +501,11 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     isBackground: boolean = false
   ) => {
     try {
+      if (!isBackground) {
+        activeDeepStudyRequests.current += 1;
+        setLoadingDeepStudy(true);
+      }
+
       const key = verse
         ? `${bookId}-${chapter}-${verse}-${version}`
         : `${bookId}-${chapter}-${version}`;
@@ -511,12 +519,16 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
             [context]: deepStudyCache.current[key][context]
           }
         }));
-        // Do NOT set loading to true if we have data
+        // We have data, but we still need to manage the loading counter if it was incremented
+        // However, if we return early, we should decrement it immediately in a finally-like manner or just here
+        if (!isBackground) {
+          activeDeepStudyRequests.current -= 1;
+          if (activeDeepStudyRequests.current <= 0) {
+            activeDeepStudyRequests.current = 0;
+            setLoadingDeepStudy(false);
+          }
+        }
         return;
-      }
-
-      if (!isBackground) {
-        setLoadingDeepStudy(true);
       }
 
       const baseUrl = verse
@@ -559,12 +571,31 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       return { [context]: data };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Deep Study Fetch Error:", error);
-      // Don't clear deep study data on error, just keep old data
+
+      const key = verse
+        ? `${bookId}-${chapter}-${verse}-${version}`
+        : `${bookId}-${chapter}-${version}`;
+
+      const errorMessage = error.response?.data?.message || error.message || "Failed to fetch content";
+
+      // Store error in state so UI can display it
+      setDeepStudyData((prev: any) => ({
+        ...prev,
+        [key]: {
+          ...prev?.[key],
+          [context]: { error: errorMessage } // Mark this specific context as errored
+        }
+      }));
+
     } finally {
       if (!isBackground) {
-        setLoadingDeepStudy(false);
+        activeDeepStudyRequests.current -= 1;
+        if (activeDeepStudyRequests.current <= 0) {
+          activeDeepStudyRequests.current = 0;
+          setLoadingDeepStudy(false);
+        }
       }
     }
   };
