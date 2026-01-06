@@ -44,13 +44,13 @@ const VerseStudy = () => {
   const chapter = searchParams.get('chapter') || '1';
   const verse = searchParams.get('verse') || '1';
 
-  const verseKey = `${book}-${chapter}-${verse}`;
+  const verseKey = `${book}-${chapter}-${verse}-${version || 'KJV'}`;
 
   // Always initialize to false - will be updated by useEffect when verse loads
   const [isRead, setIsRead] = useState(false);
 
   useEffect(() => {
-    const currentVerseKey = `${book}-${chapter}-${verse}`;
+    const currentVerseKey = `${book}-${chapter}-${verse}-${version || 'KJV'}`;
     setIsRead(false);
 
     // Then check localStorage for the current verse
@@ -62,7 +62,7 @@ const VerseStudy = () => {
       // Explicitly set to false if not found or not 'true'
       setIsRead(false);
     }
-  }, [book, chapter, verse]);
+  }, [book, chapter, verse, version]);
 
   const getBookId = () => {
     if (book.length === 36) return book;
