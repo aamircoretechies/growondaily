@@ -61,7 +61,8 @@ const HomePage = () => {
         // Calculate how many verses are marked as read in localStorage
         let readCount = 0;
         verses.forEach((v: any) => {
-          const verseKey = `verse-read-${bookSlug}-${chapter}-${v.verse}`;
+          // const verseKey = `verse-read-${bookSlug}-${chapter}-${v.verse}`;
+          const verseKey = `verse-read-${bookSlug}-${chapter}-${v.verse}-${version || 'KJV'}`;
           if (localStorage.getItem(verseKey) === 'true') {
             readCount++;
           }
