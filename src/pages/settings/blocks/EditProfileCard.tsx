@@ -196,12 +196,20 @@ const EditProfileCard = () => {
             {profileLoading ? <FormattedMessage id="PROFILE.UPDATING" /> : <FormattedMessage id="PROFILE.UPDATE_PROFILE" />}
           </Button>
 
-          <Button variant="ghost"
+          {/* <Button variant="ghost"
             onClick={() => setShowDeletePopup(true)}
             className="text-red-500 hover:text-red-600 w-full sm:w-auto text-sm">
             <span className="hidden sm:inline"><FormattedMessage id="PROFILE.DELETE_ACCOUNT_PERMANENTLY" /></span>
             <span className="sm:hidden"><FormattedMessage id="PROFILE.DELETE_ACCOUNT" /></span>
+          </Button> */}
+          <Button
+            variant="ghost"
+            onClick={() => setShowDeletePopup(true)}
+            className="text-red-500 hover:text-red-600 w-full sm:w-auto text-sm"
+          >
+            <FormattedMessage id="PROFILE.DELETE_ACCOUNT_PERMANENTLY" />
           </Button>
+
         </div>
       </CardContent>
       {showDeletePopup && (

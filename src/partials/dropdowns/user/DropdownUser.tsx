@@ -160,7 +160,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
             </span>
 
             <a
-              href={`mailto:${currentUser?.email}`}
+              // href={`mailto:${currentUser?.email}`}
               className="text-xs text-gray-600 hover:text-primary font-medium truncate pt-[2px]"
             >
               {currentUser?.email || "example@gmail.com"}
