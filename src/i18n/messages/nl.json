@@ -264,5 +264,12 @@
   "BUTTONS.DELETING": "Verwijderen...",
   "TOAST.ACCOUNT_DELETED": "Account succesvol verwijderd!",
   "TOAST.ACCOUNT_DELETE_FAILED": "Account verwijderen mislukt",
-  "TOAST.UNEXPECTED_ERROR": "Er is een onverwachte fout opgetreden"
+  "TOAST.UNEXPECTED_ERROR": "Er is een onverwachte fout opgetreden",
+  "SHARE.TITLE": "Delen",
+  "SHARE.NO_CONTENT": "Geen inhoud beschikbaar om te delen.",
+  "SHARE.ON_WHATSAPP": "Delen op WhatsApp",
+  "SHARE.ON_FACEBOOK": "Delen op Facebook",
+  "SHARE.COPY_TEXT": "Tekst Kopiëren",
+  "TOAST.COPY_SUCCESS": "Tekst succesvol gekopieerd!",
+  "TOAST.COPY_FAILED": "Kopiëren van tekst mislukt!"
 }

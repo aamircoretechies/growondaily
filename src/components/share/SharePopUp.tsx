@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { toast } from "sonner";
+import { FormattedMessage, useIntl } from "react-intl";
 
 type SharePopUpProps = {
   isOpen: boolean;
@@ -8,10 +9,13 @@ type SharePopUpProps = {
 };
 
 const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
+  const { formatMessage } = useIntl();
+
   if (!isOpen) return null;
 
   const encoded = encodeURIComponent(textToShare);
-  const hasContent = textToShare && textToShare !== "No content available to share.";
+  const noContentMessage = formatMessage({ id: "SHARE.NO_CONTENT" });
+  const hasContent = textToShare && textToShare !== "No content available to share." && textToShare !== noContentMessage;
 
   // Close popup on clicking outside
   const handleOutsideClick = (e: any) => {
@@ -30,7 +34,9 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-primary">Share</h2>
+          <h2 className="text-lg font-semibold text-primary">
+            <FormattedMessage id="SHARE.TITLE" />
+          </h2>
 
           {/* Close Icon */}
           <button
@@ -48,7 +54,7 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
           </div>
         ) : (
           <div className="mb-3 p-2 bg-gray-50 rounded-lg text-sm text-gray-500 italic text-center">
-            {textToShare || "No content available to share."}
+            {textToShare || noContentMessage}
           </div>
         )}
 
@@ -66,7 +72,7 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
           >
-            Share on WhatsApp
+            <FormattedMessage id="SHARE.ON_WHATSAPP" />
           </a>
 
           {/* Facebook */}
@@ -85,7 +91,7 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
           >
-            Share on Facebook
+            <FormattedMessage id="SHARE.ON_FACEBOOK" />
           </a>
 
           {/* Copy */}
@@ -94,19 +100,19 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
               if (hasContent) {
                 try {
                   await navigator.clipboard.writeText(textToShare);
-                  toast.success("Text copied successfully!");
+                  toast.success(formatMessage({ id: "TOAST.COPY_SUCCESS" }));
                 } catch (err) {
-                  toast.error("Failed to copy text!");
+                  toast.error(formatMessage({ id: "TOAST.COPY_FAILED" }));
                 }
               }
             }}
             disabled={!hasContent}
             className={`w-full py-2 rounded-lg font-medium transition ${hasContent
-                ? "bg-gray-200 text-primary hover:bg-gray-300"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              ? "bg-gray-200 text-primary hover:bg-gray-300"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
           >
-            Copy Text
+            <FormattedMessage id="SHARE.COPY_TEXT" />
           </button>
 
 
@@ -117,7 +123,7 @@ const SharePopUp = ({ isOpen, onClose, textToShare }: SharePopUpProps) => {
           onClick={onClose}
           className="mt-4 w-full text-center py-2 rounded-lg bg-gray-100 text-primary font-medium hover:bg-gray-200 transition"
         >
-          Close
+          <FormattedMessage id="BUTTONS.CLOSE" />
         </button>
 
       </div>
