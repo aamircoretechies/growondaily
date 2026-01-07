@@ -159,7 +159,7 @@ const AskPage = () => {
             {isTyping && (
               <div className="flex justify-start">
                 <div className="bg-white/80 dark:bg-gray-200 rounded-2xl px-4 py-3">
-                  <p className="text-sm text-gray-600">typing...</p>
+                  <p className="text-sm text-gray-600"><FormattedMessage id="ASK.TYPING" /></p>
                 </div>
               </div>
             )}
@@ -175,7 +175,7 @@ const AskPage = () => {
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder={isListening ? "Listening..." : "Type your question here..."}
+                  placeholder={isListening ? formatMessage({ id: "ASK.LISTENING" }) : formatMessage({ id: "ASK.PLACEHOLDER" })}
                   className="w-full resize-none border-0 bg-transparent focus:outline-none focus:ring-0 text-gray-700 dark:text-gray-800 placeholder-gray-400 dark:placeholder-gray-500 text-sm overflow-y-auto"
                   rows={1}
                   style={{ minHeight: "40px", maxHeight: "120px" }}
@@ -184,14 +184,14 @@ const AskPage = () => {
               <button
                 onClick={handleMicClick}
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0 ${isListening
-                    ? "bg-red-500 text-white"
-                    : "bg-primary text-white hover:bg-primary/90"
+                  ? "bg-red-500 text-white"
+                  : "bg-primary text-white hover:bg-primary/90"
                   }`}
               >
                 {isListening ? (
                   <LucideMicOff size={20} />
                 ) : inputText.trim() ? (
-                  <LucideSend size={20} className="rotate-45"/>
+                  <LucideSend size={20} className="rotate-45" />
                 ) : (
                   <LucideMic size={20} />
                 )}
