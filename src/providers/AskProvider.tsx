@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { useLanguage } from "@/providers/TranslationProvider";
 
 // Web Speech API Type Definitions
 interface IWindow extends Window {
@@ -20,6 +21,7 @@ const AskContext = createContext<AskContextType | null>(null);
 
 
 export const AskProvider = ({ children }: any) => {
+  const { currentLanguage } = useLanguage();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
@@ -119,13 +121,12 @@ export const AskProvider = ({ children }: any) => {
   // SEND CHAT MESSAGE
   const sendMessage = async (text: string) => {
     try {
-      const res = await axios.post(`/api/ai/generate`, {
-        prompt: text,
-        content_type: "reflection",
+      const res = await axios.post(`/api/ai/chat`, {
+        message: text,
       });
 
       return {
-        answer: res.data.data.generated_text,
+        answer: res.data.data.response,
         reference: "",
       };
     } catch (err: any) {
@@ -137,9 +138,11 @@ export const AskProvider = ({ children }: any) => {
   // NEW: GENERATE CONTENT API
   const generateAIContent = async (text: string) => {
     try {
+      const promptWithLang = `(Please detect the language of the following text and respond ONLY in that same language) ${text}`;
       const res = await axios.post(`/api/ai/generate`, {
-        prompt: text,
+        prompt: promptWithLang,
         content_type: "reflection",
+        language: currentLanguage.code,
       });
 
       return {
