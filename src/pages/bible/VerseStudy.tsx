@@ -139,10 +139,12 @@ const VerseStudy = () => {
       }, 300);
 
       toast.success(
-        response.is_read ? "Marked as Read" : "Marked as Unread"
+        response.is_read
+          ? formatMessage({ id: 'BIBLE.MARK_AS_READ' })
+          : formatMessage({ id: 'BIBLE.MARK_AS_UNREAD' })
       );
     } else {
-      toast.error("Something went wrong");
+      toast.error(formatMessage({ id: 'TOAST.REPORT_FAILED' }));
     }
   };
 
