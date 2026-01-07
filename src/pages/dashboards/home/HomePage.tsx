@@ -7,11 +7,12 @@ import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
 import { useBible } from '@/providers/BibleProvider';
 import { useAuthContext } from "@/auth";
 import { useLanguage } from '@/providers/TranslationProvider';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import AudioPlay from "@/components/audio/audioplay";
 import axios from 'axios';
 
 const HomePage = () => {
+  const intl = useIntl();
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const navigate = useNavigate();
   const { selectBook, selectChapter, fetchSingleVerse, books } = useBible();
@@ -182,9 +183,9 @@ const HomePage = () => {
   const getGreeting = () => {
     const now = new Date();
     const hour = now.getHours();
-    if (hour >= 5 && hour < 12) return 'Good Morning';
-    if (hour >= 12 && hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour >= 5 && hour < 12) return intl.formatMessage({ id: 'GREETING.MORNING' });
+    if (hour >= 12 && hour < 17) return intl.formatMessage({ id: 'GREETING.AFTERNOON' });
+    return intl.formatMessage({ id: 'GREETING.EVENING' });
   };
 
   const handleReadDailyWord = () => {
