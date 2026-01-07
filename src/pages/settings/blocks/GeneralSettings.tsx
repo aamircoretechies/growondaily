@@ -61,7 +61,7 @@ const GeneralSettings = ({ user }: { user: any }) => {
       const res = await changeLanguage(language);
 
       if (res?.success) {
-        toast.success("Language updated");
+        toast.success(res?.message || `Language changed to ${selectedLang?.label}`);
 
         // ✅ CONTROLLED REFRESH
         setTimeout(() => {
@@ -69,10 +69,10 @@ const GeneralSettings = ({ user }: { user: any }) => {
         }, 500);
 
       } else {
-        toast.error(res?.message || "Failed to update language");
+        toast.error(res?.message || "Failed to change language");
       }
     } catch (e) {
-      toast.error("An error occurred");
+      toast.error("Failed to change language");
     } finally {
       setLanguageLoading(false);
     }
@@ -114,15 +114,17 @@ const GeneralSettings = ({ user }: { user: any }) => {
       const res = await changeLanguage("en");
 
       if (res?.success) {
-        toast.success("Language reset to English");
+        toast.success(res?.message || `Language changed to ${englishLang?.label}`);
 
         setTimeout(() => {
           window.location.reload();
         }, 500);
 
       } else {
-        toast.error(res?.message || "Failed to reset");
+        toast.error(res?.message || "Failed to change language");
       }
+    } catch (e) {
+      toast.error("Failed to change language");
     } finally {
       setLanguageLoading(false);
     }
