@@ -210,7 +210,7 @@ const VerseStudy = () => {
       // Default to true if not set (backward compatibility)
       const isEnabled = (id: string) => prefs[id] !== false;
 
-      const newEnabledTabs = ['original', 'explanations'];
+      const newEnabledTabs = ['original', 'explanations', 'source'];
       if (isEnabled('historical')) newEnabledTabs.push('historical');
       if (isEnabled('cultural')) newEnabledTabs.push('cultural'); // Assuming cultural maps to something or always shown? User didn't specify cultural in the list, but it's in the tabs. I'll assume it's always shown or maps to historical? The user list: Historical, Ground Text, Special, Daily Life, Cross Ref, Commentary, Key Takeaways, Reflection. Cultural is NOT in the user list. I will assume it is always enabled or maybe grouped with historical? The user said "All of these options are enabled by default". If cultural isn't in the list, maybe it shouldn't be filtered? Or maybe it's part of historical? I'll leave it enabled for now to be safe, or maybe it's missing from the settings? The user instructions were specific about the list. I will leave 'cultural' and 'theological' and 'practical' enabled as they are not in the toggle list.
       if (isEnabled('theological')) newEnabledTabs.push('theological');
@@ -226,13 +226,14 @@ const VerseStudy = () => {
       setEnabledTabs(newEnabledTabs);
     } catch {
       // If error, show all
-      setEnabledTabs(['original', 'explanations', 'historical', 'cultural', 'theological', 'practical', 'commentary', 'ground_text', 'special', 'daily_life', 'cross_reference', 'key_takeaways', 'reflection']);
+      setEnabledTabs(['original', 'explanations', 'source', 'historical', 'cultural', 'theological', 'practical', 'commentary', 'ground_text', 'special', 'daily_life', 'cross_reference', 'key_takeaways', 'reflection']);
     }
   }, []);
 
   const allTabs: TabItem[] = useMemo(() => [
     { id: 'original', title: formatMessage({ id: 'DEEP_STUDY.TAB.ORIGINAL' }), icon: 'document' },
     { id: 'explanations', title: formatMessage({ id: 'DEEP_STUDY.TAB.EXPLANATION' }), icon: 'book-open' },
+    { id: 'source', title: formatMessage({ id: 'DEEP_STUDY.TAB.SOURCE' }), icon: 'document' },
     { id: 'historical', title: formatMessage({ id: 'DEEP_STUDY.TAB.HISTORICAL_CONTEXT' }), icon: 'calendar' },
     { id: 'cultural', title: formatMessage({ id: 'DEEP_STUDY.TAB.CULTURAL_CONTEXT' }), icon: 'users' },
     { id: 'theological', title: formatMessage({ id: 'DEEP_STUDY.TAB.THEOLOGICAL_INSIGHTS' }), icon: 'book' },

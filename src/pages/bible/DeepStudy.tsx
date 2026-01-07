@@ -46,7 +46,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
       // Default to true if not set
       const isEnabled = (id: string) => prefs[id] !== false;
 
-      const newEnabledTabs = ['original', 'explanations'];
+      const newEnabledTabs = ['original', 'explanations', 'source'];
       if (isEnabled('historical')) newEnabledTabs.push('historical');
       if (isEnabled('cultural')) newEnabledTabs.push('cultural');
       if (isEnabled('theological')) newEnabledTabs.push('theological');
@@ -61,13 +61,14 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
 
       setEnabledTabs(newEnabledTabs);
     } catch {
-      setEnabledTabs(['original', 'explanations', 'historical', 'cultural', 'theological', 'practical', 'commentary', 'ground_text', 'special', 'daily_life', 'cross_reference', 'key_takeaways', 'reflection']);
+      setEnabledTabs(['original', 'explanations', 'source', 'historical', 'cultural', 'theological', 'practical', 'commentary', 'ground_text', 'special', 'daily_life', 'cross_reference', 'key_takeaways', 'reflection']);
     }
   }, []);
 
   const allTabs: TabItem[] = useMemo(() => [
     { id: 'original', title: formatMessage({ id: 'DEEP_STUDY.TAB.ORIGINAL' }), icon: 'document', content: '' },
     { id: 'explanations', title: formatMessage({ id: 'DEEP_STUDY.TAB.EXPLANATION' }), icon: 'book-open', content: '' },
+    { id: 'source', title: formatMessage({ id: 'DEEP_STUDY.TAB.SOURCE' }), icon: 'document', content: '' },
     { id: 'historical', title: formatMessage({ id: 'DEEP_STUDY.TAB.HISTORICAL_CONTEXT' }), icon: 'calendar', content: '' },
     { id: 'cultural', title: formatMessage({ id: 'DEEP_STUDY.TAB.CULTURAL_CONTEXT' }), icon: 'users', content: '' },
     { id: 'theological', title: formatMessage({ id: 'DEEP_STUDY.TAB.THEOLOGICAL_INSIGHTS' }), icon: 'book', content: '' },
