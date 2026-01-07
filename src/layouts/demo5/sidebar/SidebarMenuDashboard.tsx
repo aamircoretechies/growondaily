@@ -331,7 +331,7 @@ const SidebarMenuDashboard = () => {
 
 
   return (
-    <div className="flex flex-col gap-1 px-2.5">
+    <div className="flex flex-col gap-1 ps-1 pe-4 lg:px-2.5">
       {/* Bible Books Section */}
       <div className="px-0 py-1">
         <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
@@ -367,7 +367,7 @@ const SidebarMenuDashboard = () => {
               </span>
             </MenuToggle>
 
-            <MenuSub className="menu-default w-[190px] py-2">
+            <MenuSub className="menu-default w-[180px] py-2">
               {/* Search Input */}
               <div className="px-3 py-2 border-b border-gray-200" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
                 <input
@@ -450,7 +450,7 @@ const SidebarMenuDashboard = () => {
             </span>
           </MenuToggle>
 
-          <MenuSub className="menu-default w-[190px] py-2">
+          <MenuSub className="menu-default w-[180px] py-2">
             {/* Search Input */}
             <div className="px-3 py-2 border-b border-gray-200" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
               <input
@@ -527,7 +527,7 @@ const SidebarMenuDashboard = () => {
             </span>
           </MenuToggle>
 
-          <MenuSub className="menu-default w-[190px] py-2">
+          <MenuSub className="menu-default w-[180px] py-2">
             {/* Search Input */}
             <div className="px-3 py-2 border-b border-gray-200" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
               <input
