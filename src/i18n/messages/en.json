@@ -256,5 +256,7 @@
   "REPORT.CATEGORY.AUDIO": "Audio",
   "REPORT.CATEGORY.OTHER": "Other",
   "REPORT.PLACEHOLDER_TEXT": "I feel like I'm learning to rest more instead of stressing...",
-  "REPORT.SUBMIT": "Submit"
+  "REPORT.SUBMIT": "Submit",
+  "LANGUAGE.EN": "English",
+  "LANGUAGE.NL": "Dutch"
 }

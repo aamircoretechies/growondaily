@@ -256,5 +256,7 @@
   "REPORT.CATEGORY.AUDIO": "Audio",
   "REPORT.CATEGORY.OTHER": "Anders",
   "REPORT.PLACEHOLDER_TEXT": "Ik heb het gevoel dat ik leer meer te rusten in plaats van te stressen...",
-  "REPORT.SUBMIT": "Verzenden"
+  "REPORT.SUBMIT": "Verzenden",
+  "LANGUAGE.EN": "Engels",
+  "LANGUAGE.NL": "Nederlands"
 }

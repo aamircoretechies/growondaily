@@ -1,4 +1,4 @@
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { KeenIcon } from "@/components";
 import { MenuItem, MenuLink, MenuTitle, MenuIcon, MenuBadge, MenuSub } from "@/components/menu";
 import clsx from "clsx";
@@ -13,6 +13,7 @@ interface IDropdownUserLanguagesProps {
 }
 
 const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => {
+  const { formatMessage } = useIntl();
   const { currentLanguage, changeLanguage: changeFrontendLanguage, isRTL } = useLanguage();
   const { changeLanguage: changeBackendLanguage } = useAuthContext();
 
@@ -57,10 +58,10 @@ const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => 
       >
         <MenuLink className="h-10">
           <MenuIcon>
-            <img src={item.flag} className="inline-block size-4 rounded-full" alt={item.label} />
+            <img src={item.flag} className="inline-block size-4 rounded-full" alt={formatMessage({ id: `LANGUAGE.${item.code.toUpperCase()}` })} />
           </MenuIcon>
 
-          <MenuTitle>{item.label}</MenuTitle>
+          <MenuTitle>{formatMessage({ id: `LANGUAGE.${item.code.toUpperCase()}` })}</MenuTitle>
 
           {item.code === currentLanguage.code && (
             <MenuBadge>
@@ -98,11 +99,11 @@ const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => 
         </MenuTitle>
 
         <div className="flex items-center gap-1.5 rounded-md border border-gray-300 text-gray-600 p-1.5 text-2xs font-medium shrink-0">
-          {currentLanguage.label}
+          {formatMessage({ id: `LANGUAGE.${currentLanguage.code.toUpperCase()}` })}
           <img
             src={currentLanguage.flag}
             className="inline-block size-3.5 rounded-full"
-            alt={currentLanguage.label}
+            alt={formatMessage({ id: `LANGUAGE.${currentLanguage.code.toUpperCase()}` })}
           />
         </div>
       </MenuLink>

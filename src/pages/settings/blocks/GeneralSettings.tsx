@@ -7,10 +7,11 @@ import { useAuthContext } from "@/auth";
 import { useState, useEffect } from "react";
 import { useLanguage } from '@/providers/TranslationProvider';
 import { I18N_LANGUAGES } from '@/i18n';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { toast } from "sonner";
 
 const GeneralSettings = ({ user }: { user: any }) => {
+  const { formatMessage } = useIntl();
   const { changeLanguage } = useAuthContext();
   const [languageLoading, setLanguageLoading] = useState(false);
   const { currentLanguage, changeLanguage: changeFrontendLanguage } = useLanguage();
@@ -101,31 +102,31 @@ const GeneralSettings = ({ user }: { user: any }) => {
   // };
 
   const handleReset = async () => {
-  try {
-    setLanguage("en");
-    setLanguageLoading(true);
+    try {
+      setLanguage("en");
+      setLanguageLoading(true);
 
-    const englishLang = I18N_LANGUAGES.find(l => l.code === "en");
-    if (englishLang) {
-      changeFrontendLanguage(englishLang);
+      const englishLang = I18N_LANGUAGES.find(l => l.code === "en");
+      if (englishLang) {
+        changeFrontendLanguage(englishLang);
+      }
+
+      const res = await changeLanguage("en");
+
+      if (res?.success) {
+        toast.success("Language reset to English");
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+
+      } else {
+        toast.error(res?.message || "Failed to reset");
+      }
+    } finally {
+      setLanguageLoading(false);
     }
-
-    const res = await changeLanguage("en");
-
-    if (res?.success) {
-      toast.success("Language reset to English");
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-
-    } else {
-      toast.error(res?.message || "Failed to reset");
-    }
-  } finally {
-    setLanguageLoading(false);
-  }
-};
+  };
 
 
 
@@ -155,7 +156,7 @@ const GeneralSettings = ({ user }: { user: any }) => {
                 <SelectContent>
                   {I18N_LANGUAGES.map(lang => (
                     <SelectItem key={lang.code} value={lang.code}>
-                      {lang.label}
+                      {formatMessage({ id: `LANGUAGE.${lang.code.toUpperCase()}` })}
                     </SelectItem>
                   ))}
                 </SelectContent>

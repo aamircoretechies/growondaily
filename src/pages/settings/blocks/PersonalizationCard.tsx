@@ -191,19 +191,42 @@ const PersonalizationCard = ({ user }: { user: any }) => {
     });
   };
 
+  // Mapping for Bible experience options (English and Dutch -> Internal Constants)
+  const EXPERIENCE_MAPPING: Record<string, 'First Time' | 'Occasional' | 'Regular' | 'Theological'> = {
+    // English
+    'first time': 'First Time',
+    'occasional': 'Occasional',
+    'regular': 'Regular',
+    'theological': 'Theological',
+    'first_time': 'First Time',
+    'new_to_bible': 'First Time',
+    'some_knowledge': 'Occasional',
+    'regular_study': 'Regular',
+    'advanced_theology': 'Theological',
+
+    // Dutch
+    'eerste keer': 'First Time',
+    'af en toe': 'Occasional',
+    'regelmatig': 'Regular',
+    'theologisch': 'Theological',
+    'eerste_keer': 'First Time'
+  };
+
   // Map backend enums or human-readable phrases -> UI labels
   const experienceFromEnum = (val?: string): 'First Time' | 'Occasional' | 'Regular' | 'Theological' => {
-    const v = (val || '').toString();
+    const v = (val || '').toString().toLowerCase().trim();
+    if (EXPERIENCE_MAPPING[v]) return EXPERIENCE_MAPPING[v];
+
     const up = v.toUpperCase();
     if (up === 'FIRST_TIME' || up === 'NEW_TO_BIBLE') return 'First Time';
     if (up === 'OCCASIONAL' || up === 'SOME_KNOWLEDGE') return 'Occasional';
     if (up === 'REGULAR' || up === 'REGULAR_STUDY') return 'Regular';
     if (up === 'THEOLOGICAL' || up === 'ADVANCED_THEOLOGY') return 'Theological';
-    const norm = v.trim().toLowerCase();
-    if (norm.includes('new')) return 'First Time';
-    if (norm.includes('some')) return 'Occasional';
-    if (norm.includes('regular')) return 'Regular';
-    if (norm.includes('advanced') || norm.includes('theolog')) return 'Theological';
+
+    if (v.includes('new') || v.includes('eerste')) return 'First Time';
+    if (v.includes('some') || v.includes('knowledge') || v.includes('en toe')) return 'Occasional';
+    if (v.includes('regular') || v.includes('regelmatig')) return 'Regular';
+    if (v.includes('advanced') || v.includes('theolog')) return 'Theological';
     return 'First Time';
   };
 
@@ -227,7 +250,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
     if (rawPrefs) {
       try {
         const prefs = typeof rawPrefs === 'string' ? JSON.parse(rawPrefs) : rawPrefs;
-        setExperience(prefs.experience || 'First Time');
+        setExperience(experienceFromEnum(prefs.experience));
         setBrings(Array.isArray(prefs.brings) ? prefs.brings : prefs.brings ? [prefs.brings] : []);
         setEngage(Array.isArray(prefs.engage) ? prefs.engage : prefs.engage ? [prefs.engage] : []);
         setExplain(prefs.explain || 'Clear and simple language');
