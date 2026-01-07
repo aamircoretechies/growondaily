@@ -259,5 +259,10 @@
   "REPORT.PLACEHOLDER_TEXT": "Ik heb het gevoel dat ik leer meer te rusten in plaats van te stressen...",
   "REPORT.SUBMIT": "Verzenden",
   "LANGUAGE.EN": "Engels",
-  "LANGUAGE.NL": "Nederlands"
+  "LANGUAGE.NL": "Nederlands",
+  "ACCOUNT.DELETE_ACCOUNT_CONFIRMATION": "Weet u zeker dat u uw account wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+  "BUTTONS.DELETING": "Verwijderen...",
+  "TOAST.ACCOUNT_DELETED": "Account succesvol verwijderd!",
+  "TOAST.ACCOUNT_DELETE_FAILED": "Account verwijderen mislukt",
+  "TOAST.UNEXPECTED_ERROR": "Er is een onverwachte fout opgetreden"
 }

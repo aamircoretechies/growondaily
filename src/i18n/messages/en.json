@@ -259,5 +259,10 @@
   "REPORT.PLACEHOLDER_TEXT": "I feel like I'm learning to rest more instead of stressing...",
   "REPORT.SUBMIT": "Submit",
   "LANGUAGE.EN": "English",
-  "LANGUAGE.NL": "Dutch"
+  "LANGUAGE.NL": "Dutch",
+  "ACCOUNT.DELETE_ACCOUNT_CONFIRMATION": "Are you sure you want to delete your account? This action cannot be undone.",
+  "BUTTONS.DELETING": "Deleting...",
+  "TOAST.ACCOUNT_DELETED": "Account deleted successfully!",
+  "TOAST.ACCOUNT_DELETE_FAILED": "Failed to delete account",
+  "TOAST.UNEXPECTED_ERROR": "An unexpected error occurred"
 }

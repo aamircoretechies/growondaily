@@ -2,10 +2,12 @@ import { useSettingEdit } from "@/pages/settings/Provider/SettingeEditProvider";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const DeleteAccountPopUp = ({ onClose }: any) => {
   const { deleteAccount } = useSettingEdit();
   const navigate = useNavigate();
+  const { formatMessage } = useIntl();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -20,7 +22,7 @@ const DeleteAccountPopUp = ({ onClose }: any) => {
         localStorage.clear();
         sessionStorage.clear();
 
-        toast.success("Account deleted successfully!");
+        toast.success(formatMessage({ id: "TOAST.ACCOUNT_DELETED" }));
         // Close popup
         onClose();
 
@@ -30,17 +32,17 @@ const DeleteAccountPopUp = ({ onClose }: any) => {
         // Log validation errors for debugging
         if (response?.errors && response.errors.length > 0) {
           console.error("Validation errors:", response.errors);
-          const errorMessages = response.errors.map((err: any) => 
+          const errorMessages = response.errors.map((err: any) =>
             err.msg || err.message || JSON.stringify(err)
           ).join(", ");
-          setErrorMessage(errorMessages || response.message || "Failed to delete account");
+          setErrorMessage(errorMessages || response.message || formatMessage({ id: "TOAST.ACCOUNT_DELETE_FAILED" }));
         } else {
-          setErrorMessage(response.message || "Failed to delete account");
+          setErrorMessage(response.message || formatMessage({ id: "TOAST.ACCOUNT_DELETE_FAILED" }));
         }
         setLoading(false);
       }
     } catch (error) {
-      setErrorMessage("An unexpected error occurred");
+      setErrorMessage(formatMessage({ id: "TOAST.UNEXPECTED_ERROR" }));
       setLoading(false);
     }
   };
@@ -49,9 +51,11 @@ const DeleteAccountPopUp = ({ onClose }: any) => {
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
-        <h2 className="text-lg font-semibold text-gray-800">Delete Account</h2>
+        <h2 className="text-lg font-semibold text-gray-800">
+          <FormattedMessage id="PROFILE.DELETE_ACCOUNT" />
+        </h2>
         <p className="text-sm text-gray-500 mt-2">
-          Are you sure you want to delete your account? This action cannot be undone.
+          <FormattedMessage id="ACCOUNT.DELETE_ACCOUNT_CONFIRMATION" />
         </p>
 
         {errorMessage && (
@@ -65,7 +69,7 @@ const DeleteAccountPopUp = ({ onClose }: any) => {
             onClick={onClose}
             className="px-4 py-2 rounded-lg border bg-transparent text-gray-800 border-gray-300 hover:bg-gray-100 dark:text-gray-700 dark:border-gray-500 dark:hover:bg-gray-700 dark:hover:text-white"
           >
-            Cancel 
+            <FormattedMessage id="BUTTONS.CANCEL" />
           </button>
 
           <button
@@ -73,7 +77,11 @@ const DeleteAccountPopUp = ({ onClose }: any) => {
             disabled={loading}
             className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
           >
-            {loading ? "Deleting..." : "Delete"}
+            {loading ? (
+              <FormattedMessage id="BUTTONS.DELETING" />
+            ) : (
+              <FormattedMessage id="BUTTONS.DELETE" />
+            )}
           </button>
         </div>
       </div>
