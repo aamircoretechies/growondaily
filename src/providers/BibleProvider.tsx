@@ -162,6 +162,13 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   }, [version, isInitialized]);
 
   const [error, setError] = useState<string | null>(null);
+
+  // Clear Deep Study cache when locale changes to avoid showing stale translations
+  useEffect(() => {
+    deepStudyCache.current = {};
+    setDeepStudyData(null);
+  }, [intl.locale]);
+
   const [deepStudyData, setDeepStudyData] = useState<Record<string, any> | null>(null);
 
   const [showDeepStudy, setShowDeepStudy] = useState(false);
@@ -201,7 +208,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       const cacheKey = `${bookId}-${nextChapter}-${version}`;
       if (!versesCache.current[cacheKey]) {
         try {
-          const url = `/api/bible/books/${bookId}/chapters/${nextChapter}/verses/${version}`;
+          const url = `/api/bible/books/${bookId}/chapters/${nextChapter}/verses/${version}?lang=${intl.locale}`;
           const res = await axios.get(url);
           versesCache.current[cacheKey] = res.data?.data?.verses || [];
           console.log(`Prefetched Chapter ${nextChapter}`);
@@ -216,7 +223,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       const cacheKey = `${bookId}-${prevChapter}-${version}`;
       if (!versesCache.current[cacheKey]) {
         try {
-          const url = `/api/bible/books/${bookId}/chapters/${prevChapter}/verses/${version}`;
+          const url = `/api/bible/books/${bookId}/chapters/${prevChapter}/verses/${version}?lang=${intl.locale}`;
           const res = await axios.get(url);
           versesCache.current[cacheKey] = res.data?.data?.verses || [];
           console.log(`Prefetched Chapter ${prevChapter}`);
@@ -225,7 +232,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     }
-  }, [getBookInfo]);
+  }, [getBookInfo, intl.locale]);
 
   useEffect(() => {
     // Only fetch books after auth is ready
@@ -252,7 +259,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         // const res = await axios.get("/api/bible/books");
-        const res = await axios.get(`/api/bible/books?version=${version}&locale=${intl.locale}`);
+        const res = await axios.get(`/api/bible/books?version=${version}&locale=${intl.locale}&lang=${intl.locale}`);
         const data = res.data?.data?.books || [];
         setBooks(data);
         // booksCache.current = data;
@@ -380,7 +387,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         abortControllerChapters.current = new AbortController();
 
         setLoadingChapters(true);
-        const url = `/api/bible/books/${bookId}/chapters/${normalizeVersion(versionParam)}`;
+        const url = `/api/bible/books/${bookId}/chapters/${normalizeVersion(versionParam)}?lang=${intl.locale}`;
         const res = await axios.get(url, { signal: abortControllerChapters.current.signal });
 
         const data = res.data?.data?.chapters || [];
@@ -427,7 +434,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         abortControllerVerses.current = new AbortController();
 
         setLoadingVerses(true);
-        const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${normalizeVersion(versionParam)}`;
+        const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${normalizeVersion(versionParam)}?lang=${intl.locale}`;
         const res = await axios.get(url, { signal: abortControllerVerses.current.signal });
 
         const data = res.data?.data?.verses || [];
@@ -524,7 +531,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         // Don't set global loading for single verse fetch to avoid full screen flicker
-        const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${verse}/${normalizeVersion(versionParam)}`
+        const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${verse}/${normalizeVersion(versionParam)}?lang=${intl.locale}`
         const res = await axios.get(url);
         const verseData = res.data?.data?.verse as Verse | undefined;
         setSelectedVerse(verseData || null);
@@ -583,7 +590,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
           ? `/api/bible/deep-study/${bookId}/${chapter}/${verse}/${v}`
           : `/api/bible/deep-study/${bookId}/${chapter}/${v}`;
 
-        const res = await axios.get(`${baseUrl}?deep-study-context=${context}`);
+        const res = await axios.get(`${baseUrl}?deep-study-context=${context}&lang=${intl.locale}`);
         const data = res.data?.data || null;
 
         // Update Cache
@@ -724,16 +731,20 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Update cache as well
-      const key = verse === 0 ? `${book_id}-${chapter}` : `${book_id}-${chapter}-${verse}`;
-      if (deepStudyCache.current[key] && deepStudyCache.current[key]['original']) {
-        const ctx = deepStudyCache.current[key]['original'];
+      const currentVersion = versionRef.current || "KJV";
+      const cacheUpdateKey = verse === 0
+        ? `${intl.locale}-${book_id}-${chapter}-${currentVersion}`
+        : `${intl.locale}-${book_id}-${chapter}-${verse}-${currentVersion}`;
+
+      if (deepStudyCache.current[cacheUpdateKey] && deepStudyCache.current[cacheUpdateKey]['original']) {
+        const ctx = deepStudyCache.current[cacheUpdateKey]['original'];
         const newNote = {
           content,
           emotion_tags,
           note_id: res.data?.data?.note?.note_id || Date.now().toString(),
           created_at: res.data?.data?.note?.created_at || new Date().toISOString(),
         };
-        deepStudyCache.current[key]['original'] = {
+        deepStudyCache.current[cacheUpdateKey]['original'] = {
           ...ctx,
           notes: ctx.notes ? [...ctx.notes, newNote] : [newNote]
         };

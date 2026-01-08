@@ -240,6 +240,7 @@
   "TOAST.NETWORK_ERROR": "Netwerkfout. Probeer het opnieuw",
   "TOAST.PROFILE_PIC_UPDATE_FAILED": "Uploaden profielafbeelding mislukt",
   "TOAST.PROFILE_UPDATED": "Profiel succesvol bijgewerkt!",
+  "USER.LANGUAGE.SETUP_REQUIRED": "Voltooi eerst uw profielinstelling.",
   "TOAST.VALIDATION_FAILED": "Validatie mislukt",
   "REFLECTIONS.ALL_JOURNAL_ENTRIES": "Al je dagboeknotities en reflecties",
   "REFLECTIONS.NO_JOURNAL_ENTRIES": "Geen dagboeknotities gevonden",

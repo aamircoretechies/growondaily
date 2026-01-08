@@ -72,11 +72,14 @@ export function setupAxios(axios: any) {
         config.headers.Authorization = `Bearer ${auth.access_token}`;
       }
 
+      const currentLanguage = getCurrentLanguage();
+      const langCode = currentLanguage.code;
+
+      // Add Accept-Language header
+      (config.headers as any)['Accept-Language'] = langCode;
+
       // Add language code to all API requests
       if (config.url && config.url.startsWith('/api')) {
-        const currentLanguage = getCurrentLanguage();
-        const langCode = currentLanguage.code;
-
         // For GET requests, add to params
         if (!config.method || config.method.toLowerCase() === 'get') {
           config.params = config.params || {};

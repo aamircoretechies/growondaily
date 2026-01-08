@@ -15,10 +15,19 @@ interface IDropdownUserLanguagesProps {
 const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => {
   const { formatMessage } = useIntl();
   const { currentLanguage, changeLanguage: changeFrontendLanguage, isRTL } = useLanguage();
-  const { changeLanguage: changeBackendLanguage } = useAuthContext();
+  const { currentUser, changeLanguage: changeBackendLanguage } = useAuthContext();
 
   const handleLanguageChange = async (lang: TLanguage) => {
     try {
+      // Check if profile setup is done before calling backend API
+      if (currentUser && !currentUser.is_preference_setup_done) {
+        toast.info(formatMessage({ id: "USER.LANGUAGE.SETUP_REQUIRED" }));
+        if (menuItemRef.current) {
+          menuItemRef.current.hide();
+        }
+        return;
+      }
+
       // console.log("Frontend language update to:", lang);
       changeFrontendLanguage(lang);
 

@@ -240,6 +240,7 @@
   "TOAST.NETWORK_ERROR": "Network error. Please try again",
   "TOAST.PROFILE_PIC_UPDATE_FAILED": "Failed to upload profile picture",
   "TOAST.PROFILE_UPDATED": "Profile updated successfully!",
+  "USER.LANGUAGE.SETUP_REQUIRED": "Please complete your profile setup first.",
   "TOAST.VALIDATION_FAILED": "Validation failed",
   "REFLECTIONS.ALL_JOURNAL_ENTRIES": "All your journal entries and reflections",
   "REFLECTIONS.NO_JOURNAL_ENTRIES": "No journal entries found",
