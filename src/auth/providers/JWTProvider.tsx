@@ -363,7 +363,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       };
 
       const payloadPreferences = {
-        language_code: 'en',
+        language_code: authHelper.getCurrentLanguage().code || 'en',
         bible_version: (preferencesData?.translations?.[0]?.split(' - ')[0] || 'KJV').toUpperCase(),
         depth_level: preferencesData?.depth?.includes('Short')
           ? 'short'
@@ -465,7 +465,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       const explanationStyle = preferencesData?.explainStyle || preferencesData?.explain || "";
 
       const payloadPreferences = {
-        language_code: "en",
+        language_code: authHelper.getCurrentLanguage().code || "en",
         bible_version:
           (preferencesData?.translations?.[0]?.split(" - ")[0] || "").toUpperCase(),
         depth_level: preferencesData?.depth?.includes("Short")
@@ -689,64 +689,64 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   //     return null;
   //   }
   // };
-   
- const MAX_MB = 1.5;
 
-const updateProfileImage = async (file: File): Promise<UserModel> => {
-  const sizeMB = file.size / (1024 * 1024);
+  const MAX_MB = 1.5;
 
-  console.log("Selected file:", {
-    name: file.name,
-    size_mb: sizeMB.toFixed(2),
-    type: file.type,
-  });
+  const updateProfileImage = async (file: File): Promise<UserModel> => {
+    const sizeMB = file.size / (1024 * 1024);
 
-  if (sizeMB > MAX_MB) {
-    throw new Error(`IMAGE_TOO_LARGE_${MAX_MB}`);
-  }
+    console.log("Selected file:", {
+      name: file.name,
+      size_mb: sizeMB.toFixed(2),
+      type: file.type,
+    });
 
-  const token =
-    auth?.access_token ||
-    auth?.api_token ||
-    authHelper.getAuth()?.access_token ||
-    authHelper.getAuth()?.api_token;
+    if (sizeMB > MAX_MB) {
+      throw new Error(`IMAGE_TOO_LARGE_${MAX_MB}`);
+    }
 
-  if (!token) throw new Error("AUTH_REQUIRED");
+    const token =
+      auth?.access_token ||
+      auth?.api_token ||
+      authHelper.getAuth()?.access_token ||
+      authHelper.getAuth()?.api_token;
 
-  const formData = new FormData();
-  formData.append("profile_picture", file);
+    if (!token) throw new Error("AUTH_REQUIRED");
 
-  try {
-    const response = await axios.put(
-      `/api/auth/profile-picture`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    const formData = new FormData();
+    formData.append("profile_picture", file);
+
+    try {
+      const response = await axios.put(
+        `/api/auth/profile-picture`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Upload success:", response.data);
+
+      const updatedUser = await getUser(token);
+      setCurrentUser(updatedUser);
+      return updatedUser;
+
+    } catch (error: any) {
+      const status = error?.response?.status;
+
+      if (status === 413) {
+        throw new Error("BACKEND_IMAGE_TOO_LARGE");
       }
-    );
 
-    console.log("Upload success:", response.data);
+      if (error?.message === "Network Error") {
+        throw new Error("NETWORK_ERROR");
+      }
 
-    const updatedUser = await getUser(token);
-    setCurrentUser(updatedUser);
-    return updatedUser;
-
-  } catch (error: any) {
-    const status = error?.response?.status;
-
-    if (status === 413) {
-      throw new Error("BACKEND_IMAGE_TOO_LARGE");
+      throw new Error("UPLOAD_FAILED");
     }
-
-    if (error?.message === "Network Error") {
-      throw new Error("NETWORK_ERROR");
-    }
-
-    throw new Error("UPLOAD_FAILED");
-  }
-};
+  };
 
 
 

@@ -111,4 +111,4 @@ const getAccessToken = (): string | null => {
 };
 
 
-export { AUTH_LOCAL_STORAGE_KEY, getAuth, removeAuth, setAuth, getAccessToken };
+export { AUTH_LOCAL_STORAGE_KEY, getAuth, removeAuth, setAuth, getAccessToken, getCurrentLanguage };

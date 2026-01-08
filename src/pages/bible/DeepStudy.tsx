@@ -28,7 +28,7 @@ const Loader = () => {
 
 const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, }: DeepStudyProps) => {
   const { selectedBookId, selectedChapter, version, deepStudyData, fetchDeepStudy, selectedBookName, loadingDeepStudy, activeTab, setActiveTab } = useBible();
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const [enabledTabs, setEnabledTabs] = useState<string[]>([]);
 
   // Pre-fetch all active tabs for better performance with priority
@@ -45,7 +45,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
         }, (index + 1) * 100);
       });
     }
-  }, [selectedBookId, selectedChapter, version, enabledTabs, activeTab]);
+  }, [selectedBookId, selectedChapter, version, enabledTabs, activeTab, locale]);
 
   useEffect(() => {
     try {
@@ -103,7 +103,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
   const getTabContent = useCallback((tabId: string) => {
     if (loadingDeepStudy) return <Loader />;
     if (!deepStudyData) return 'No data available.';
-    const currentKey = `${selectedBookId}-${selectedChapter}-${version}`;
+    const currentKey = `${locale}-${selectedBookId}-${selectedChapter}-${version}`;
     const ctx = deepStudyData?.[currentKey]?.[tabId];
 
     if (ctx?.error) return <span className="text-red-500">{ctx.error}</span>;
@@ -188,7 +188,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                     />
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-700">
                       {(() => {
-                        const currentKey = `${selectedBookId}-${selectedChapter}-${version}`;
+                        const currentKey = `${locale}-${selectedBookId}-${selectedChapter}-${version}`;
                         const ctx = deepStudyData?.[currentKey]?.[tab.id];
                         const date = ctx?.generated_at
                           ? new Date(ctx.generated_at).toLocaleDateString()
@@ -201,11 +201,11 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                   </div>
 
                   {/* User Notes Section - Only show in original tab */}
-                  {tab.id === "original" && deepStudyData?.[`${selectedBookId}-${selectedChapter}-${version}`]?.original
+                  {tab.id === "original" && deepStudyData?.[`${locale}-${selectedBookId}-${selectedChapter}-${version}`]?.original
                     ?.notes?.length > 0 && (
                       <div className="mt-3 space-y-2">
                         <h3 className="text-sm font-semibold text-primary mb-2 ">Your Notes</h3>
-                        {deepStudyData[`${selectedBookId}-${selectedChapter}-${version}`].original.notes.map((note: any, idx: number) => (
+                        {deepStudyData[`${locale}-${selectedBookId}-${selectedChapter}-${version}`].original.notes.map((note: any, idx: number) => (
                           <div
                             key={note.note_id || idx}
                             className="border border-gray-200 bg-white/80 dark:bg-gray-100 rounded-lg p-2 sm:p-3"

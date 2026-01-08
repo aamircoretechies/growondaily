@@ -361,7 +361,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   }, [dashboardLoaded, authLoading, currentUser, version, intl.locale]);
 
   const fetchChapters = async (bookId: string, versionParam: string) => {
-    const cacheKey = `${bookId}-${versionParam}`;
+    const cacheKey = `${intl.locale}-${bookId}-${versionParam}`;
     if (inFlightRequests.current[cacheKey]) return inFlightRequests.current[cacheKey];
 
     const fetchPromise = (async () => {
@@ -405,7 +405,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const fetchVerses = async (bookId: string, chapter: number, versionParam: string) => {
-    const cacheKey = `${bookId}-${chapter}-${versionParam}`;
+    const cacheKey = `${intl.locale}-${bookId}-${chapter}-${versionParam}`;
     if (inFlightRequests.current[cacheKey]) return inFlightRequests.current[cacheKey];
 
     const fetchPromise = (async () => {
@@ -553,8 +553,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     isBackground: boolean = false
   ) => {
     const key = verse
-      ? `${bookId}-${chapter}-${verse}-${versionParam}`
-      : `${bookId}-${chapter}-${versionParam}`;
+      ? `${intl.locale}-${bookId}-${chapter}-${verse}-${versionParam}`
+      : `${intl.locale}-${bookId}-${chapter}-${versionParam}`;
     const fullKey = `deep-${key}-${context}`;
 
     if (inFlightRequests.current[fullKey]) return inFlightRequests.current[fullKey];
@@ -690,7 +690,9 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         const safePrev = prev || {};
         // Use versionRef.current to get the latest version without dependency issues
         const currentVersion = versionRef.current || "KJV";
-        const key = verse === 0 ? `${book_id}-${chapter}-${currentVersion}` : `${book_id}-${chapter}-${verse}-${currentVersion}`;
+        const key = verse === 0
+          ? `${intl.locale}-${book_id}-${chapter}-${currentVersion}`
+          : `${intl.locale}-${book_id}-${chapter}-${verse}-${currentVersion}`;
         const prevData = safePrev[key] || {};
         const updated = { ...safePrev };
 

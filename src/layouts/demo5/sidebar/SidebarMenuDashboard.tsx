@@ -120,7 +120,7 @@ const SidebarMenuDashboard = () => {
       setSelectedVerse(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, books.length, version]);
+  }, [searchParams, books.length, version, formatMessage]);
   // Reduced dependencies to minimize unnecessary runs
 
 
