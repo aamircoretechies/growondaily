@@ -135,9 +135,9 @@ const SidebarMenuDashboard = () => {
     const searchLower = chapterSearchTerm.toLowerCase();
     return chapters.filter((chapter: any) =>
       chapter?.chapter?.toString().includes(searchLower) ||
-      `Chapter ${chapter?.chapter}`.toLowerCase().includes(searchLower)
+      `${formatMessage({ id: 'BIBLE.CHAPTER_LABEL' })} ${chapter?.chapter}`.toLowerCase().includes(searchLower)
     );
-  }, [chapters, chapterSearchTerm]);
+  }, [chapters, chapterSearchTerm, formatMessage]);
 
   // Filter verses based on search term - similar to books search
   const filteredVerses = useMemo(() => {
@@ -146,10 +146,10 @@ const SidebarMenuDashboard = () => {
     const searchLower = verseSearchTerm.toLowerCase();
     return verses.filter((v: any) =>
       v?.verse?.toString().includes(searchLower) ||
-      `Verse ${v?.verse}`.toLowerCase().includes(searchLower) ||
+      `${formatMessage({ id: 'BIBLE.VERSE_LABEL' })} ${v?.verse}`.toLowerCase().includes(searchLower) ||
       (v?.text && v.text.toLowerCase().includes(searchLower))
     );
-  }, [verses, verseSearchTerm]);
+  }, [verses, verseSearchTerm, formatMessage]);
 
   // Function to determine what text to share based on selection and deep study state
   const getShareText = (): string => {
@@ -372,7 +372,7 @@ const SidebarMenuDashboard = () => {
               <div className="px-3 py-2 border-b border-gray-200" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
                 <input
                   type="text"
-                  placeholder="Search books..."
+                  placeholder={formatMessage({ id: 'BIBLE.SEARCH_BOOKS' })}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -409,7 +409,7 @@ const SidebarMenuDashboard = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="px-3 py-2 text-sm text-gray-500">No books found</div>
+                  <div className="px-3 py-2 text-sm text-gray-500">{formatMessage({ id: 'BIBLE.NO_BOOKS_FOUND' })}</div>
                 )}
               </div>
             </MenuSub>
@@ -443,7 +443,7 @@ const SidebarMenuDashboard = () => {
           <MenuToggle className="w-full btn btn-light btn-sm justify-between flex-nowrap">
             <span className="flex items-center gap-1.5">
               {/* Chapters */}
-              {selectedChapter ? `Chapter ${selectedChapter}` : 'Chapters'}
+              {selectedChapter ? `${formatMessage({ id: 'BIBLE.CHAPTER_LABEL' })} ${selectedChapter}` : formatMessage({ id: 'BIBLE.CHAPTERS_LABEL' })}
             </span>
             <span className="flex items-center lg:ms-4">
               <KeenIcon icon="down" className="!text-xs" />
@@ -455,7 +455,7 @@ const SidebarMenuDashboard = () => {
             <div className="px-3 py-2 border-b border-gray-200" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
               <input
                 type="text"
-                placeholder="Search chapters..."
+                placeholder={formatMessage({ id: 'BIBLE.SEARCH_CHAPTERS' })}
                 value={chapterSearchTerm}
                 onChange={(e) => setChapterSearchTerm(e.target.value)}
                 className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -474,7 +474,7 @@ const SidebarMenuDashboard = () => {
               onClick={(e) => e.stopPropagation()}
             >
               {loadingChapters ? (
-                <div className="px-3 py-2 text-sm text-gray-500">Loading chapters...</div>
+                <div className="px-3 py-2 text-sm text-gray-500">{formatMessage({ id: 'BIBLE.LOADING_CHAPTERS' })}</div>
               ) : filteredChapters.length > 0 ? (
                 filteredChapters.map((c, index) => (
                   <div
@@ -486,11 +486,11 @@ const SidebarMenuDashboard = () => {
                       handleChapterClick(c.chapter, c.book_id);
                     }}
                   >
-                    Chapter {c.chapter}
+                    {formatMessage({ id: 'BIBLE.CHAPTER_LABEL' })} {c.chapter}
                   </div>
                 ))
               ) : (
-                <div className="px-3 py-2 text-sm text-gray-500">No chapters found</div>
+                <div className="px-3 py-2 text-sm text-gray-500">{formatMessage({ id: 'BIBLE.NO_CHAPTERS_FOUND' })}</div>
               )}
             </div>
 
@@ -520,7 +520,7 @@ const SidebarMenuDashboard = () => {
           <MenuToggle className="w-full btn btn-light btn-sm justify-between flex-nowrap">
             {/* <span className="flex items-center gap-1.5">Verses</span> */}
             <span className="flex items-center gap-1.5">
-              {selectedVerse ? `Verse ${selectedVerse.verse}` : 'Verses'}
+              {selectedVerse ? `${formatMessage({ id: 'BIBLE.VERSE_LABEL' })} ${selectedVerse.verse}` : formatMessage({ id: 'BIBLE.VERSES_LABEL' })}
             </span>
             <span className="flex items-center lg:ms-4">
               <KeenIcon icon="down" className="!text-xs" />
@@ -532,7 +532,7 @@ const SidebarMenuDashboard = () => {
             <div className="px-3 py-2 border-b border-gray-200" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
               <input
                 type="text"
-                placeholder="Search verses..."
+                placeholder={formatMessage({ id: 'BIBLE.SEARCH_VERSES' })}
                 value={verseSearchTerm}
                 onChange={(e) => setVerseSearchTerm(e.target.value)}
                 className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -551,7 +551,7 @@ const SidebarMenuDashboard = () => {
               onClick={(e) => e.stopPropagation()}
             >
               {loadingVerses ? (
-                <div className="px-3 py-2 text-sm text-gray-500">Loading verses...</div>
+                <div className="px-3 py-2 text-sm text-gray-500">{formatMessage({ id: 'BIBLE.LOADING_VERSES' })}</div>
               ) : filteredVerses.length > 0 ? (
                 filteredVerses.map((v, index) => (
                   <div
@@ -570,12 +570,12 @@ const SidebarMenuDashboard = () => {
                       navigate(`/bible?bible=${bookSlug}&chapter=${v.chapter}&verse=${v.verse}`);
                     }}
                   >
-                    Verse {v.verse}
+                    {formatMessage({ id: 'BIBLE.VERSE_LABEL' })} {v.verse}
                   </div>
                 ))
               ) : (
                 <div className="px-3 py-2 text-sm text-gray-500">
-                  No verses found
+                  {formatMessage({ id: 'BIBLE.NO_VERSES_FOUND' })}
                 </div>
               )}
             </div>
