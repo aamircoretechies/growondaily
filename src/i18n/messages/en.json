@@ -304,5 +304,6 @@
   "EDIT_NOTE.PLACEHOLDER": "Write your note...",
   "EDIT_NOTE.EMOTION_TAGS": "Emotion Tags",
   "PROFILE_SETUP.COMPLETED": "Profile setup completed!",
-  "PROFILE_SETUP.ERROR_SAVING": "Error saving profile setup"
+  "PROFILE_SETUP.ERROR_SAVING": "Error saving profile setup",
+  "TOAST.SELECT_VERSE_TO_BOOKMARK": "Please select a verse to bookmark"
 }

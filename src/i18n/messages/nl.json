@@ -304,5 +304,6 @@
   "EDIT_NOTE.PLACEHOLDER": "Schrijf uw notitie...",
   "EDIT_NOTE.EMOTION_TAGS": "Emotie Tags",
   "PROFILE_SETUP.COMPLETED": "Profielinstellingen voltooid!",
-  "PROFILE_SETUP.ERROR_SAVING": "Fout bij opslaan van profielinstellingen"
+  "PROFILE_SETUP.ERROR_SAVING": "Fout bij opslaan van profielinstellingen",
+  "TOAST.SELECT_VERSE_TO_BOOKMARK": "Selecteer een vers om een bladwijzer te maken"
 }

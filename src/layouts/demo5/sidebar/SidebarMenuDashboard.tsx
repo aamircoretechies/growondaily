@@ -640,7 +640,8 @@ const SidebarMenuDashboard = () => {
 
                     if (!selectedBookName || !selectedVerse) {
                       console.warn("No verse selected for bookmark");
-                      toast.error("Please select a verse to bookmark");
+                      // toast.error("Please select a verse to bookmark");
+                      toast.error(formatMessage({ id: 'TOAST.SELECT_VERSE_TO_BOOKMARK' }));
                       return;
                     }
 

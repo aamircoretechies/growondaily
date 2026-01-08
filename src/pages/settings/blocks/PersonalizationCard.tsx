@@ -232,9 +232,10 @@ const PersonalizationCard = ({ user }: { user: any }) => {
     return 'First Time';
   };
 
-  const titleForVersionCode = (code?: string) => {
-    const c = (code || '').toUpperCase();
-    const match = translationOptions.find((o) => o.startsWith(`${c} `));
+  const titleForVersionCode = (code?: any) => {
+    const c = String(code || '').toUpperCase().split(' ')[0];
+    if (!c) return 'KJV - King James Version';
+    const match = translationOptions.find((o) => o.toUpperCase().startsWith(c + ' '));
     return match || 'KJV - King James Version';
   };
 
@@ -256,13 +257,12 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         setBrings(Array.isArray(prefs.brings) ? prefs.brings : prefs.brings ? [prefs.brings] : []);
         setEngage(Array.isArray(prefs.engage) ? prefs.engage : prefs.engage ? [prefs.engage] : []);
         setExplain(prefs.explain || 'Clear and simple language');
-        setTranslations(
-          Array.isArray(prefs.translations)
-            ? prefs.translations
-            : prefs.translations
-              ? [prefs.translations]
-              : ['KJV - King James Version']
-        );
+        const rawTranslations = Array.isArray(prefs.translations)
+          ? prefs.translations
+          : prefs.translations
+            ? [prefs.translations]
+            : ['KJV'];
+        setTranslations(rawTranslations.map((t: any) => String(t || '').split(' ')[0].toUpperCase()).filter(Boolean));
         setDailyPref(prefs.dailyPref || 'Daily');
         setDepth(prefs.depth || 'Short (1-2 min read)');
         return;
@@ -345,7 +345,7 @@ const PersonalizationCard = ({ user }: { user: any }) => {
       );
 
       // bible_version code -> full title if possible
-      setTranslations([titleForVersionCode(backend.bible_version)]);
+      setTranslations([String(backend.bible_version || 'KJV').toUpperCase().split(' ')[0]]);
 
       // receive_daily -> UI
       setDailyPref(backend.receive_daily ? 'Daily' : 'Occasionally');
