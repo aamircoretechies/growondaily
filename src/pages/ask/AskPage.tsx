@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Container } from "@/components/container";
 import { LucideMic, LucideMicOff, LucideSend } from "lucide-react";
@@ -16,21 +16,25 @@ interface Message {
 
 const AskPage = () => {
   const { formatMessage } = useIntl();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      type: "user",
-      content: "Why did Jesus speak in parables?",
-    },
-    {
-      id: "2",
-      type: "ai",
-      content:
-        '"Jesus spoke all these things to the crowd in parables; he did not say anything to them without using a parable." Jesus used parables to reveal spiritual truths. These stories used everyday events to teach deeper lessons. Parables engaged listeners\' hearts and minds. They also caused reflection—helping to better understand His message.',
-      timestamp: "Answered just now",
-      reference: "Matthew 13:34",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  // Update initial messages when language changes
+  useEffect(() => {
+    setMessages([
+      {
+        id: "1",
+        type: "user",
+        content: formatMessage({ id: "ASK.DEFAULT_QUESTION" }),
+      },
+      {
+        id: "2",
+        type: "ai",
+        content: formatMessage({ id: "ASK.DEFAULT_ANSWER" }),
+        timestamp: formatMessage({ id: "ASK.ANSWERED" }),
+        reference: formatMessage({ id: "ASK.DEFAULT_REFERENCE" }),
+      },
+    ]);
+  }, [formatMessage]);
 
   const [inputText, setInputText] = useState("");
   // const [inputText, setInputText] = useState("");
@@ -70,7 +74,8 @@ const AskPage = () => {
         id: (Date.now() + 1).toString(),
         type: "ai",
         content: ai.answer,
-        timestamp: "just now",
+        // timestamp: "just now",
+        timestamp: formatMessage({ id: "ASK.ANSWERED" }),
         reference: ai.reference || "—",
       };
 
