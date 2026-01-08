@@ -1,6 +1,6 @@
 import { ChangeEvent, Fragment, useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useAuthContext } from '@/auth';
 import { useLanguage } from '@/i18n';
 import { toAbsoluteUrl } from '@/utils';
@@ -18,6 +18,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
   const { settings, storeSettings } = useSettings();
   const { logout, currentUser, updateProfileImage } = useAuthContext();
   const { isRTL } = useLanguage();
+  const { formatMessage } = useIntl();
   const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
@@ -67,24 +68,24 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
 
     try {
       await updateProfileImage(file);
-      toast.success("Profile picture updated ");
+      toast.success(formatMessage({ id: "TOAST.PROFILE_PIC_UPDATED" }));
     } catch (err: any) {
       const msg = err?.message;
 
       if (msg?.startsWith("IMAGE_TOO_LARGE")) {
-        toast.error("Image size must be under 1.5 MB");
+        toast.error(formatMessage({ id: "TOAST.IMAGE_TOO_LARGE" }));
       }
       else if (msg === "BACKEND_IMAGE_TOO_LARGE") {
-        toast.error("Image too large (server limit exceeded)");
+        toast.error(formatMessage({ id: "TOAST.IMAGE_TOO_LARGE_SERVER" }));
       }
       else if (msg === "NETWORK_ERROR") {
-        toast.error("Network error. Please try again");
+        toast.error(formatMessage({ id: "TOAST.NETWORK_ERROR" }));
       }
       else {
-        toast.error("Failed to upload profile picture");
+        toast.error(formatMessage({ id: "TOAST.PROFILE_PIC_UPDATE_FAILED" }));
       }
 
-      e.target.value = ""; 
+      e.target.value = "";
     }
   };
 
