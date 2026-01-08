@@ -15,6 +15,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 
 
 const ReflectionsPage = () => {
+  const intl = useIntl();
   const navigate = useNavigate();
   const { currentLanguage } = useLanguage();
   const { formatMessage } = useIntl();
@@ -245,11 +246,7 @@ const ReflectionsPage = () => {
                     <div className="flex items-center gap-2 mb-3">
                       <LucideCalendar className="text-amber-600 w-4 h-4" />
                       <span className="text-gray-600 text-sm">
-                        {new Date(entry.created_at).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                        })}{" "}
+                        {new Date(entry.created_at).toLocaleDateString(intl.locale,{year: 'numeric',month: 'long',day: 'numeric',})}{" "}
                         –{" "}
                         {entry.book && entry.chapter
                           ? `${entry.book} ${entry.chapter}${entry.verse ? ':' + entry.verse : ''}`

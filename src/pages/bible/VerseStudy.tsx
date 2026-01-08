@@ -487,8 +487,10 @@ const VerseStudy = () => {
                   );
                   if (found) bookId = found.book_id;
                 }
-                const verseKey = `${bookId}-${chapter}-${verse}-${version || 'KJV'}`;
-                const verseNotes = deepStudyData?.[verseKey]?.original?.notes || [];
+                const verseKey = `${locale}-${bookId}-${chapter}-${verse}-${version || 'KJV'}`;
+                const slugKey = `${locale}-${book}-${chapter}-${verse}-${version || 'KJV'}`;
+                const verseNotes = deepStudyData?.[verseKey]?.original?.notes ||
+                  deepStudyData?.[slugKey]?.original?.notes || [];
 
                 return (
                   <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
@@ -514,7 +516,7 @@ const VerseStudy = () => {
                                     key={i}
                                     className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
                                   >
-                                    #{tag}
+                                    #<FormattedMessage id={`EMOTION.${tag.toUpperCase()}`} defaultMessage={tag} />
                                   </span>
                                 ))}
                               </div>

@@ -86,7 +86,7 @@ const BookmarksPage = () => {
           </div>
 
           <h1 className="font-merriweather text-4xl text-primary mb-2">
-            Bookmarks
+            <FormattedMessage id="REFLECTIONS.BOOKMARKS" />
           </h1>
           <p className="text-gray-600 text-lg">
             <FormattedMessage id="REFLECTIONS.BOOKMARKS_SUBTITLE" />
@@ -182,7 +182,7 @@ const BookmarksPage = () => {
                   onClick={() => setVisibleCount(filtered.length)} // show all bookmarks
                   className="px-6 py-3 bg-sand text-primary rounded-lg hover:bg-primary hover:text-white transition-colors font-medium"
                 >
-                  Load More Bookmarks
+                  <FormattedMessage id="REFLECTIONS.LOAD_MORE" />
                 </button>
               </div>
             )}

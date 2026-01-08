@@ -239,7 +239,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                                     key={i}
                                     className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
                                   >
-                                    #{tag}
+                                    #<FormattedMessage id={`EMOTION.${tag.toUpperCase()}`} defaultMessage={tag} />
                                   </span>
                                 ))}
                               </div>
