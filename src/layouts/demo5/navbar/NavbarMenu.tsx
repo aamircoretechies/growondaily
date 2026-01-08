@@ -1,36 +1,38 @@
 import { Menu, MenuItem, MenuLink, MenuTitle } from '@/components';
+import { useIntl } from 'react-intl';
 
 interface INavbarMenuItem {
   title: string;
   path: string;
   partial?: string | false;
 }
-interface INavbarMenuItems extends Array<INavbarMenuItem> {}
+interface INavbarMenuItems extends Array<INavbarMenuItem> { }
 
 const NavbarMenu = () => {
+  const { formatMessage } = useIntl();
   const items: INavbarMenuItems = [
     {
-      title: 'Home',
+      title: formatMessage({ id: 'NAV.HOME' }),
       path: '/home',
       partial: false
     },
     {
-      title: 'Reflections',
+      title: formatMessage({ id: 'NAV.REFLECTION' }),
       path: '/reflections',
       partial: '/reflections'
     },
     {
-      title: 'Bible',
+      title: formatMessage({ id: 'NAV.BIBLE' }),
       path: '/bible',
       partial: '/bible'
     },
     {
-      title: 'Ask',
+      title: formatMessage({ id: 'NAV.ASK' }),
       path: '/ask',
       partial: '/ask'
     },
     {
-      title: 'Settings',
+      title: formatMessage({ id: 'NAV.SETTINGS' }),
       path: '/settings',
       partial: '/settings'
     }

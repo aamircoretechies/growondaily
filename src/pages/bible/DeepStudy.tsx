@@ -31,21 +31,26 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
   const { formatMessage, locale } = useIntl();
   const [enabledTabs, setEnabledTabs] = useState<string[]>([]);
 
-  // Pre-fetch all active tabs for better performance with priority
+  // 1. Prioritize current active tab
+  useEffect(() => {
+    if (selectedBookId && selectedChapter && version) {
+      fetchDeepStudy(selectedBookId, selectedChapter, version, activeTab, undefined, false);
+    }
+  }, [selectedBookId, selectedChapter, version, activeTab, locale]);
+
+  // 2. Stagger background tabs to avoid connection congestion
   useEffect(() => {
     if (selectedBookId && selectedChapter && version && enabledTabs.length > 0) {
-      // 1. Prioritize current active tab
-      fetchDeepStudy(selectedBookId, selectedChapter, version, activeTab, undefined, false);
-
-      // 2. Stagger background tabs to avoid connection congestion
       const backgroundTabs = enabledTabs.filter(t => t !== activeTab);
       backgroundTabs.forEach((tab, index) => {
         setTimeout(() => {
           fetchDeepStudy(selectedBookId!, selectedChapter!, version!, tab, undefined, true);
-        }, (index + 1) * 100);
+        }, (index + 1) * 300); // 300ms stagger
       });
     }
-  }, [selectedBookId, selectedChapter, version, enabledTabs, activeTab, locale]);
+    // Only re-run when book/chapter/version changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBookId, selectedChapter, version, locale, enabledTabs.length]);
 
   useEffect(() => {
     try {
@@ -101,16 +106,30 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
   }, [enabledTabs, activeTab, setActiveTab]);
 
   const getTabContent = useCallback((tabId: string) => {
-    if (loadingDeepStudy) return <Loader />;
     if (!deepStudyData) return 'No data available.';
+
+    // Primary key (current ID)
     const currentKey = `${locale}-${selectedBookId}-${selectedChapter}-${version}`;
-    const ctx = deepStudyData?.[currentKey]?.[tabId];
+
+    // Check if data is already in state for the current key
+    let ctx = deepStudyData?.[currentKey]?.[tabId];
+
+    // Fallback: Check if there's any data for this chapter/version in the current locale
+    // This helps during transitions where selectedBookId might not have updated yet
+    if (!ctx) {
+      const keys = Object.keys(deepStudyData);
+      const partialKey = `${locale}-`; // Start with locale
+      const suffixKey = `-${selectedChapter}-${version}`;
+
+      const foundKey = keys.find(k => k.startsWith(partialKey) && k.endsWith(suffixKey) && deepStudyData[k]?.[tabId]);
+      if (foundKey) ctx = deepStudyData[foundKey][tabId];
+    }
 
     if (ctx?.error) return <span className="text-red-500">{ctx.error}</span>;
 
     if (!ctx) return <Loader />;
     return (ctx.content || '').replace(/\*/g, '') || <Loader />;
-  }, [deepStudyData, selectedBookId, selectedChapter, version, loadingDeepStudy]);
+  }, [deepStudyData, selectedBookId, selectedChapter, version, locale]);
 
   return (
     <div className="min-h-screen text-primary overflow-hidden">

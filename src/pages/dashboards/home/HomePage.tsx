@@ -438,10 +438,10 @@ const HomePage = () => {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-primary text-sm sm:text-base mb-1 truncate">
-                          {reflection.reference || `Reflection ${index + 1}`}
+                          {reflection.reference || intl.formatMessage({ id: 'HOME.REFLECTION_FALLBACK' }, { number: index + 1 })}
                         </h3>
                         <p className="text-gray-600 text-xs sm:text-sm leading-relaxed line-clamp-2">
-                          {reflection.text || reflection.context || "No description available."}
+                          {reflection.text || reflection.context || intl.formatMessage({ id: 'HOME.NO_DESCRIPTION' })}
                         </p>
                       </div>
                       <div className="ml-2 sm:ml-3 flex-shrink-0">

@@ -46,7 +46,8 @@ const VerseStudy = () => {
   const [note, setNote] = useState("");
   const [savedNote, setSavedNote] = useState("");
   const { submitReport } = useReflection();
-  const { formatMessage } = useIntl();
+  const intl = useIntl();
+  const { formatMessage, locale } = intl;
 
 
   const { books, loadingDeepStudy, fetchSingleVerse, fetchDeepStudyForVerse, deepStudyData, toggleVerseStatus, verseActiveTab, setVerseActiveTab, version } = useBible();
@@ -179,32 +180,44 @@ const VerseStudy = () => {
 
   const [enabledTabs, setEnabledTabs] = useState<string[]>([]);
 
-  // Separate effect for pre-fetching ALL enabled tabs with priority
+  // 1. Prioritize current active tab
   useEffect(() => {
-    const loadAllDeepStudy = async () => {
+    const loadActiveDeepStudy = async () => {
       let bookId = book;
       if (books.length > 0 && book.length !== 36) {
-        const found = books.find(
-          (b) => slugify(b.name) === slugify(book)
-        );
+        const found = books.find((b) => slugify(b.name) === slugify(book));
+        if (found) bookId = found.book_id;
+      }
+
+      if (bookId) {
+        fetchDeepStudyForVerse(bookId, Number(chapter), Number(verse), version || 'KJV', verseActiveTab, false);
+      }
+    };
+    loadActiveDeepStudy();
+  }, [book, chapter, verse, books, verseActiveTab, version, locale]);
+
+  // 2. Stagger background tabs to avoid connection congestion
+  useEffect(() => {
+    const loadBackgroundDeepStudy = async () => {
+      let bookId = book;
+      if (books.length > 0 && book.length !== 36) {
+        const found = books.find((b) => slugify(b.name) === slugify(book));
         if (found) bookId = found.book_id;
       }
 
       if (bookId && enabledTabs.length > 0) {
-        // 1. Prioritize current active tab
-        fetchDeepStudyForVerse(bookId, Number(chapter), Number(verse), version || 'KJV', verseActiveTab, false);
-
-        // 2. Stagger background tabs to avoid connection congestion
         const backgroundTabs = enabledTabs.filter(t => t !== verseActiveTab);
         backgroundTabs.forEach((tab: string, index: number) => {
           setTimeout(() => {
             fetchDeepStudyForVerse(bookId!, Number(chapter), Number(verse), version || 'KJV', tab, true);
-          }, (index + 1) * 100); // 100ms stagger between requests
+          }, (index + 1) * 300); // Increased stagger to 300ms for better concurrency
         });
       }
     };
-    loadAllDeepStudy();
-  }, [book, chapter, verse, books, enabledTabs, verseActiveTab, version]);
+    loadBackgroundDeepStudy();
+    // Only re-run when verse/book/chapter/version changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [book, chapter, verse, version, locale, enabledTabs.length]);
 
 
 
@@ -266,22 +279,29 @@ const VerseStudy = () => {
 
 
   const getTabContent = useCallback((tabId: string) => {
-    if (loadingDeepStudy) return <Loader />;
     if (!deepStudyData) return 'No data available.';
 
-    // Find the correct bookId - optimizing this inside the callback to avoid complex dependency
+    // Current ID (preferred)
     let bookId = book;
     if (books.length > 0 && book.length !== 36) {
-      const found = books.find(
-        // (b) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === book.toLowerCase()
-        (b) => slugify(b.name) === slugify(book)
-      );
+      const found = books.find((b) => slugify(b.name) === slugify(book));
       if (found) bookId = found.book_id;
     }
 
-    const verseKey = `${bookId}-${chapter}-${verse}-${version || 'KJV'}`;
+    const uuidKey = `${locale}-${bookId}-${chapter}-${verse}-${version || 'KJV'}`;
+    const slugKey = `${locale}-${book}-${chapter}-${verse}-${version || 'KJV'}`;
 
-    const deepData = deepStudyData?.[verseKey];
+    let deepData = deepStudyData?.[uuidKey] || deepStudyData?.[slugKey];
+
+    // Final fallback: search for anything matching this locale/chapter/verse
+    if (!deepData) {
+      const keys = Object.keys(deepStudyData);
+      const partialKey = `${locale}-`;
+      const suffixKey = `-${chapter}-${verse}-${version || 'KJV'}`;
+      const foundKey = keys.find(k => k.startsWith(partialKey) && k.endsWith(suffixKey) && deepStudyData[k]);
+      if (foundKey) deepData = deepStudyData[foundKey];
+    }
+
     const ctx = deepData?.[tabId];
 
     if (ctx?.error) return <span className="text-red-500">{ctx.error}</span>;
@@ -289,7 +309,7 @@ const VerseStudy = () => {
     if (!ctx) return <Loader />;
     const cleanText = (ctx.content || '').replace(/\*/g, '');
     return cleanText || <Loader />;
-  }, [deepStudyData, book, books, chapter, verse, version, loadingDeepStudy]);
+  }, [deepStudyData, book, books, chapter, verse, version, locale]);
 
 
   // const handleReportSubmit = async () => {
@@ -452,7 +472,7 @@ const VerseStudy = () => {
                   {getTabContent(tab.id)}
                 </p> */}
                 <div className="font-merriweather text-lg leading-relaxed text-primary whitespace-pre-line">
-                  {loadingDeepStudy ? <Loader /> : getTabContent(tab.id)}
+                  {getTabContent(tab.id)}
                 </div>
               </div>
 

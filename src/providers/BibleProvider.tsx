@@ -228,8 +228,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   }, [getBookInfo]);
 
   useEffect(() => {
-    // Only fetch books after dashboard is loaded and auth is ready
-    if (!dashboardLoaded || authLoading) return;
+    // Only fetch books after auth is ready
+    if (authLoading) return;
 
     const fetchBooks = async () => {
       const cacheKey = `${intl.locale}_${version}`;
@@ -358,7 +358,7 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     };
     fetchBooks();
     // }, [dashboardLoaded, authLoading, currentUser]);
-  }, [dashboardLoaded, authLoading, currentUser, version, intl.locale]);
+  }, [authLoading, currentUser, version, intl.locale]);
 
   const fetchChapters = async (bookId: string, versionParam: string) => {
     const cacheKey = `${intl.locale}-${bookId}-${versionParam}`;
