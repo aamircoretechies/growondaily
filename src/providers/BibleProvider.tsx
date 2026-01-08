@@ -5,6 +5,23 @@ import debounce from "lodash/debounce";
 import { useDashboard } from "@/pages/dashboards/providers/DashboardProvider";
 import { AuthContext } from "@/auth/providers/JWTProvider";
 import { useIntl } from 'react-intl';
+// Add normalization helpers
+const normalizeVersion = (v: any) => {
+  if (typeof v !== 'string') return 'KJV';
+  return v.split(' ')[0].toUpperCase() || 'KJV';
+};
+
+const slugify = (text: string) => {
+  return (text || '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-');
+};
 
 interface BibleBook {
   book_id: string;
@@ -109,12 +126,14 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedBookName, setSelectedBookName] = useState<string | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
   const [selectedVerse, setSelectedVerse] = useState<Verse | null>(null);
-  const [version, setVersion] = useState<string>(currentUser?.preferences?.bible_version || "KJV");
+  // const [version, setVersion] = useState<string>(currentUser?.preferences?.bible_version || "KJV");
+  const [version, setVersion] = useState<string>(normalizeVersion(currentUser?.preferences?.bible_version || "KJV"));
   const versionRef = useRef(version);
 
   useEffect(() => {
     if (currentUser?.preferences?.bible_version) {
-      setVersion(currentUser.preferences.bible_version);
+      // setVersion(currentUser.preferences.bible_version);
+      setVersion(normalizeVersion(currentUser.preferences.bible_version));
     }
   }, [currentUser]);
 
@@ -128,18 +147,19 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const [loadingVerses, setLoadingVerses] = useState(false);
   const [loadingDeepStudy, setLoadingDeepStudy] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const inFlightRequests = useRef<Record<string, Promise<any> | undefined>>({});
 
   // Refetch content when version changes or initialization completes
   useEffect(() => {
     if (selectedBookId && isInitialized) {
-      const currentVersion = versionRef.current; // Use ref to be sure, though state should be synced
-      fetchChapters(selectedBookId, currentVersion);
-      fetchVerses(selectedBookId, selectedChapter, currentVersion);
-      if (selectedVerse) {
-        fetchSingleVerse(selectedBookId, selectedChapter, selectedVerse.verse, currentVersion);
-      }
+      const currentVersion = versionRef.current;
+      // fetchChapters(selectedBookId, currentVersion);
+      // fetchVerses(selectedBookId, selectedChapter, currentVersion);
+      // if (selectedVerse) {
+      //   fetchSingleVerse(selectedBookId, selectedChapter, selectedVerse.verse, currentVersion);
+      // }
     }
-  }, [version, isInitialized]); // Added isInitialized to dependencies
+  }, [version, isInitialized]);
 
   const [error, setError] = useState<string | null>(null);
   const [deepStudyData, setDeepStudyData] = useState<Record<string, any> | null>(null);
@@ -149,7 +169,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const [verseActiveTab, setVerseActiveTab] = useState<string>('explanations');
 
   // Caching Refs
-  const booksCache = useRef<BibleBook[] | null>(null);
+  // const booksCache = useRef<BibleBook[] | null>(null);
+  const booksCache = useRef<Record<string, BibleBook[]>>({});
   const chaptersCache = useRef<Record<string, any[]>>({});
   const versesCache = useRef<Record<string, Verse[]>>({});
   const deepStudyCache = useRef<Record<string, any>>({});
@@ -211,24 +232,31 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
     if (!dashboardLoaded || authLoading) return;
 
     const fetchBooks = async () => {
+      const cacheKey = `${intl.locale}_${version}`;
       try {
         setLoadingBooks(true);
+        setError(null);
 
         // Deterministic version: Prefer user preference, fallback to ref or "KJV"
-        const preferredVersion = currentUser?.preferences?.bible_version || versionRef.current || "KJV";
+        // const preferredVersion = currentUser?.preferences?.bible_version || versionRef.current || "KJV";
+        const preferredVersion = normalizeVersion(currentUser?.preferences?.bible_version || versionRef.current || "KJV");
 
         // Check Cache
-        if (booksCache.current) {
-          setBooks(booksCache.current);
+        // const cacheKey = `${intl.locale}_${version}`;
+        if (booksCache.current[cacheKey]) {
+          const data = booksCache.current[cacheKey];
+          setBooks(data);
           setLoadingBooks(false);
           setIsInitialized(true);
-          return;
+          // return; 
         }
 
-        const res = await axios.get("/api/bible/books");
+        // const res = await axios.get("/api/bible/books");
+        const res = await axios.get(`/api/bible/books?version=${version}&locale=${intl.locale}`);
         const data = res.data?.data?.books || [];
         setBooks(data);
-        booksCache.current = data;
+        // booksCache.current = data;
+        booksCache.current[cacheKey] = data;
 
         // Check URL parameters first (they take precedence on page refresh)
         const urlParams = new URLSearchParams(window.location.search);
@@ -249,7 +277,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
               return { id: slug, name: found?.name || null };
             }
             const found = data.find(
-              (b: BibleBook) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase()
+              // (b: BibleBook) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === slug.toLowerCase()
+              (b: BibleBook) => slugify(b.name) === slugify(slug)
             );
             return { id: found?.book_id || null, name: found?.name || null };
           };
@@ -288,7 +317,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Default to Genesis if nothing found
         if (!targetBookId) {
-          const genesis = data.find((b: any) => b.name.toLowerCase() === "genesis");
+          // const genesis = data.find((b: any) => b.name.toLowerCase() === "genesis");
+          const genesis = data.find((b: any) => slugify(b.name) === "genesis");
           if (genesis) {
             targetBookId = genesis.book_id;
             targetBookName = genesis.name;
@@ -302,9 +332,6 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
           setSelectedBookId(targetBookId);
           setSelectedBookName(targetBookName);
           setSelectedChapter(targetChapter);
-
-
-
 
           // Fetch chapters and verses in parallel
           await Promise.all([
@@ -323,90 +350,109 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         setTimeout(fetchBooks, 3000);
         return;
       } finally {
-        if (booksCache.current) {
+        if (booksCache.current[cacheKey]) {
           setLoadingBooks(false);
           setIsInitialized(true);
         }
       }
     };
     fetchBooks();
-  }, [dashboardLoaded, authLoading, currentUser]);
+    // }, [dashboardLoaded, authLoading, currentUser]);
+  }, [dashboardLoaded, authLoading, currentUser, version, intl.locale]);
 
-  const fetchChapters = async (bookId: string, version: string) => {
-    try {
-      // Check Cache
-      const cacheKey = `${bookId}-${version}`;
-      if (chaptersCache.current[cacheKey]) {
-        setChapters(chaptersCache.current[cacheKey]);
-        return;
+  const fetchChapters = async (bookId: string, versionParam: string) => {
+    const cacheKey = `${bookId}-${versionParam}`;
+    if (inFlightRequests.current[cacheKey]) return inFlightRequests.current[cacheKey];
+
+    const fetchPromise = (async () => {
+      try {
+        setError(null);
+        // Check Cache
+        if (chaptersCache.current[cacheKey]) {
+          setChapters(chaptersCache.current[cacheKey]);
+          return;
+        }
+
+        // Cancel previous request
+        if (abortControllerChapters.current) {
+          abortControllerChapters.current.abort();
+        }
+        abortControllerChapters.current = new AbortController();
+
+        setLoadingChapters(true);
+        const url = `/api/bible/books/${bookId}/chapters/${normalizeVersion(versionParam)}`;
+        const res = await axios.get(url, { signal: abortControllerChapters.current.signal });
+
+        const data = res.data?.data?.chapters || [];
+        setChapters(data);
+        chaptersCache.current[cacheKey] = data;
+
+      } catch (err: any) {
+        if (axios.isCancel(err)) {
+          console.log("Chapters fetch cancelled");
+          return;
+        }
+        console.error("Chapters Fetch Error:", err);
+        setError("Failed to load chapters");
+      } finally {
+        setLoadingChapters(false);
+        delete inFlightRequests.current[cacheKey];
       }
+    })();
 
-      // Cancel previous request
-      if (abortControllerChapters.current) {
-        abortControllerChapters.current.abort();
-      }
-      abortControllerChapters.current = new AbortController();
-
-      setLoadingChapters(true);
-      const url = `/api/bible/books/${bookId}/chapters/${version}`;
-      const res = await axios.get(url, { signal: abortControllerChapters.current.signal });
-
-      const data = res.data?.data?.chapters || [];
-      setChapters(data);
-      chaptersCache.current[cacheKey] = data;
-
-    } catch (err: any) {
-      if (axios.isCancel(err)) {
-        console.log("Chapters fetch cancelled");
-        return;
-      }
-      console.error("Chapters Fetch Error:", err);
-      setError("Failed to load chapters");
-    } finally {
-      setLoadingChapters(false);
-    }
+    inFlightRequests.current[cacheKey] = fetchPromise;
+    return fetchPromise;
   };
 
-  const fetchVerses = async (bookId: string, chapter: number, version: string) => {
-    try {
-      // Check Cache
-      const cacheKey = `${bookId}-${chapter}-${version}`;
-      if (versesCache.current[cacheKey]) {
-        setVerses(versesCache.current[cacheKey]);
+  const fetchVerses = async (bookId: string, chapter: number, versionParam: string) => {
+    const cacheKey = `${bookId}-${chapter}-${versionParam}`;
+    if (inFlightRequests.current[cacheKey]) return inFlightRequests.current[cacheKey];
+
+    const fetchPromise = (async () => {
+      try {
+        setError(null);
+        // Check Cache
+        if (versesCache.current[cacheKey]) {
+          setVerses(versesCache.current[cacheKey]);
+          setSelectedVerse(null);
+          // Trigger prefetch even if cached
+          prefetchAdjacentChapters(bookId, chapter, versionParam);
+          return;
+        }
+
+        // Cancel previous request
+        if (abortControllerVerses.current) {
+          abortControllerVerses.current.abort();
+        }
+        abortControllerVerses.current = new AbortController();
+
+        setLoadingVerses(true);
+        const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${normalizeVersion(versionParam)}`;
+        const res = await axios.get(url, { signal: abortControllerVerses.current.signal });
+
+        const data = res.data?.data?.verses || [];
+        setVerses(data);
+        versesCache.current[cacheKey] = data;
         setSelectedVerse(null);
-        // Trigger prefetch even if cached
-        prefetchAdjacentChapters(bookId, chapter, version);
-        return;
+
+        // Trigger prefetch
+        prefetchAdjacentChapters(bookId, chapter, versionParam);
+
+      } catch (err: any) {
+        if (axios.isCancel(err)) {
+          console.log("Verses fetch cancelled");
+          return;
+        }
+        console.error("Verse Fetch Error:", err);
+        setError("Failed to load verses");
+      } finally {
+        setLoadingVerses(false);
+        delete inFlightRequests.current[cacheKey];
       }
+    })();
 
-      // Cancel previous request
-      if (abortControllerVerses.current) {
-        abortControllerVerses.current.abort();
-      }
-      abortControllerVerses.current = new AbortController();
-
-      setLoadingVerses(true);
-      const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${version}`;
-      const res = await axios.get(url, { signal: abortControllerVerses.current.signal });
-
-      const data = res.data?.data?.verses || [];
-      setVerses(data);
-      versesCache.current[cacheKey] = data;
-      setSelectedVerse(null);
-
-      // Trigger prefetch
-      prefetchAdjacentChapters(bookId, chapter, version);
-
-    } catch (err: any) {
-      if (axios.isCancel(err)) {
-        console.log("Verses fetch cancelled");
-        return;
-      }
-      console.error("Verse Fetch Error:", err);
-      setError("Failed to load verses");
-    } finally {
-      setLoadingVerses(false);
-    }
+    inFlightRequests.current[cacheKey] = fetchPromise;
+    return fetchPromise;
   };
 
   useEffect(() => {
@@ -421,8 +467,8 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   }, [selectedBookId, selectedBookName, selectedChapter, selectedVerse]);
 
 
-  // Debounced Select Book
-  const debouncedSelectBook = useCallback(debounce(async (bookId: string, name: string, chapter: number) => {
+  // Internal helper for fetching book data
+  const internalSelectBook = useCallback(async (bookId: string, name: string, chapter: number) => {
     try {
       setSelectedBookId(bookId);
       setSelectedBookName(name);
@@ -434,60 +480,64 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
         fetchVerses(bookId, chapter, version),
       ]);
 
-      // Fetch deep study in background without blocking
-      // Only fetch 'original' tab initially for lazy loading
-      fetchDeepStudyForVerse(bookId, chapter, 1, version, "original");
+      // Note: We used to pre-fetch all deep study tabs for verse 1 here,
+      // but it causes network congestion. Components now handle their own
+      // prioritized/staggered fetching.
 
     } catch (err) {
       console.error("Error selecting book:", err);
     }
-  }, 300), [version]);
+  }, [version]);
 
   const selectBook = async (bookId: string, name: string, chapter: number = 1) => {
     // Update state immediately for UI responsiveness
     setSelectedBookId(bookId);
     setSelectedBookName(name);
     setSelectedChapter(chapter);
-    // Trigger debounced fetch
-    debouncedSelectBook(bookId, name, chapter);
+    // Trigger internal fetch immediately
+    internalSelectBook(bookId, name, chapter);
   };
-
-  // Debounced Select Chapter
-  const debouncedSelectChapter = useCallback(debounce(async (chapter: number, bookId: string) => {
-    // Reset verse to null when chapter changes (edge case)
-    setSelectedVerse(null);
-    await fetchVerses(bookId, chapter, version);
-  }, 300), [version]);
 
   const selectChapter = async (chapter: number) => {
     if (!selectedBookId) return;
     setSelectedChapter(chapter);
-    debouncedSelectChapter(chapter, selectedBookId);
+    setSelectedVerse(null);
+    await fetchVerses(selectedBookId, chapter, version);
   };
 
   const fetchSingleVerse = async (
     bookId: string,
     chapter: number,
     verse: number,
-    version: string
+    versionParam: string
   ) => {
-    try {
-      // Check if verse exists in current verses list first
-      const existingVerse = verses.find(v => v.verse === verse && v.chapter === chapter && v.book === bookId);
-      if (existingVerse) {
-        setSelectedVerse(existingVerse);
-        return;
-      }
+    const cacheKey = `single-${bookId}-${chapter}-${verse}-${versionParam}`;
+    if (inFlightRequests.current[cacheKey]) return inFlightRequests.current[cacheKey];
 
-      // Don't set global loading for single verse fetch to avoid full screen flicker
-      const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${verse}/${version}`
-      const res = await axios.get(url);
-      const verseData = res.data?.data?.verse as Verse | undefined;
-      setSelectedVerse(verseData || null);
-    } catch (error) {
-      console.error("Error fetching single verse:", error);
-      setSelectedVerse(null);
-    }
+    const fetchPromise = (async () => {
+      try {
+        // Check if verse exists in current verses list first
+        const existingVerse = verses.find(v => v.verse === verse && v.chapter === chapter && v.book === bookId);
+        if (existingVerse) {
+          setSelectedVerse(existingVerse);
+          return;
+        }
+
+        // Don't set global loading for single verse fetch to avoid full screen flicker
+        const url = `/api/bible/books/${bookId}/chapters/${chapter}/verses/${verse}/${normalizeVersion(versionParam)}`
+        const res = await axios.get(url);
+        const verseData = res.data?.data?.verse as Verse | undefined;
+        setSelectedVerse(verseData || null);
+      } catch (error) {
+        console.error("Error fetching single verse:", error);
+        setSelectedVerse(null);
+      } finally {
+        delete inFlightRequests.current[cacheKey];
+      }
+    })();
+
+    inFlightRequests.current[cacheKey] = fetchPromise;
+    return fetchPromise;
   };
 
 
@@ -497,32 +547,93 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchDeepStudy = async (
     bookId: string,
     chapter: number,
-    version: string,
+    versionParam: string,
     context: string = 'original', // Default to original if not specified
     verse?: string | number,
     isBackground: boolean = false
   ) => {
-    try {
-      if (!isBackground) {
-        activeDeepStudyRequests.current += 1;
-        setLoadingDeepStudy(true);
-      }
+    const key = verse
+      ? `${bookId}-${chapter}-${verse}-${versionParam}`
+      : `${bookId}-${chapter}-${versionParam}`;
+    const fullKey = `deep-${key}-${context}`;
 
-      const key = verse
-        ? `${bookId}-${chapter}-${verse}-${version}`
-        : `${bookId}-${chapter}-${version}`;
+    if (inFlightRequests.current[fullKey]) return inFlightRequests.current[fullKey];
 
-      // Check Cache for specific context
-      if (deepStudyCache.current[key] && deepStudyCache.current[key][context]) {
+    const fetchPromise = (async () => {
+      try {
+        if (!isBackground) {
+          activeDeepStudyRequests.current += 1;
+          setLoadingDeepStudy(true);
+        }
+
+        // Check Cache for specific context
+        if (deepStudyCache.current[key] && deepStudyCache.current[key][context]) {
+          setDeepStudyData((prev: any) => ({
+            ...prev,
+            [key]: {
+              ...prev?.[key],
+              [context]: deepStudyCache.current[key][context]
+            }
+          }));
+          return;
+        }
+
+        const v = normalizeVersion(versionParam || version);
+        const baseUrl = verse
+          ? `/api/bible/deep-study/${bookId}/${chapter}/${verse}/${v}`
+          : `/api/bible/deep-study/${bookId}/${chapter}/${v}`;
+
+        const res = await axios.get(`${baseUrl}?deep-study-context=${context}`);
+        const data = res.data?.data || null;
+
+        // Update Cache
+        if (!deepStudyCache.current[key]) deepStudyCache.current[key] = {};
+        deepStudyCache.current[key][context] = data;
+
+        setDeepStudyData((prev: any) => {
+          const safePrev = prev || {};
+          const prevData = safePrev[key] || {};
+
+          // Merge with existing data
+          const merged = { ...prevData, [context]: data };
+
+          // Handle Notes Merging if applicable (mostly for 'original' context)
+          if (context === 'original' && data?.notes) {
+            const prevNotes = Array.isArray(prevData[context]?.notes) ? prevData[context].notes : [];
+            const newNotes = Array.isArray(data.notes) ? data.notes : [];
+
+            const notesMap = new Map();
+            prevNotes.forEach((note: any) => note.note_id && notesMap.set(note.note_id, note));
+            newNotes.forEach((note: any) => {
+              if (note.note_id) notesMap.set(note.note_id, note);
+              else notesMap.set(Date.now().toString() + Math.random(), note);
+            });
+
+            merged[context].notes = Array.from(notesMap.values());
+          }
+
+          return {
+            ...safePrev,
+            [key]: merged,
+          };
+        });
+
+        return { [context]: data };
+      } catch (error: any) {
+        console.error("Deep Study Fetch Error:", error);
+
+        const errorMessage = error.response?.data?.message || error.message || "Failed to fetch content";
+
+        // Store error in state so UI can display it
         setDeepStudyData((prev: any) => ({
           ...prev,
           [key]: {
             ...prev?.[key],
-            [context]: deepStudyCache.current[key][context]
+            [context]: { error: errorMessage } // Mark this specific context as errored
           }
         }));
-        // We have data, but we still need to manage the loading counter if it was incremented
-        // However, if we return early, we should decrement it immediately in a finally-like manner or just here
+
+      } finally {
         if (!isBackground) {
           activeDeepStudyRequests.current -= 1;
           if (activeDeepStudyRequests.current <= 0) {
@@ -530,76 +641,12 @@ export const BibleProvider = ({ children }: { children: React.ReactNode }) => {
             setLoadingDeepStudy(false);
           }
         }
-        return;
+        delete inFlightRequests.current[fullKey];
       }
+    })();
 
-      const baseUrl = verse
-        ? `/api/bible/deep-study/${bookId}/${chapter}/${verse}/${version}`
-        : `/api/bible/deep-study/${bookId}/${chapter}/${version}`;
-
-      const res = await axios.get(`${baseUrl}?deep-study-context=${context}`);
-      const data = res.data?.data || null;
-
-      // Update Cache
-      if (!deepStudyCache.current[key]) deepStudyCache.current[key] = {};
-      deepStudyCache.current[key][context] = data;
-
-      setDeepStudyData((prev: any) => {
-        const safePrev = prev || {};
-        const prevData = safePrev[key] || {};
-
-        // Merge with existing data
-        const merged = { ...prevData, [context]: data };
-
-        // Handle Notes Merging if applicable (mostly for 'original' context)
-        if (context === 'original' && data?.notes) {
-          const prevNotes = Array.isArray(prevData[context]?.notes) ? prevData[context].notes : [];
-          const newNotes = Array.isArray(data.notes) ? data.notes : [];
-
-          const notesMap = new Map();
-          prevNotes.forEach((note: any) => note.note_id && notesMap.set(note.note_id, note));
-          newNotes.forEach((note: any) => {
-            if (note.note_id) notesMap.set(note.note_id, note);
-            else notesMap.set(Date.now().toString() + Math.random(), note);
-          });
-
-          merged[context].notes = Array.from(notesMap.values());
-        }
-
-        return {
-          ...safePrev,
-          [key]: merged,
-        };
-      });
-
-      return { [context]: data };
-    } catch (error: any) {
-      console.error("Deep Study Fetch Error:", error);
-
-      const key = verse
-        ? `${bookId}-${chapter}-${verse}-${version}`
-        : `${bookId}-${chapter}-${version}`;
-
-      const errorMessage = error.response?.data?.message || error.message || "Failed to fetch content";
-
-      // Store error in state so UI can display it
-      setDeepStudyData((prev: any) => ({
-        ...prev,
-        [key]: {
-          ...prev?.[key],
-          [context]: { error: errorMessage } // Mark this specific context as errored
-        }
-      }));
-
-    } finally {
-      if (!isBackground) {
-        activeDeepStudyRequests.current -= 1;
-        if (activeDeepStudyRequests.current <= 0) {
-          activeDeepStudyRequests.current = 0;
-          setLoadingDeepStudy(false);
-        }
-      }
-    }
+    inFlightRequests.current[fullKey] = fetchPromise;
+    return fetchPromise;
   };
 
   const fetchDeepStudyForVerse = async (

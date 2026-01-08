@@ -32,7 +32,8 @@ export default function EditNotePopup({ note, onClose }: Props) {
     'peace': 'Peace',
     'vrede': 'Peace',
     'kingdom': 'Kingdom',
-    'koninkrijk': 'Kingdom'
+    'koninkrijk': 'Kingdom',
+    'gelof': 'Faith'
   };
 
   const normalizeTag = (tag: string) => {
@@ -102,7 +103,7 @@ export default function EditNotePopup({ note, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between pb-4">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-primary">
-            Edit Note
+            {formatMessage({ id: 'EDIT_NOTE.TITLE' })}
           </h2>
 
           <button
@@ -122,14 +123,16 @@ export default function EditNotePopup({ note, onClose }: Props) {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Write your note..."
+          placeholder={formatMessage({ id: 'EDIT_NOTE.PLACEHOLDER' })}
           className="w-full h-32 p-4 bg-white/60 dark:bg-gray-200 rounded-lg border border-gray-200 dark:border-gray-400 resize-none 
-                   focus:outline-none focus:ring-2 focus:ring-primary text-gray-700"
+                   focus:outline-none focus:ring-2 focus:ring-primary text-gray-700 font-merriweather"
         />
 
         {/* Tags */}
         <div className="mt-5">
-          <p className="text-primary font-medium mb-3">Emotion Tags</p>
+          <p className="text-primary font-medium mb-3">
+            {formatMessage({ id: 'EDIT_NOTE.EMOTION_TAGS' })}
+          </p>
 
           <div className="flex flex-wrap gap-2">
             {["Faith", "Trust", "Peace", "Kingdom"].map((tag) => (
@@ -153,14 +156,14 @@ export default function EditNotePopup({ note, onClose }: Props) {
             onClick={onClose}
             className="text-primary hover:underline transition"
           >
-            Cancel
+            {formatMessage({ id: 'BUTTONS.CANCEL' })}
           </button>
 
           <button
             onClick={handleSave}
             className="bg-sand hover:bg-primary text-white px-6 py-2 rounded-xl font-medium hover:bg-primary/90 transition"
           >
-            Save
+            {formatMessage({ id: 'BUTTONS.SAVE' })}
           </button>
         </div>
       </div>

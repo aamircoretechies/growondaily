@@ -8,6 +8,18 @@ import { useDashboard } from '@/pages/dashboards/providers/DashboardProvider';
 import { useReflection } from "@/providers/ReflectionProvider";
 import { FormattedMessage, useIntl } from 'react-intl';
 
+const slugify = (text: string) => {
+  return (text || '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-');
+};
+
 
 
 interface TabItem {
@@ -69,9 +81,10 @@ const VerseStudy = () => {
     if (books.length > 0) {
       const found = books.find(
         (b) =>
-          (b.name || "")
-            .toLowerCase()
-            .replace(/\s+/g, "-") === book.toLowerCase()
+          // (b.name || "")
+          //   .toLowerCase()
+          //   .replace(/\s+/g, "-") === book.toLowerCase()
+          slugify(b.name) === slugify(book)
       );
       if (found) return found.book_id;
     }
@@ -105,9 +118,10 @@ const VerseStudy = () => {
 
       const foundBook = books.find(
         (b) =>
-          (b.name || "")
-            .toLowerCase()
-            .replace(/\s+/g, "-") === book.toLowerCase()
+          // (b.name || "")
+          //   .toLowerCase()
+          //   .replace(/\s+/g, "-") === book.toLowerCase()
+          slugify(b.name) === slugify(book)
       );
       const bookName = foundBook?.name || book;
 
@@ -152,23 +166,8 @@ const VerseStudy = () => {
 
 
 
+  // fetchSingleVerse is now handled by BibleProvider/Sidebar synchronization
   useEffect(() => {
-    const loadVerse = async () => {
-      let bookId = book;
-      if (books.length > 0 && book.length !== 36) {
-        const found = books.find(
-          (b) =>
-            (b.name || '').toLowerCase().replace(/\s+/g, '-') ===
-            book.toLowerCase()
-        );
-        if (found) bookId = found.book_id;
-      }
-
-      if (bookId) {
-        await fetchSingleVerse(bookId, Number(chapter), Number(verse), version || 'KJV');
-      }
-    };
-
     const noteKey = `note-${book}-${chapter}-${verse}`;
     const saved = localStorage.getItem(noteKey);
     if (saved) {
@@ -176,33 +175,39 @@ const VerseStudy = () => {
     } else {
       setSavedNote("");
     }
-    loadVerse();
-  }, [book, chapter, verse, books, version]);
+  }, [book, chapter, verse]);
 
-  // Separate effect for lazy loading deep study content
+  const [enabledTabs, setEnabledTabs] = useState<string[]>([]);
+
+  // Separate effect for pre-fetching ALL enabled tabs with priority
   useEffect(() => {
-    const loadDeepStudy = async () => {
+    const loadAllDeepStudy = async () => {
       let bookId = book;
       if (books.length > 0 && book.length !== 36) {
         const found = books.find(
-          (b) =>
-            (b.name || '').toLowerCase().replace(/\s+/g, '-') ===
-            book.toLowerCase()
+          (b) => slugify(b.name) === slugify(book)
         );
         if (found) bookId = found.book_id;
       }
 
-      if (bookId) {
-        await fetchDeepStudyForVerse(bookId, Number(chapter), Number(verse), version || 'KJV', verseActiveTab);
+      if (bookId && enabledTabs.length > 0) {
+        // 1. Prioritize current active tab
+        fetchDeepStudyForVerse(bookId, Number(chapter), Number(verse), version || 'KJV', verseActiveTab, false);
+
+        // 2. Stagger background tabs to avoid connection congestion
+        const backgroundTabs = enabledTabs.filter(t => t !== verseActiveTab);
+        backgroundTabs.forEach((tab: string, index: number) => {
+          setTimeout(() => {
+            fetchDeepStudyForVerse(bookId!, Number(chapter), Number(verse), version || 'KJV', tab, true);
+          }, (index + 1) * 100); // 100ms stagger between requests
+        });
       }
     };
-    loadDeepStudy();
-  }, [book, chapter, verse, books, verseActiveTab, version]);
+    loadAllDeepStudy();
+  }, [book, chapter, verse, books, enabledTabs, verseActiveTab, version]);
 
 
 
-
-  const [enabledTabs, setEnabledTabs] = useState<string[]>([]);
 
   useEffect(() => {
     try {
@@ -214,7 +219,7 @@ const VerseStudy = () => {
 
       const newEnabledTabs = ['original', 'explanations', 'source'];
       if (isEnabled('historical')) newEnabledTabs.push('historical');
-      if (isEnabled('cultural')) newEnabledTabs.push('cultural'); // Assuming cultural maps to something or always shown? User didn't specify cultural in the list, but it's in the tabs. I'll assume it's always shown or maps to historical? The user list: Historical, Ground Text, Special, Daily Life, Cross Ref, Commentary, Key Takeaways, Reflection. Cultural is NOT in the user list. I will assume it is always enabled or maybe grouped with historical? The user said "All of these options are enabled by default". If cultural isn't in the list, maybe it shouldn't be filtered? Or maybe it's part of historical? I'll leave it enabled for now to be safe, or maybe it's missing from the settings? The user instructions were specific about the list. I will leave 'cultural' and 'theological' and 'practical' enabled as they are not in the toggle list.
+      if (isEnabled('cultural')) newEnabledTabs.push('cultural'); // Assuming cultural maps to something or always shown? User didn't specify cultural in the list, but it's in the tabs. I'll assume it's always shown or maps to historical? The user list: Historical, Ground Text, Special, Daily Life, Cross Ref, Commentary, Key Takeaways, Reflection. Cultural is NOT in the user list. I will assume it is always enabled or maybe grouped with historical? The user instructions were specific about the list. I will leave 'cultural' and 'theological' and 'practical' enabled as they are not in the toggle list.
       if (isEnabled('theological')) newEnabledTabs.push('theological');
       if (isEnabled('practical')) newEnabledTabs.push('practical');
       if (isEnabled('commentary')) newEnabledTabs.push('commentary');
@@ -268,7 +273,8 @@ const VerseStudy = () => {
     let bookId = book;
     if (books.length > 0 && book.length !== 36) {
       const found = books.find(
-        (b) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === book.toLowerCase()
+        // (b) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === book.toLowerCase()
+        (b) => slugify(b.name) === slugify(book)
       );
       if (found) bookId = found.book_id;
     }
@@ -280,9 +286,9 @@ const VerseStudy = () => {
 
     if (ctx?.error) return <span className="text-red-500">{ctx.error}</span>;
 
-    if (!ctx) return 'Content not available.';
+    if (!ctx) return <Loader />;
     const cleanText = (ctx.content || '').replace(/\*/g, '');
-    return cleanText || 'Content not available.';
+    return cleanText || <Loader />;
   }, [deepStudyData, book, books, chapter, verse, version, loadingDeepStudy]);
 
 
@@ -375,7 +381,7 @@ const VerseStudy = () => {
 
         <div className="mb-4">
           <button
-            onClick={() => navigate('/bible')}
+            onClick={() => navigate(`/bible?bible=${slugify(book)}&chapter=${chapter}`)}
             className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-200"
           >
             <KeenIcon icon="black-left-line" className="w-5 h-5" />
@@ -456,7 +462,8 @@ const VerseStudy = () => {
                 let bookId = book;
                 if (books.length > 0 && book.length !== 36) {
                   const found = books.find(
-                    (b) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === book.toLowerCase()
+                    // (b) => (b.name || '').toLowerCase().replace(/\s+/g, '-') === book.toLowerCase()
+                    (b) => slugify(b.name) === slugify(book)
                   );
                   if (found) bookId = found.book_id;
                 }

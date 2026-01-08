@@ -29,14 +29,23 @@ const Loader = () => {
 const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, }: DeepStudyProps) => {
   const { selectedBookId, selectedChapter, version, deepStudyData, fetchDeepStudy, selectedBookName, loadingDeepStudy, activeTab, setActiveTab } = useBible();
   const { formatMessage } = useIntl();
-
-  useEffect(() => {
-    if (selectedBookId && selectedChapter && version) {
-      fetchDeepStudy(selectedBookId, selectedChapter, version, activeTab);
-    }
-  }, [selectedBookId, selectedChapter, version, activeTab]);
-
   const [enabledTabs, setEnabledTabs] = useState<string[]>([]);
+
+  // Pre-fetch all active tabs for better performance with priority
+  useEffect(() => {
+    if (selectedBookId && selectedChapter && version && enabledTabs.length > 0) {
+      // 1. Prioritize current active tab
+      fetchDeepStudy(selectedBookId, selectedChapter, version, activeTab, undefined, false);
+
+      // 2. Stagger background tabs to avoid connection congestion
+      const backgroundTabs = enabledTabs.filter(t => t !== activeTab);
+      backgroundTabs.forEach((tab, index) => {
+        setTimeout(() => {
+          fetchDeepStudy(selectedBookId!, selectedChapter!, version!, tab, undefined, true);
+        }, (index + 1) * 100);
+      });
+    }
+  }, [selectedBookId, selectedChapter, version, enabledTabs, activeTab]);
 
   useEffect(() => {
     try {
@@ -99,8 +108,8 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
 
     if (ctx?.error) return <span className="text-red-500">{ctx.error}</span>;
 
-    if (!ctx) return 'Content not available.';
-    return (ctx.content || '').replace(/\*/g, '') || 'Content not available.';
+    if (!ctx) return <Loader />;
+    return (ctx.content || '').replace(/\*/g, '') || <Loader />;
   }, [deepStudyData, selectedBookId, selectedChapter, version, loadingDeepStudy]);
 
   return (

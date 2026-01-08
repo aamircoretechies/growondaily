@@ -5,6 +5,18 @@ import { useBible } from '@/providers/BibleProvider';
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
+const slugify = (text: string) => {
+  return (text || '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-');
+};
+
 interface BibleContentProps {
   showDeepStudyButton?: boolean;
   onDeepStudyToggle?: () => void;
@@ -23,18 +35,22 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
     selectedVerse,
     fetchSingleVerse,
     version: bibleVersion,
+    loadingVerses,
   } = useBible();
+
+  const Loader = () => (
+    <div className="flex justify-center items-center py-10">
+      <div className="w-6 h-6 border-2 border-gray-400 border-t-primary rounded-full animate-spin"></div>
+    </div>
+  );
 
   const [totalVerses, setTotalVerses] = useState<number>(0);
 
   const query = new URLSearchParams(location.search);
   const verseNum = query.get("verse") || "all";
 
-  useEffect(() => {
-    if (selectedBookId && selectedChapter) {
-      fetchVerses(selectedBookId, selectedChapter, bibleVersion);
-    }
-  }, [selectedBookId, selectedChapter, bibleVersion, fetchVerses]);
+  // Removed redundant useEffect that calls fetchVerses. 
+  // Fetching is already handled by BibleProvider when book/chapter changes.
 
   useEffect(() => {
     if (Array.isArray(verses)) {
@@ -87,7 +103,9 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
         </div>
 
         <div className="space-y-6">
-          {selectedVerse ? (
+          {loadingVerses ? (
+            <Loader />
+          ) : selectedVerse ? (
             <div className="flex flex-col">
               <h1 className="font-merriweather text-2xl mb-2">
                 {selectedVerse.book_name} {selectedVerse.chapter}:{selectedVerse.verse}
@@ -109,7 +127,8 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
 
                 <div className="flex-1">
                   <Link
-                    to={`/bible?bible=${v.book_name.toLowerCase()}&chapter=${v.chapter}&verse=${v.verse}`}
+                    // to={`/bible?bible=${v.book_name.toLowerCase()}&chapter=${v.chapter}&verse=${v.verse}`}
+                    to={`/bible?bible=${slugify(v.book_name)}&chapter=${v.chapter}&verse=${v.verse}`}
                     className="block font-merriweather text-lg leading-relaxed  hover:text-sand transition-colors duration-200"
                   >
                     {v.text}

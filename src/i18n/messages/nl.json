@@ -232,6 +232,7 @@
   "TOAST.IMAGE_TOO_LARGE_SERVER": "Afbeelding te groot (serverlimiet overschreden)",
   "TOAST.NETWORK_ERROR": "Netwerkfout. Probeer het opnieuw",
   "TOAST.PROFILE_PIC_UPDATE_FAILED": "Uploaden profielafbeelding mislukt",
+  "TOAST.PROFILE_UPDATED": "Profiel succesvol bijgewerkt!",
   "TOAST.VALIDATION_FAILED": "Validatie mislukt",
   "REFLECTIONS.ALL_JOURNAL_ENTRIES": "Al je dagboeknotities en reflecties",
   "REFLECTIONS.NO_JOURNAL_ENTRIES": "Geen dagboeknotities gevonden",
@@ -293,5 +294,15 @@
   "SHARE.ON_FACEBOOK": "Delen op Facebook",
   "SHARE.COPY_TEXT": "Tekst Kopiëren",
   "TOAST.COPY_SUCCESS": "Tekst succesvol gekopieerd!",
-  "TOAST.COPY_FAILED": "Kopiëren van tekst mislukt!"
+  "TOAST.COPY_FAILED": "Kopiëren van tekst mislukt!",
+  "MAKE_NOTE.TITLE": "NOTITIE",
+  "MAKE_NOTE.SAVE_NOTE": "Notitie Opslaan",
+  "MAKE_NOTE.ALERT.SELECT_BOOK": "Selecteer een boek voordat u een notitie opslaat.",
+  "MAKE_NOTE.ERROR.SAVE_FAILED": "Notitie opslaan mislukt",
+  "MAKE_NOTE.PLACEHOLDER": "Wat betekent dit vers vandaag voor u?",
+  "EDIT_NOTE.TITLE": "Notitie Bewerken",
+  "EDIT_NOTE.PLACEHOLDER": "Schrijf uw notitie...",
+  "EDIT_NOTE.EMOTION_TAGS": "Emotie Tags",
+  "PROFILE_SETUP.COMPLETED": "Profielinstellingen voltooid!",
+  "PROFILE_SETUP.ERROR_SAVING": "Fout bij opslaan van profielinstellingen"
 }

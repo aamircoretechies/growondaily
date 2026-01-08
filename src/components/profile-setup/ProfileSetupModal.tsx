@@ -319,14 +319,18 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
               <button
                 key={option}
                 onClick={() => {
+                  const code = option.split(' ')[0].toUpperCase();
                   setProfileData(prev => ({
                     ...prev,
-                    translations: prev.translations.includes(option)
-                      ? prev.translations.filter(item => item !== option)
-                      : [...prev.translations, option]
+                    // translations: prev.translations.includes(option)
+                    //   ? prev.translations.filter(item => item !== option)
+                    //   : [...prev.translations, option]
+                    translations: prev.translations.includes(code)
+                      ? prev.translations.filter(item => item !== code)
+                      : [...prev.translations, code]
                   }));
                 }}
-                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.translations.includes(option)
+                className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.translations.some(t => option.startsWith(t + ' '))
                   ? 'bg-sand dark:bg-gray-400 border-2 border-primary'
                   : 'bg-white/60 dark:bg-gray-200 border-2 border-transparent hover:border-gray-300'
                   }`}
@@ -484,8 +488,8 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
 
     // Always hydrate from the latest user object to ensure sync with PersonalizationCard
     // Default dailyPref to 'Daily' if not set, or use the saved value
-      // const savedDailyPref = u?.preferences?.receive_daily ? 'Daily' : (u?.preferences?.receive_daily === false ? 'Occasionally' : 'Daily');
-      const savedDailyPref = u?.preferences?.receive_daily ? 'Daily' : (u?.preferences?.receive_daily === false ? 'Occasionally' : 'Occasionally');
+    // const savedDailyPref = u?.preferences?.receive_daily ? 'Daily' : (u?.preferences?.receive_daily === false ? 'Occasionally' : 'Daily');
+    const savedDailyPref = u?.preferences?.receive_daily ? 'Daily' : (u?.preferences?.receive_daily === false ? 'Occasionally' : 'Occasionally');
 
     // Map depth_level from backend to UI format
     const depthLevel = (backend?.depth_level || '').toString().toLowerCase();
@@ -526,7 +530,8 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
 
     // Map bible_version from backend code to full UI format
     const bibleVersionCode = backend?.bible_version;
-    const mappedTranslations = bibleVersionCode ? [titleForVersionCode(bibleVersionCode)] : [];
+    // const mappedTranslations = bibleVersionCode ? [titleForVersionCode(bibleVersionCode)] : [];
+    const mappedTranslations = bibleVersionCode ? [bibleVersionCode.toUpperCase()] : [];
 
     setProfileData(prev => ({
       ...prev,
@@ -656,7 +661,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
 
       // Update local storage state as well
       const wizardState = {
-        step: currentStep + 1, 
+        step: currentStep + 1,
         data: profileData
       };
       localStorage.setItem("profileSetupWizardState", JSON.stringify(wizardState));
@@ -677,7 +682,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
         setProfileProgress(100);
         localStorage.setItem("profileProgress", "100");
 
-        toast.success(formatMessage({ id: 'Profile setup completed!' }));
+        toast.success(formatMessage({ id: 'PROFILE_SETUP.COMPLETED' }));
 
         // Refresh dashboard to ensure everything is up to date (USER data)
         await refreshDashboard();
@@ -692,7 +697,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
         }, 500);
 
       } catch (err) {
-        toast.error(formatMessage({ id: 'PROFILE SETUP.ERROR SAVING' }));
+        toast.error(formatMessage({ id: 'PROFILE_SETUP.ERROR_SAVING' }));
         console.error('Profile save failed', err);
       }
 

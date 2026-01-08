@@ -119,19 +119,26 @@ const getInitialLanguage = (): TLanguage => {
   if (langParam) {
     const matchedLanguage = I18N_LANGUAGES.find((lang) => lang.code === langParam);
     if (matchedLanguage) {
-      setData(I18N_CONFIG_KEY, matchedLanguage);
+      setData(I18N_CONFIG_KEY, { code: matchedLanguage.code });
       return matchedLanguage;
     }
   }
 
-  const currentLanguage = getData(I18N_CONFIG_KEY) as TLanguage | undefined;
-  return currentLanguage ?? I18N_DEFAULT_LANGUAGE;
+  const storedConfig = getData(I18N_CONFIG_KEY) as any;
+  const storedCode = typeof storedConfig === 'string' ? storedConfig : storedConfig?.code;
+
+  if (storedCode) {
+    const matchedLanguage = I18N_LANGUAGES.find((lang) => lang.code === storedCode);
+    if (matchedLanguage) return matchedLanguage;
+  }
+
+  return I18N_DEFAULT_LANGUAGE;
 };
 
 // Create a placeholder initial props - don't call getInitialLanguage() here to avoid circular dependency
 const createInitialProps = (): ITranslationProviderProps => ({
   currentLanguage: getInitialLanguage(),
-  changeLanguage: (_: TLanguage) => {},
+  changeLanguage: (_: TLanguage) => { },
   isRTL: () => false
 });
 
@@ -146,9 +153,9 @@ const useLanguage = () => {
   return context;
 };
 
-const I18NProvider = ({ 
+const I18NProvider = ({
   children,
-  currentLanguage 
+  currentLanguage
 }: PropsWithChildren & { currentLanguage: TLanguage }) => {
   return (
     <IntlProvider
@@ -167,7 +174,7 @@ const TranslationProvider = ({ children }: PropsWithChildren) => {
   const [currentLanguage, setCurrentLanguage] = useState<TLanguage>(() => getInitialLanguage());
 
   const changeLanguage = (language: TLanguage) => {
-    setData(I18N_CONFIG_KEY, language);
+    setData(I18N_CONFIG_KEY, { code: language.code });
     setCurrentLanguage(language);
   };
 

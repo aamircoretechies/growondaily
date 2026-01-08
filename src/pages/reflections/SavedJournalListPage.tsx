@@ -21,6 +21,22 @@ const SavedJournalListPage = () => {
   const [selectedNote, setSelectedNote] = useState<any>(null);
   const [visibleCount, setVisibleCount] = useState(6);
   const [searchQuery, setSearchQuery] = useState("");
+  const TAG_MAPPING: Record<string, string> = {
+    'faith': 'FAITH',
+    'geloof': 'FAITH',
+    'trust': 'TRUST',
+    'vertrouwen': 'TRUST',
+    'peace': 'PEACE',
+    'vrede': 'PEACE',
+    'kingdom': 'KINGDOM',
+    'koninkrijk': 'KINGDOM'
+  };
+
+  const getLocalizedTag = (tag: string) => {
+    const lower = tag.trim().toLowerCase();
+    const key = TAG_MAPPING[lower] || tag.toUpperCase();
+    return intl.formatMessage({ id: `EMOTION.${key}`, defaultMessage: tag });
+  };
 
 
   const Loader = () => (
@@ -184,7 +200,7 @@ const SavedJournalListPage = () => {
                 <div className="flex items-center gap-2 mb-4">
                   <LucideCalendar className="text-amber-600 w-4 h-4" />
                   <span className="text-gray-600 text-sm font-medium">
-                    {new Date(entry.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    {new Date(entry.created_at).toLocaleDateString(intl.locale, { year: 'numeric', month: 'long', day: 'numeric' })}
                   </span>
                 </div>
 
@@ -212,7 +228,7 @@ const SavedJournalListPage = () => {
                       key={index}
                       className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-full font-medium "
                     >
-                      {tag}
+                      {getLocalizedTag(tag)}
                     </span>
                   ))}
                 </div>

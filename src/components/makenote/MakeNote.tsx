@@ -42,7 +42,7 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
     }
 
     if (!selectedBookId) {
-      alert("Please select a book before saving a note.");
+      alert(formatMessage({ id: 'MAKE_NOTE.ALERT.SELECT_BOOK' }));
       return;
     }
 
@@ -56,7 +56,7 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
       onClose();
     } catch (err) {
       console.error("Failed to save note:", err);
-      toast.error("Note failed to save");
+      toast.error(formatMessage({ id: 'MAKE_NOTE.ERROR.SAVE_FAILED' }));
     }
   };
 
@@ -74,8 +74,8 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
 
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-primary">
-            NOTE
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-primary uppercase">
+            {formatMessage({ id: 'MAKE_NOTE.TITLE' })}
           </h2>
           <button
             onClick={onClose}
@@ -96,7 +96,7 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
             </p>
           ) : (
             <p className="italic text-gray-500">
-              What does this verse mean to you today?
+              {formatMessage({ id: 'MAKE_NOTE.PLACEHOLDER' })}
             </p>
           )}
         </div>
@@ -108,8 +108,8 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
           <textarea
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
-            placeholder="What does this verse mean to you today?"
-            className="w-full h-32 p-4 bg-white/60 dark:bg-gray-200 rounded-lg border border-gray-200 dark:border-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary text-gray-700"
+            placeholder={formatMessage({ id: 'MAKE_NOTE.PLACEHOLDER' })}
+            className="w-full h-32 p-4 bg-white/60 dark:bg-gray-200 rounded-lg border border-gray-200 dark:border-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary text-gray-700 font-merriweather"
           />
 
           {/* Tag Buttons */}
@@ -133,7 +133,7 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
             onClick={handleSave}
             className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary/90 transition"
           >
-            Save Note
+            {formatMessage({ id: 'MAKE_NOTE.SAVE_NOTE' })}
           </button>
 
           {/* hide link verse for now */}

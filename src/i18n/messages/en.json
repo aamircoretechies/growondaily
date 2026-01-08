@@ -232,6 +232,7 @@
   "TOAST.IMAGE_TOO_LARGE_SERVER": "Image too large (server limit exceeded)",
   "TOAST.NETWORK_ERROR": "Network error. Please try again",
   "TOAST.PROFILE_PIC_UPDATE_FAILED": "Failed to upload profile picture",
+  "TOAST.PROFILE_UPDATED": "Profile updated successfully!",
   "TOAST.VALIDATION_FAILED": "Validation failed",
   "REFLECTIONS.ALL_JOURNAL_ENTRIES": "All your journal entries and reflections",
   "REFLECTIONS.NO_JOURNAL_ENTRIES": "No journal entries found",
@@ -293,5 +294,15 @@
   "SHARE.ON_FACEBOOK": "Share on Facebook",
   "SHARE.COPY_TEXT": "Copy Text",
   "TOAST.COPY_SUCCESS": "Text copied successfully!",
-  "TOAST.COPY_FAILED": "Failed to copy text!"
+  "TOAST.COPY_FAILED": "Failed to copy text!",
+  "MAKE_NOTE.TITLE": "NOTE",
+  "MAKE_NOTE.SAVE_NOTE": "Save Note",
+  "MAKE_NOTE.ALERT.SELECT_BOOK": "Please select a book before saving a note.",
+  "MAKE_NOTE.ERROR.SAVE_FAILED": "Note failed to save",
+  "MAKE_NOTE.PLACEHOLDER": "What does this verse mean to you today?",
+  "EDIT_NOTE.TITLE": "Edit Note",
+  "EDIT_NOTE.PLACEHOLDER": "Write your note...",
+  "EDIT_NOTE.EMOTION_TAGS": "Emotion Tags",
+  "PROFILE_SETUP.COMPLETED": "Profile setup completed!",
+  "PROFILE_SETUP.ERROR_SAVING": "Error saving profile setup"
 }

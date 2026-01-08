@@ -133,9 +133,11 @@ const PersonalizationCard = ({ user }: { user: any }) => {
     // '日本語口語訳 (Japanese Kougo Yaku)',
     // 'Hindi - आसान बाइबल (ERV-HI)'
   ] as const;
-  const [translations, setTranslations] = useState<string[]>(['KJV - King James Version']);
+  const [translations, setTranslations] = useState<string[]>(['KJV']);
   const toggleTranslation = (option: string) => {
-    setTranslations([option]);
+    // setTranslations([option]);
+    const code = option.split(' ')[0].toUpperCase();
+    setTranslations([code]);
   };
   const [dailyOpen, setDailyOpen] = useState(false);
   // const [dailyPref, setDailyPref] = useState<'Daily' | 'Occasionally'>('Daily');
@@ -447,7 +449,8 @@ const PersonalizationCard = ({ user }: { user: any }) => {
         />
         <Row
           title={formatMessage({ id: 'PROFILE_SETUP.WHICH_TRANSLATION' })}
-          subtitle={translations.join(', ')}
+          // subtitle={translations.join(', ')}
+          subtitle={translations.map(code => titleForVersionCode(code)).join(', ')}
           onClick={() => setTranslationsOpen(true)}
         />
         <Row
@@ -676,7 +679,8 @@ const PersonalizationCard = ({ user }: { user: any }) => {
                 {translationOptions
                   .filter((o) => o.toLowerCase().includes(translationQuery.toLowerCase()))
                   .map((option) => {
-                    const selected = translations.includes(option);
+                    // const selected = translations.includes(option);
+                    const selected = translations.some(t => option.startsWith(t + ' '));
                     return (
                       <button
                         type="button"

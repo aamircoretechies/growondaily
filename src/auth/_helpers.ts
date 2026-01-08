@@ -2,12 +2,11 @@ import { User as Auth0UserModel } from '@auth0/auth0-spa-js';
 
 import { getData, setData } from '@/utils';
 import { type AuthModel } from './_models';
-import { I18N_CONFIG_KEY, I18N_DEFAULT_LANGUAGE } from '@/i18n';
+import { I18N_CONFIG_KEY, I18N_DEFAULT_LANGUAGE, I18N_LANGUAGES } from '@/i18n';
 import { type TLanguage } from '@/i18n';
 
-const AUTH_LOCAL_STORAGE_KEY = `${import.meta.env.VITE_APP_NAME}-auth-v${
-  import.meta.env.VITE_APP_VERSION
-}`;
+const AUTH_LOCAL_STORAGE_KEY = `${import.meta.env.VITE_APP_NAME}-auth-v${import.meta.env.VITE_APP_VERSION
+  }`;
 
 const getAuth = (): AuthModel | undefined => {
   try {
@@ -42,8 +41,15 @@ const removeAuth = () => {
 // Get current language from localStorage
 const getCurrentLanguage = (): TLanguage => {
   try {
-    const language = getData(I18N_CONFIG_KEY) as TLanguage | undefined;
-    return language ?? I18N_DEFAULT_LANGUAGE;
+    const storedConfig = getData(I18N_CONFIG_KEY) as any;
+    const storedCode = typeof storedConfig === 'string' ? storedConfig : storedConfig?.code;
+
+    if (storedCode) {
+      const matchedLanguage = I18N_LANGUAGES.find((l: TLanguage) => l.code === storedCode);
+      if (matchedLanguage) return matchedLanguage;
+    }
+
+    return I18N_DEFAULT_LANGUAGE;
   } catch (error) {
     return I18N_DEFAULT_LANGUAGE;
   }
@@ -53,13 +59,13 @@ export function setupAxios(axios: any) {
   axios.defaults.headers.Accept = 'application/json';
   axios.defaults.withCredentials = true;
   axios.interceptors.request.use(
-   (config: {
-    method?: string;
-    headers: { Authorization?: string };
-    params?: any;
-    url?: string;
-    data?: any;
-  }) => {
+    (config: {
+      method?: string;
+      headers: { Authorization?: string };
+      params?: any;
+      url?: string;
+      data?: any;
+    }) => {
       const auth = getAuth();
 
       if (auth?.access_token) {
