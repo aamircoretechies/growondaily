@@ -3,14 +3,13 @@ import { KeenIcon } from '@/components';
 import { useLocation } from 'react-router-dom';
 import { useBible } from '@/providers/BibleProvider';
 import { useEffect, useState } from 'react';
+import { FormattedMessage } from 'react-intl';
 
 interface BibleContentProps {
   showDeepStudyButton?: boolean;
   onDeepStudyToggle?: () => void;
   isDeepStudyActive?: boolean;
 }
-
-import { FormattedMessage } from 'react-intl';
 
 const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive }: BibleContentProps) => {
   const location = useLocation();
@@ -23,6 +22,7 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
     selectedChapter,
     selectedVerse,
     fetchSingleVerse,
+    version: bibleVersion,
   } = useBible();
 
   const [totalVerses, setTotalVerses] = useState<number>(0);
@@ -32,9 +32,9 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
 
   useEffect(() => {
     if (selectedBookId && selectedChapter) {
-      fetchVerses(selectedBookId, selectedChapter, 'KJV');
+      fetchVerses(selectedBookId, selectedChapter, bibleVersion);
     }
-  }, [selectedBookId, selectedChapter]);
+  }, [selectedBookId, selectedChapter, bibleVersion, fetchVerses]);
 
   useEffect(() => {
     if (Array.isArray(verses)) {
@@ -44,12 +44,12 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
     if (verseNum !== "all" && selectedBookId && selectedChapter) {
       const num = Number(verseNum);
       if (!Number.isNaN(num)) {
-        fetchSingleVerse(selectedBookId, selectedChapter, num, 'KJV');
+        fetchSingleVerse(selectedBookId, selectedChapter, num, bibleVersion);
       }
     }
-  }, [verses, verseNum, selectedBookId, selectedChapter, fetchSingleVerse]);
+  }, [verses, verseNum, selectedBookId, selectedChapter, fetchSingleVerse, bibleVersion]);
 
-  const version = selectedVerse?.version || "KJV";
+  const version = selectedVerse?.version || bibleVersion;
 
   return (
     <div className="min-h-screen text-primary p-0 ">
@@ -58,12 +58,9 @@ const BibleContent = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActiv
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
             <div className="flex-1">
               <h1 className="font-merriweather text-2xl">
-                {/* Shepherd's Psalm */}
-
                 {selectedBookName
                   ? `${selectedBookName} ${selectedChapter || ''}`
                   : 'Loading...'}
-
               </h1>
               <p className="font-merriweather text-sm text-gray-600 dark:text-gray-400 mt-1">
                 (
