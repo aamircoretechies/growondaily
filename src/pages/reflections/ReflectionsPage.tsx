@@ -189,12 +189,12 @@ const ReflectionsPage = () => {
           {/* Left Column - Saved Journal List */}
           <div className="lg:col-span-1">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-merriweather text-2xl text-primary">
+              <h3 className="font-merriweather text-2xl text-primary ">
                 <FormattedMessage id="REFLECTIONS.SAVED_JOURNAL_LIST" />
               </h3>
               <button
                 onClick={() => navigate('/reflections/journal')}
-                className="text-sm text-gray-600 hover:text-primary transition-colors"
+                className="text-sm text-gray-600 hover:text-primary transition-colors whitespace-nowrap"
               >
                 {/* View All */}
                 <FormattedMessage id="REFLECTIONS.VIEW_ALL" />
@@ -208,7 +208,7 @@ const ReflectionsPage = () => {
                 <LucideSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search by keywords or tags.."
+                  placeholder={formatMessage({ id: 'REFLECTIONS.SEARCH_KEYWORDS_TAGS' })}
                   className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-xl border-0 text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sand/50"
                 />
               </div>

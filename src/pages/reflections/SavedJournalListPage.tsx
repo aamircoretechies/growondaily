@@ -147,7 +147,7 @@ const SavedJournalListPage = () => {
                 <LucideSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search by keywords, verses, or tags..."
+                  placeholder={intl.formatMessage({ id: 'REFLECTIONS.SEARCH_JOURNAL_PLACEHOLDER' })}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-xl border-0 text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sand/50"
@@ -263,7 +263,7 @@ const SavedJournalListPage = () => {
               onClick={() => setVisibleCount(filteredEntries.length)}
               className="px-6 py-3 bg-sand text-primary rounded-lg hover:bg-primary hover:text-white transition-colors font-medium"
             >
-              Load More Entries
+              <FormattedMessage id="REFLECTIONS.LOAD_MORE_ENTRIES" />
             </button>
           </div>
         )}

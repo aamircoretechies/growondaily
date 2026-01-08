@@ -5,10 +5,11 @@ import { LucideSearch, LucideCalendar, LucideTrash2, LucideArrowLeft, } from "lu
 import { useNavigate } from "react-router-dom";
 import { useBible } from "@/providers/BibleProvider";
 import { useReflection } from "@/providers/ReflectionProvider";
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 
 const BookmarksPage = () => {
   const navigate = useNavigate();
+  const { formatMessage } = useIntl();
   // const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [visibleCount, setVisibleCount] = useState(6);
   // const [loading, setLoading] = useState(true);
@@ -100,7 +101,7 @@ const BookmarksPage = () => {
                 <LucideSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search bookmarks by verse or content..."
+                  placeholder={formatMessage({ id: 'REFLECTIONS.SEARCH_BOOKMARKS_BY' })}
                   className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-xl border-0 text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sand/50"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
