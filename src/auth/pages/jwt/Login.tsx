@@ -84,7 +84,7 @@ const Login = () => {
         } else {
           localStorage.removeItem("email");
         }
-        navigate(from, { replace: true });
+        window.location.href = from;
       } catch (error: any) {
         console.error("Login error", error);
 
@@ -164,7 +164,7 @@ const Login = () => {
                 if (!loginWithGoogle) throw new Error("Google login not found");
                 const success = await loginWithGoogle();
                 if (success) {
-                  navigate(from, { replace: true });
+                  window.location.href = from;
                 }
                 // If success is false, user closed the popup - do nothing
               } catch (error: any) {

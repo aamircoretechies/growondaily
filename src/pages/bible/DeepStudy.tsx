@@ -228,7 +228,9 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
 
                     return (
                       <div className="mt-3 space-y-2">
-                        <h3 className="text-sm font-semibold text-primary mb-2 ">Your Notes</h3>
+                        <h3 className="text-sm font-semibold text-primary mb-2 ">
+                          <FormattedMessage id="COMMON.YOUR_NOTES" />
+                        </h3>
                         {!deepData ? (
                           <Loader />
                         ) : notes.length > 0 ? (

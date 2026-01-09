@@ -81,6 +81,11 @@ export default function EditNotePopup({ note, onClose }: Props) {
       return;
     }
 
+    if (content.length > 250) {
+      toast.error(formatMessage({ id: 'TOAST.CHAR_LIMIT' }));
+      return;
+    }
+
     // items in selectedTags are already Title Case (Faith, Trust..)
     const tagsForBackend = selectedTags;
 

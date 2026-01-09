@@ -355,7 +355,7 @@ const VerseStudy = () => {
 
   const handleReportSubmit = async () => {
     if (!reportIssue.trim() || !reportCategory) {
-      toast.error("Please fill all fields");
+      toast.error(formatMessage({ id: 'REPORT.FILL_ALL_FIELDS' }));
       return;
     }
 

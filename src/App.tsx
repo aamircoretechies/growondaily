@@ -46,12 +46,14 @@ import { useSettings } from '@/providers/SettingsProvider';
 import { AppRouting } from '@/routing';
 import { PathnameProvider } from '@/providers';
 import { Toaster } from '@/components/ui/sonner';
+import { useIntl } from 'react-intl';
 
 const { BASE_URL } = import.meta.env;
 
 const App = () => {
   const { settings } = useSettings();
   const location = useLocation();
+  const { formatMessage } = useIntl();
 
   useEffect(() => {
     document.documentElement.classList.remove('dark');
@@ -63,16 +65,15 @@ const App = () => {
     const path = location.pathname;
 
     const titles: Record<string, string> = {
-  "/home": "Home",
-  "/reflection": "Reflection",
-  "/bible": "Bible",
-  "/ask": "Ask",
-  "/settings": "Settings"
-};
-
+      "/home": formatMessage({ id: 'NAV.HOME' }),
+      "/reflection": formatMessage({ id: 'NAV.REFLECTION' }),
+      "/bible": formatMessage({ id: 'NAV.BIBLE' }),
+      "/ask": formatMessage({ id: 'NAV.ASK' }),
+      "/settings": formatMessage({ id: 'NAV.SETTINGS' })
+    };
 
     document.title = titles[path] || "GrowOnDaily";
-  }, [location.pathname]);
+  }, [location.pathname, formatMessage]);
 
   return (
     <PathnameProvider>

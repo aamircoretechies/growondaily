@@ -41,6 +41,11 @@ const MakeNote = ({ isOpen, onClose }: MakeNoteProps) => {
       return;
     }
 
+    if (noteText.length > 250) {
+      toast.error(formatMessage({ id: 'TOAST.CHAR_LIMIT' }));
+      return;
+    }
+
     if (!selectedBookId) {
       alert(formatMessage({ id: 'MAKE_NOTE.ALERT.SELECT_BOOK' }));
       return;

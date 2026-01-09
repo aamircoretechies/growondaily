@@ -322,12 +322,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
                   const code = option.split(' ')[0].toUpperCase();
                   setProfileData(prev => ({
                     ...prev,
-                    // translations: prev.translations.includes(option)
-                    //   ? prev.translations.filter(item => item !== option)
-                    //   : [...prev.translations, option]
-                    translations: prev.translations.includes(code)
-                      ? prev.translations.filter(item => item !== code)
-                      : [...prev.translations, code]
+                    translations: [code]
                   }));
                 }}
                 className={`w-full text-left rounded-xl transition-colors p-4 ${profileData.translations.some(t => option.startsWith(t + ' '))
@@ -337,14 +332,14 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
               >
                 <div className="flex items-center justify-between">
                   <span className="text-primary font-medium">{option}</span>
-                  {profileData.translations.includes(option) && (
+                  {profileData.translations.includes(option.split(' ')[0].toUpperCase()) && (
                     <KeenIcon icon="check" className="text-primary w-5 h-5" />
                   )}
                 </div>
               </button>
             ))}
           </div>
-        </div>
+        </div >
       )
     },
     {
@@ -651,7 +646,7 @@ const ProfileSetupModal = ({ isOpen, onClose }: ProfileSetupModalProps) => {
     }
 
     if (!isValid) {
-      toast.error("Please fill this preference first.");
+      toast.error(formatMessage({ id: 'PROFILE_SETUP.FILL_PREFERENCE' }));
       return;
     }
 

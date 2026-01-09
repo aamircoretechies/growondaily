@@ -21,6 +21,7 @@ const SavedJournalListPage = () => {
   const [selectedNote, setSelectedNote] = useState<any>(null);
   const [visibleCount, setVisibleCount] = useState(6);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedNotes, setExpandedNotes] = useState<Record<string, boolean>>({});
   const TAG_MAPPING: Record<string, string> = {
     'faith': 'FAITH',
     'geloof': 'FAITH',
@@ -94,6 +95,14 @@ const SavedJournalListPage = () => {
     } else {
       toast.error("Failed to delete note");
     }
+  };
+
+  const toggleNoteExpansion = (noteId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedNotes(prev => ({
+      ...prev,
+      [noteId]: !prev[noteId]
+    }));
   };
 
   const journalEntries = allNotes || [];
@@ -213,10 +222,21 @@ const SavedJournalListPage = () => {
                   </h3>
                 </div>
 
-                {/* Entry Content */}
-                <p className="text-primary text-sm leading-relaxed mb-4 line-clamp-3 ">
-                  {entry.content || 'No content'}
-                </p>
+                <div className="mb-4">
+                  <p className={`text-primary text-sm leading-relaxed break-words ${expandedNotes[entry.note_id] ? '' : 'line-clamp-3'}`}>
+                    {entry.content || 'No content'}
+                  </p>
+                  {(entry.content && entry.content.length > 100) && (
+                    <button
+                      onClick={(e) => toggleNoteExpansion(entry.note_id, e)}
+                      className="text-primary text-xs font-semibold mt-1 hover:underline"
+                    >
+                      {expandedNotes[entry.note_id]
+                        ? intl.formatMessage({ id: 'COMMON.READ_LESS' })
+                        : intl.formatMessage({ id: 'COMMON.READ_MORE' })}
+                    </button>
+                  )}
+                </div>
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-4 ">

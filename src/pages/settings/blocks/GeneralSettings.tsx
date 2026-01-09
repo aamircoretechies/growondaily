@@ -61,7 +61,8 @@ const GeneralSettings = ({ user }: { user: any }) => {
       const res = await changeLanguage(language);
 
       if (res?.success) {
-        toast.success(res?.message || `Language changed to ${selectedLang?.label}`);
+        // toast.success(res?.message || `Language changed to ${selectedLang?.label}`);
+          toast.success(`Language changed to ${selectedLang?.label}`);
 
         // ✅ CONTROLLED REFRESH
         setTimeout(() => {
@@ -69,7 +70,8 @@ const GeneralSettings = ({ user }: { user: any }) => {
         }, 500);
 
       } else {
-        toast.error(res?.message || "Failed to change language");
+        // toast.error(res?.message || "Failed to change language");
+        toast.error("Failed to change language");
       }
     } catch (e) {
       toast.error("Failed to change language");

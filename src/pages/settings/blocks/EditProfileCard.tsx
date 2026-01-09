@@ -121,6 +121,10 @@ const EditProfileCard = () => {
   };
 
 
+  const hasChanges =
+    firstName !== (currentUser?.first_name || currentUser?.first_name?.split(" ")[0] || "") ||
+    lastName !== (currentUser?.last_name || currentUser?.first_name?.split(" ")[1] || "");
+
   useEffect(() => {
     if (currentUser) {
       setFirstName(currentUser?.first_name || currentUser?.first_name?.split(" ")[0] || "");
@@ -192,7 +196,7 @@ const EditProfileCard = () => {
 
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-          <Button onClick={handleUpdate} disabled={profileLoading} className="w-full sm:w-auto">
+          <Button onClick={handleUpdate} disabled={profileLoading || !hasChanges} className="w-full sm:w-auto">
             {profileLoading ? <FormattedMessage id="PROFILE.UPDATING" /> : <FormattedMessage id="PROFILE.UPDATE_PROFILE" />}
           </Button>
 

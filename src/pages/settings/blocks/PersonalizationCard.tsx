@@ -336,13 +336,15 @@ const PersonalizationCard = ({ user }: { user: any }) => {
 
       // explanation_style -> UI option
       const style = (backend.explanation_style || '').toString().toLowerCase();
-      setExplain(
-        style === 'simple'
-          ? 'Clear and simple language'
-          : style === 'deep'
-            ? 'A bit deeper with context'
-            : 'Mixed depending on topic'
-      );
+      if (style === 'simple') {
+        setExplain('Clear and simple language');
+      } else if (style === 'balanced' || style === 'deeper' || style === 'deep') {
+        setExplain('A bit deeper with context');
+      } else if (style === 'mixed') {
+        setExplain('Mixed depending on topic');
+      } else if (style === 'decide_later' || style === 'later') {
+        setExplain("I'll decide later");
+      }
 
       // bible_version code -> full title if possible
       setTranslations([String(backend.bible_version || 'KJV').toUpperCase().split(' ')[0]]);

@@ -253,7 +253,7 @@ const Signup = () => {
                 if (!loginWithGoogle) throw new Error("Google login not found");
                 const success = await loginWithGoogle();
                 if (success) {
-                  navigate(from, { replace: true });
+                  window.location.href = from;
                 }
                 // If success is false, user closed the popup - do nothing
               } catch (error: any) {
