@@ -279,7 +279,7 @@ const VerseStudy = () => {
 
 
   const getTabContent = useCallback((tabId: string) => {
-    if (!deepStudyData) return 'No data available.';
+    if (!deepStudyData || loadingDeepStudy) return <Loader />;
 
     // Current ID (preferred)
     let bookId = book;
@@ -291,9 +291,10 @@ const VerseStudy = () => {
     const uuidKey = `${locale}-${bookId}-${chapter}-${verse}-${version || 'KJV'}`;
     const slugKey = `${locale}-${book}-${chapter}-${verse}-${version || 'KJV'}`;
 
+    // Check if data is already in state for the current key
     let deepData = deepStudyData?.[uuidKey] || deepStudyData?.[slugKey];
 
-    // Final fallback: search for anything matching this locale/chapter/verse
+    // Fallback: search for anything matching this locale/chapter/verse
     if (!deepData) {
       const keys = Object.keys(deepStudyData);
       const partialKey = `${locale}-`;
@@ -302,14 +303,17 @@ const VerseStudy = () => {
       if (foundKey) deepData = deepStudyData[foundKey];
     }
 
+    if (!deepData) return <Loader />;
+
     const ctx = deepData?.[tabId];
 
-    if (ctx?.error) return <span className="text-red-500">{ctx.error}</span>;
-
     if (!ctx) return <Loader />;
+
+    if (ctx?.error) return <span className="text-red-500 font-medium p-4 block bg-red-50 rounded-lg">{ctx.error}</span>;
+
     const cleanText = (ctx.content || '').replace(/\*/g, '');
     return cleanText || <Loader />;
-  }, [deepStudyData, book, books, chapter, verse, version, locale]);
+  }, [deepStudyData, loadingDeepStudy, book, books, chapter, verse, version, locale]);
 
 
   // const handleReportSubmit = async () => {
@@ -489,8 +493,8 @@ const VerseStudy = () => {
                 }
                 const verseKey = `${locale}-${bookId}-${chapter}-${verse}-${version || 'KJV'}`;
                 const slugKey = `${locale}-${book}-${chapter}-${verse}-${version || 'KJV'}`;
-                const verseNotes = deepStudyData?.[verseKey]?.original?.notes ||
-                  deepStudyData?.[slugKey]?.original?.notes || [];
+                const deepData = deepStudyData?.[verseKey] || deepStudyData?.[slugKey];
+                const verseNotes = deepData?.original?.notes || [];
 
                 return (
                   <div className="mt-6 bg-white/70 dark:bg-gray-300 rounded-lg p-4 border border-gray-200 dark:border-gray-400">
@@ -498,7 +502,9 @@ const VerseStudy = () => {
                       <FormattedMessage id="COMMON.YOUR_NOTES" />
                     </h3>
 
-                    {verseNotes.length > 0 ? (
+                    {!deepData ? (
+                      <Loader />
+                    ) : verseNotes.length > 0 ? (
                       <div className="space-y-3">
                         {verseNotes.map((note: any, index: number) => (
                           <div

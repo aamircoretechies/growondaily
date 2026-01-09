@@ -106,7 +106,7 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
   }, [enabledTabs, activeTab, setActiveTab]);
 
   const getTabContent = useCallback((tabId: string) => {
-    if (!deepStudyData) return 'No data available.';
+    if (!deepStudyData || loadingDeepStudy) return <Loader />;
 
     // Primary key (current ID)
     const currentKey = `${locale}-${selectedBookId}-${selectedChapter}-${version}`;
@@ -125,11 +125,12 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
       if (foundKey) ctx = deepStudyData[foundKey][tabId];
     }
 
-    if (ctx?.error) return <span className="text-red-500">{ctx.error}</span>;
-
     if (!ctx) return <Loader />;
+
+    if (ctx?.error) return <span className="text-red-500 font-medium p-4 block bg-red-50 rounded-lg">{ctx.error}</span>;
+
     return (ctx.content || '').replace(/\*/g, '') || <Loader />;
-  }, [deepStudyData, selectedBookId, selectedChapter, version, locale]);
+  }, [deepStudyData, loadingDeepStudy, selectedBookId, selectedChapter, version, locale]);
 
   return (
     <div className="min-h-screen text-primary overflow-hidden">
@@ -220,37 +221,50 @@ const DeepStudy = ({ showDeepStudyButton, onDeepStudyToggle, isDeepStudyActive, 
                   </div>
 
                   {/* User Notes Section - Only show in original tab */}
-                  {tab.id === "original" && deepStudyData?.[`${locale}-${selectedBookId}-${selectedChapter}-${version}`]?.original
-                    ?.notes?.length > 0 && (
+                  {tab.id === "original" && (() => {
+                    const currentKey = `${locale}-${selectedBookId}-${selectedChapter}-${version}`;
+                    const deepData = deepStudyData?.[currentKey];
+                    const notes = deepData?.original?.notes || [];
+
+                    return (
                       <div className="mt-3 space-y-2">
                         <h3 className="text-sm font-semibold text-primary mb-2 ">Your Notes</h3>
-                        {deepStudyData[`${locale}-${selectedBookId}-${selectedChapter}-${version}`].original.notes.map((note: any, idx: number) => (
-                          <div
-                            key={note.note_id || idx}
-                            className="border border-gray-200 bg-white/80 dark:bg-gray-100 rounded-lg p-2 sm:p-3"
-                          >
-                            <p className="text-sm text-gray-800 font-merriweather whitespace-pre-wrap break-words break-all">
-                              {note.content}
-                            </p>
-                            {note.emotion_tags?.length > 0 && (
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {note.emotion_tags.map((tag: string, i: number) => (
-                                  <span
-                                    key={i}
-                                    className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
-                                  >
-                                    #<FormattedMessage id={`EMOTION.${tag.toUpperCase()}`} defaultMessage={tag} />
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                            <p className="text-xs text-gray-500 mt-2">
-                              {new Date(note.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                        ))}
+                        {!deepData ? (
+                          <Loader />
+                        ) : notes.length > 0 ? (
+                          notes.map((note: any, idx: number) => (
+                            <div
+                              key={note.note_id || idx}
+                              className="border border-gray-200 bg-white/80 dark:bg-gray-100 rounded-lg p-2 sm:p-3"
+                            >
+                              <p className="text-sm text-gray-800 font-merriweather whitespace-pre-wrap break-words break-all">
+                                {note.content}
+                              </p>
+                              {note.emotion_tags?.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {note.emotion_tags.map((tag: string, i: number) => (
+                                    <span
+                                      key={i}
+                                      className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                                    >
+                                      #<FormattedMessage id={`EMOTION.${tag.toUpperCase()}`} defaultMessage={tag} />
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              <p className="text-xs text-gray-500 mt-2">
+                                {new Date(note.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 italic text-sm">
+                            <FormattedMessage id="COMMON.NO_NOTES" />
+                          </p>
+                        )}
                       </div>
-                    )}
+                    );
+                  })()}
                 </div>
               </div>
             ))}

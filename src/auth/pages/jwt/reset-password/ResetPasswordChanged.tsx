@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/utils';
 import { useLayout } from '@/providers';
+import { FormattedMessage } from 'react-intl';
 
 const ResetPasswordChanged = () => {
   const { currentLayout } = useLayout();
@@ -22,12 +23,12 @@ const ResetPasswordChanged = () => {
         </div>
 
         <h3 className="text-lg font-medium text-gray-900 text-center mb-4">
-          Your password is changed
+          <FormattedMessage id="AUTH.RESET_PASSWORD.CHANGED.TITLE" />
         </h3>
         <div className="text-2sm text-center text-gray-700 mb-7.5">
-          Your password has been successfully updated.
+          <FormattedMessage id="AUTH.RESET_PASSWORD.CHANGED.MSG" />
           <br />
-          Your account's security is our priority.
+          <FormattedMessage id="AUTH.RESET_PASSWORD.CHANGED.MSG_SECURITY" />
         </div>
 
         <div className="flex justify-center">
@@ -35,7 +36,7 @@ const ResetPasswordChanged = () => {
             to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'}
             className="btn btn-primary"
           >
-            Sign in
+            <FormattedMessage id="AUTH.RESET_PASSWORD.CHANGED.BUTTON" />
           </Link>
         </div>
       </div>

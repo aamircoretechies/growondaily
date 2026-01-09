@@ -219,18 +219,19 @@ import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/providers';
 import { AxiosError } from 'axios';
+import { useIntl, FormattedMessage } from 'react-intl';
 
-const passwordSchema = Yup.object().shape({
+const getPasswordSchema = (intl: any) => Yup.object().shape({
   newPassword: Yup.string()
-    .min(8, 'Password must be at least 8 characters long.')
+    .min(8, intl.formatMessage({ id: 'AUTH.VALIDATION.PASSWORD_STRENGTH' }))
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/,
-      'Password must include uppercase, lowercase, number & special character.'
+      intl.formatMessage({ id: 'AUTH.VALIDATION.PASSWORD_STRENGTH' })
     )
-    .required('New password is required'),
+    .required(intl.formatMessage({ id: 'AUTH.VALIDATION.NEW_PASSWORD_REQUIRED' })),
   confirmPassword: Yup.string()
-    .oneOf([Yup.ref('newPassword')], 'Passwords must match')
-    .required('Please confirm your new password')
+    .oneOf([Yup.ref('newPassword')], intl.formatMessage({ id: 'AUTH.VALIDATION.PASSWORDS_MUST_MATCH' }))
+    .required(intl.formatMessage({ id: 'AUTH.VALIDATION.CONFIRM_PASSWORD_REQUIRED' }))
 });
 
 const ResetPasswordChange = () => {
@@ -241,6 +242,8 @@ const ResetPasswordChange = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showNewPasswordConfirmation, setShowNewPasswordConfirmation] = useState(false);
   const { changePassword, verifyResetToken } = useAuthContext();
+  const intl = useIntl();
+  const passwordSchema = getPasswordSchema(intl);
 
   const formik = useFormik({
     initialValues: {
@@ -325,19 +328,25 @@ const ResetPasswordChange = () => {
           noValidate
         >
           <div className="text-center">
-            <h3 className="text-lg font-medium text-gray-900">Reset Password</h3>
-            <span className="text-2sm text-gray-700">Enter your new password</span>
+            <h3 className="text-lg font-medium text-gray-900">
+              <FormattedMessage id="AUTH.RESET_PASSWORD.RESET.TITLE" />
+            </h3>
+            <span className="text-2sm text-gray-700">
+              <FormattedMessage id="AUTH.RESET_PASSWORD.RESET.DESC" />
+            </span>
           </div>
 
           {hasErrors && <Alert variant="danger">{formik.status}</Alert>}
 
           {/* NEW PASSWORD */}
           <div className="flex flex-col gap-1">
-            <label className="form-label text-gray-900">New Password</label>
+            <label className="form-label text-gray-900">
+              <FormattedMessage id="AUTH.RESET_PASSWORD.RESET.NEW_PASSWORD" />
+            </label>
             <label className="input">
               <input
                 type={showNewPassword ? 'text' : 'password'}
-                placeholder="Enter a new password"
+                placeholder={intl.formatMessage({ id: 'AUTH.RESET_PASSWORD.RESET.PLACEHOLDER_NEW_PASSWORD' })}
                 autoComplete="off"
                 {...formik.getFieldProps('newPassword')}
                 className={clsx(
@@ -366,11 +375,13 @@ const ResetPasswordChange = () => {
 
           {/* CONFIRM PASSWORD */}
           <div className="flex flex-col gap-1">
-            <label className="form-label text-gray-900">Confirm New Password</label>
+            <label className="form-label text-gray-900">
+              <FormattedMessage id="AUTH.RESET_PASSWORD.RESET.CONFIRM_PASSWORD" />
+            </label>
             <label className="input">
               <input
                 type={showNewPasswordConfirmation ? 'text' : 'password'}
-                placeholder="Re-enter a new Password"
+                placeholder={intl.formatMessage({ id: 'AUTH.RESET_PASSWORD.RESET.PLACEHOLDER_CONFIRM_PASSWORD' })}
                 autoComplete="off"
                 {...formik.getFieldProps('confirmPassword')}
                 className={clsx(
@@ -402,7 +413,7 @@ const ResetPasswordChange = () => {
             className="btn btn-primary flex justify-center grow"
             disabled={loading}
           >
-            {loading ? 'Please wait...' : 'Submit'}
+            {loading ? intl.formatMessage({ id: 'AUTH.GENERAL.PLEASE_WAIT' }) : intl.formatMessage({ id: 'AUTH.RESET_PASSWORD.RESET.BUTTON' })}
           </button>
         </form>
       </div>

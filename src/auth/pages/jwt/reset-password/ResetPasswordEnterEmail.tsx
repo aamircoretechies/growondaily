@@ -6,12 +6,13 @@ import clsx from 'clsx';
 import { KeenIcon, Alert } from '@/components';
 import { useLayout } from '@/providers';
 import { useAuthContext } from '@/auth';
+import { useIntl, FormattedMessage } from 'react-intl';
 
-const forgotPasswordSchema = Yup.object().shape({
+const getForgotPasswordSchema = (intl: any) => Yup.object().shape({
   email: Yup.string()
-    // .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Please enter a valid email address.')
-    .matches(/^[A-Z0-9._%+-]+@gmail\.com$/i, 'Please enter a valid Gmail address.')
-    .required('Email is required')
+    // .matches(/^[A-Z0-9._%+-]+@gmail\.com$/i, 'Please enter a valid Gmail address.')
+    .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, intl.formatMessage({ id: 'AUTH.VALIDATION.INVALID_EMAIL' }))
+    .required(intl.formatMessage({ id: 'AUTH.VALIDATION.EMAIL_REQUIRED' }))
 });
 
 const ResetPasswordEnterEmail = () => {
@@ -19,6 +20,8 @@ const ResetPasswordEnterEmail = () => {
   const { requestPasswordResetLink } = useAuthContext();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const intl = useIntl();
+  const forgotPasswordSchema = getForgotPasswordSchema(intl);
 
   const formik = useFormik({
     initialValues: {
@@ -57,20 +60,26 @@ const ResetPasswordEnterEmail = () => {
         noValidate
       >
         <div className="text-center">
-          <h3 className="text-lg font-medium text-gray-900">Your Email</h3>
-          <span className="text-2sm text-gray-700">Enter your email to reset password</span>
+          <h3 className="text-lg font-medium text-gray-900">
+            <FormattedMessage id="AUTH.RESET_PASSWORD.ENTER_EMAIL.TITLE" />
+          </h3>
+          <span className="text-2sm text-gray-700">
+            <FormattedMessage id="AUTH.RESET_PASSWORD.ENTER_EMAIL.DESC" />
+          </span>
         </div>
 
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
 
         <div className="flex flex-col gap-1">
-          <label className="form-label font-normal text-gray-900">Email</label>
+          <label className="form-label font-normal text-gray-900">
+            <FormattedMessage id="AUTH.RESET_PASSWORD.ENTER_EMAIL.EMAIL" />
+          </label>
           <input
             className={clsx('input', {
               'is-invalid': formik.touched.email && formik.errors.email
             })}
             type="email"
-            placeholder="email@email.com"
+            placeholder={intl.formatMessage({ id: 'AUTH.SIGNUP.PLACEHOLDER_EMAIL' })}
             autoComplete="off"
             {...formik.getFieldProps('email')}
           />
@@ -86,7 +95,7 @@ const ResetPasswordEnterEmail = () => {
           className="btn btn-primary flex justify-center grow"
           disabled={loading || formik.isSubmitting || !formik.isValid || !formik.dirty}
         >
-          {loading ? 'Please wait...' : 'Continue'}
+          {loading ? intl.formatMessage({ id: 'AUTH.GENERAL.PLEASE_WAIT' }) : intl.formatMessage({ id: 'AUTH.RESET_PASSWORD.ENTER_EMAIL.BUTTON' })}
           {!loading && <KeenIcon icon="black-right" />}
         </button>
       </form>

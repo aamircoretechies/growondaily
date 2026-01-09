@@ -19,29 +19,18 @@ const DropdownUserLanguages = ({ menuItemRef }: IDropdownUserLanguagesProps) => 
 
   const handleLanguageChange = async (lang: TLanguage) => {
     try {
-      // Check if profile setup is done before calling backend API
-      if (currentUser && !currentUser.is_preference_setup_done) {
-        toast.info(formatMessage({ id: "USER.LANGUAGE.SETUP_REQUIRED" }));
-        if (menuItemRef.current) {
-          menuItemRef.current.hide();
-        }
-        return;
-      }
 
-      // console.log("Frontend language update to:", lang);
       changeFrontendLanguage(lang);
 
-      // console.log("Sending backend request with:", lang.code);
       const result = await changeBackendLanguage(lang.code);
 
-      // console.log("Backend response:", result);
 
       if (result?.success) {
-        // console.log(" Language updated successfully in backend");
-        toast.success(result?.message || `Language changed to ${lang.label}`);
+        // toast.success(result?.message || `Language changed to ${lang.label}`);
+        toast.success(`Language changed to ${lang.label}`);
       } else {
-        // console.warn(" Backend language change FAILED:", result);
-        toast.error(result?.message || "Failed to change language");
+        // toast.error(result?.message || "Failed to change language");
+        toast.error("Failed to change language");
       }
 
       if (menuItemRef.current) {

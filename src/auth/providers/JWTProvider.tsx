@@ -303,19 +303,18 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       // otherwise fall back to field-based calculation.
       // FIX: Prefer step-based progress from localStorage or check if setup is fully done.
       // We DO NOT calculate based on fields anymore as that causes "settings" updates to affect "setup" progress.
+      // FIX: Profile progress should ONLY be controlled by ProfileSetupModal via localStorage
+      // Do NOT automatically set to 100 based on is_preference_setup_done
+      // is_preference_setup_done can become true after first language change,
+      // but this should NOT affect the Profile Setup card visibility
       const savedProgress = localStorage.getItem("profileProgress");
 
       if (savedProgress) {
         setProfileProgress(Number(savedProgress));
       } else {
-        // Fallback: If no local progress, check if user is famously done
-        if (fullUser.is_preference_setup_done) {
-          setProfileProgress(100);
-        } else {
-          // Default to 0 if nothing is saved and not done. 
-          // We explicitly do NOT calculate based on partial fields.
-          setProfileProgress(0);
-        }
+        // Default to 0 if nothing is saved
+        // Only ProfileSetupModal should update this to 100
+        setProfileProgress(0);
       }
 
       try {
@@ -760,20 +759,54 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
       if (!token) throw new Error("No token available");
 
-      // Payload exactly as requested
-      const payload = {
-        language_code: langCode
-      };
+      let response;
 
-      const response = await axios.post(`/api/auth/change-language`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      // Use POST /api/auth/preferences for first-time users (is_preference_setup_done = false)
+      // Use PUT /api/auth/preferences for existing users (is_preference_setup_done = true)
+      if (currentUser && !currentUser.is_preference_setup_done) {
+        // First-time user: use POST /api/auth/preferences
+        // Send only language_code with all other fields empty
+        const payload = {
+          preferences: {
+            language_code: langCode,
+            bible_version: "",
+            depth_level: "",
+            experience_with_bible: [],
+            what_brings_you: "",
+            engagement_preference: [],
+            explanation_style: "",
+            receive_daily: false
+          }
+        };
+
+        response = await axios.post(`/api/auth/preferences`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      } else {
+        // Existing user: use PUT /api/auth/preferences
+        // Update only language_code
+        const payload = {
+          preferences: {
+            language_code: langCode
+          }
+        };
+
+        response = await axios.put(`/api/auth/preferences`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
 
       // Verify response status
       if (response.data?.status === 1) {

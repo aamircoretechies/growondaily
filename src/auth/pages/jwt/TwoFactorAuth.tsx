@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/utils';
 import { KeenIcon } from '@/components';
+import { FormattedMessage } from 'react-intl';
 
 const TwoFactorAuth = () => {
   const [codeInputs, setCodeInputs] = useState(Array(6).fill(''));
@@ -28,10 +29,12 @@ const TwoFactorAuth = () => {
         />
 
         <div className="text-center mb-2">
-          <h3 className="text-lg font-medium text-gray-900 mb-5">Verify your phone</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-5">
+            <FormattedMessage id="AUTH.TWO_FACTOR.TITLE" />
+          </h3>
           <div className="flex flex-col">
             <span className="text-2sm text-gray-700 mb-1.5">
-              Enter the verification code we sent to
+              <FormattedMessage id="AUTH.TWO_FACTOR.MSG" />
             </span>
             <a href="#" className="text-sm font-medium text-gray-900">
               ****** 7859
@@ -53,20 +56,24 @@ const TwoFactorAuth = () => {
         </div>
 
         <div className="flex items-center justify-center mb-2">
-          <span className="text-xs text-gray-700 me-1.5">Didn’t receive a code? (37s)</span>
+          <span className="text-xs text-gray-700 me-1.5">
+            <FormattedMessage id="AUTH.TWO_FACTOR.DIDNT_RECEIVE" /> (37s)
+          </span>
           <Link to="/auth/classic/login" className="text-xs link">
-            Resend
+            <FormattedMessage id="AUTH.TWO_FACTOR.RESEND" />
           </Link>
         </div>
 
-        <button className="btn btn-primary flex justify-center grow">Continue</button>
+        <button className="btn btn-primary flex justify-center grow">
+          <FormattedMessage id="AUTH.TWO_FACTOR.BUTTON" />
+        </button>
 
         <Link
           to="/auth/login"
           className="flex items-center justify-center text-sm gap-2 text-gray-700 hover:text-primary"
         >
           <KeenIcon icon="black-left" />
-          Back to Login
+          <FormattedMessage id="AUTH.TWO_FACTOR.BACK_TO_LOGIN" />
         </Link>
       </form>
     </div>

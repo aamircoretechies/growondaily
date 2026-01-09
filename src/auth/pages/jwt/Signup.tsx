@@ -9,6 +9,7 @@ import { toAbsoluteUrl } from '@/utils';
 import { Alert, KeenIcon } from '@/components';
 import { useLayout } from '@/providers';
 import { toast } from "sonner";
+import { useIntl, FormattedMessage } from 'react-intl';
 
 const initialValues = {
   email: '',
@@ -17,11 +18,11 @@ const initialValues = {
   acceptTerms: false
 };
 
-const signupSchema = Yup.object().shape({
+const getSignupSchema = (intl: any) => Yup.object().shape({
   email: Yup.string()
-    .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Please enter a valid email address.')
-    .email('Please enter a valid email address.')
-    .required('Email is required'),
+    .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, intl.formatMessage({ id: 'AUTH.VALIDATION.INVALID_EMAIL' }))
+    .email(intl.formatMessage({ id: 'AUTH.VALIDATION.INVALID_EMAIL' }))
+    .required(intl.formatMessage({ id: 'AUTH.VALIDATION.EMAIL_REQUIRED' })),
 
   // email: Yup.string()
   //   .email('Please enter a valid email address.')
@@ -65,15 +66,13 @@ const signupSchema = Yup.object().shape({
 
 
   password: Yup.string()
-    .min(8, 'Password must be 8+ character with upper, lower, number & special character')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/, 'Password must be 8+ character with upper, lower, number & special character.')
-    .required('Password is required'),
+    .min(8, intl.formatMessage({ id: 'AUTH.VALIDATION.PASSWORD_STRENGTH' }))
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/, intl.formatMessage({ id: 'AUTH.VALIDATION.PASSWORD_STRENGTH' }))
+    .required(intl.formatMessage({ id: 'AUTH.VALIDATION.PASSWORD_REQUIRED' })),
   changepassword: Yup.string()
-    .required('Password confirmation is required')
-    .oneOf([Yup.ref('password')], "Password and Confirm Password didn't match"),
-  // acceptTerms: Yup.bool().required('You must accept the terms and conditions')
-  acceptTerms: Yup.bool().oneOf([true], 'Required*')
-
+    .required(intl.formatMessage({ id: 'AUTH.VALIDATION.CONFIRM_PASSWORD_REQUIRED' }))
+    .oneOf([Yup.ref('password')], intl.formatMessage({ id: 'AUTH.VALIDATION.PASSWORDS_MUST_MATCH' })),
+  acceptTerms: Yup.bool().oneOf([true], intl.formatMessage({ id: 'AUTH.VALIDATION.ACCEPT_TERMS' }))
 });
 
 
@@ -87,6 +86,8 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { currentLayout } = useLayout();
+  const intl = useIntl();
+  const signupSchema = getSignupSchema(intl);
 
 
   const formik = useFormik({
@@ -162,7 +163,7 @@ const Signup = () => {
 
         // SUCCESS → status 1 hua karega
         if (backendStatus === 1) {
-          toast.success("Registered successfully!");
+          toast.success(intl.formatMessage({ id: 'COMMON.SUCCESS' }));
           navigate('/auth/login', { replace: true });
           return;
         }
@@ -219,14 +220,18 @@ const Signup = () => {
         onSubmit={formik.handleSubmit}
       >
         <div className="text-center mb-2.5">
-          <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">Sign up</h3>
+          <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">
+            <FormattedMessage id="AUTH.SIGNUP.TITLE" />
+          </h3>
           <div className="flex items-center justify-center font-medium">
-            <span className="text-2sm text-gray-600 me-1.5">Already have an Account ?</span>
+            <span className="text-2sm text-gray-600 me-1.5">
+              <FormattedMessage id="AUTH.SIGNUP.ALREADY_HAVE_ACCOUNT" />
+            </span>
             <Link
               to={currentLayout?.name === 'auth-branded' ? '/auth/login' : '/auth/classic/login'}
               className="text-2sm link"
             >
-              Sign In
+              <FormattedMessage id="AUTH.SIGNUP.SIGNIN" />
             </Link>
           </div>
         </div>
@@ -261,24 +266,28 @@ const Signup = () => {
             className="btn btn-light btn-sm justify-center"
           >
             <img src={toAbsoluteUrl('/media/brand-logos/google.svg')} className="size-3.5 shrink-0" />
-            Continue with Google
+            <FormattedMessage id="AUTH.SIGNUP.CONTINUE_WITH_GOOGLE" />
           </button>
 
         </div>
 
         <div className="flex items-center gap-2">
           <span className="border-t border-gray-200 w-full"></span>
-          <span className="text-2xs text-gray-500 font-medium uppercase">Or</span>
+          <span className="text-2xs text-gray-500 font-medium uppercase">
+            <FormattedMessage id="AUTH.SIGNUP.OR" />
+          </span>
           <span className="border-t border-gray-200 w-full"></span>
         </div>
 
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
 
         <div className="flex flex-col gap-1">
-          <label className="form-label text-gray-900">Email</label>
+          <label className="form-label text-gray-900">
+            <FormattedMessage id="AUTH.SIGNUP.EMAIL" />
+          </label>
           <label className="input">
             <input
-              placeholder="email@email.com"
+              placeholder={intl.formatMessage({ id: 'AUTH.SIGNUP.PLACEHOLDER_EMAIL' })}
               // type="email"
               type="text"
               autoComplete="off"
@@ -304,11 +313,13 @@ const Signup = () => {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="form-label text-gray-900">Password</label>
+          <label className="form-label text-gray-900">
+            <FormattedMessage id="AUTH.SIGNUP.PASSWORD" />
+          </label>
           <label className="input">
             <input
               type={showPassword ? 'text' : 'password'}
-              placeholder="Enter Password"
+              placeholder={intl.formatMessage({ id: 'AUTH.SIGNUP.PLACEHOLDER_PASSWORD' })}
               autoComplete="off"
               {...formik.getFieldProps('password')}
               onChange={(e) => {
@@ -341,11 +352,13 @@ const Signup = () => {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="form-label text-gray-900">Confirm Password</label>
+          <label className="form-label text-gray-900">
+            <FormattedMessage id="AUTH.SIGNUP.CONFIRM_PASSWORD" />
+          </label>
           <label className="input">
             <input
               type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="Re-enter Password"
+              placeholder={intl.formatMessage({ id: 'AUTH.SIGNUP.PLACEHOLDER_CONFIRM_PASSWORD' })}
               autoComplete="off"
               {...formik.getFieldProps('changepassword')}
 
@@ -435,7 +448,7 @@ const Signup = () => {
                 formik.setFieldValue("acceptTerms", !formik.values.acceptTerms)
               }
             >
-              I accept{" "}
+              <FormattedMessage id="AUTH.SIGNUP.ACCEPT_TERMS" />{" "}
               <a
                 href="https://growondaily.com/terms/"
                 target="_blank"
@@ -443,7 +456,7 @@ const Signup = () => {
                 className="text-2sm link"
                 onClick={(e) => e.stopPropagation()}
               >
-                Terms & Conditions
+                <FormattedMessage id="AUTH.SIGNUP.TERMS_CONDITIONS" />
               </a>
               <span className="text-red-500 ml-1">*</span>
             </span>
@@ -471,7 +484,7 @@ const Signup = () => {
               {/* <span>Signing up...</span> */}
             </div>
           ) : (
-            "Sign UP"
+            intl.formatMessage({ id: 'AUTH.SIGNUP.BUTTON' })
           )}
 
         </button>

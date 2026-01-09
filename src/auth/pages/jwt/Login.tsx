@@ -8,32 +8,22 @@ import { toAbsoluteUrl } from '@/utils';
 import { useAuthContext } from '@/auth';
 import { useLayout } from '@/providers';
 import { Alert } from '@/components';
+import { useIntl, FormattedMessage } from 'react-intl';
 import axios from "axios";
 
 
 
-const loginSchema = Yup.object().shape({
-  // email: Yup.string()
-  //   .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Please enter a valid email address.')
-  //   .required('Email is required'),
+const getLoginSchema = (intl: any) => Yup.object().shape({
   email: Yup.string()
-    // .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{3,}$/i, 'Please enter a valid email address.')
-    .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, 'Please enter a valid email address.')
-    .required('Email is required'),
-
-  // password: Yup.string()
-  //   .min(3, 'Minimum 3 symbols')
-  //   .max(50, 'Maximum 50 symbols')
-  //   .required('Password is required'),
-  // remember: Yup.boolean()
+    .matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, intl.formatMessage({ id: 'AUTH.VALIDATION.INVALID_EMAIL' }))
+    .required(intl.formatMessage({ id: 'AUTH.VALIDATION.EMAIL_REQUIRED' })),
   password: Yup.string()
-    .min(8, 'Password must be 8+ character with upper, lower, number & special character')
+    .min(8, intl.formatMessage({ id: 'AUTH.VALIDATION.PASSWORD_STRENGTH' }))
     .matches(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      'Password must be 8+ character with upper, lower, number & special character'
+      intl.formatMessage({ id: 'AUTH.VALIDATION.PASSWORD_STRENGTH' })
     )
-    .required('Password is required'),
-
+    .required(intl.formatMessage({ id: 'AUTH.VALIDATION.PASSWORD_REQUIRED' })),
 });
 
 const initialValues = {
@@ -51,6 +41,8 @@ const Login = () => {
   const from = location.state?.from?.pathname || '/home';
   const [showPassword, setShowPassword] = useState(false);
   const { currentLayout } = useLayout();
+  const intl = useIntl();
+  const loginSchema = getLoginSchema(intl);
 
   const formik = useFormik({
     initialValues,
@@ -106,10 +98,10 @@ const Login = () => {
         //   msg = "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character";
         // }
 
-        console.log(" LOGIN ERROR MESSAGE FROM BACKEND:",error?.response?.data?.message);
-         console.log("LOGIN ERROR DATA:",error?.response?.data?.data);
+        console.log(" LOGIN ERROR MESSAGE FROM BACKEND:", error?.response?.data?.message);
+        console.log("LOGIN ERROR DATA:", error?.response?.data?.data);
 
-        const msg =error?.response?.data?.message ||error?.message ||"Invalid email or password";
+        const msg = error?.response?.data?.message || error?.message || "Invalid email or password";
         console.log(" ERROR SHOWN TO USER:", msg);
         setStatus(msg);
         setSubmitting(false);
@@ -139,14 +131,18 @@ const Login = () => {
         noValidate
       >
         <div className="text-center mb-2.5">
-          <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">Sign in</h3>
+          <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">
+            <FormattedMessage id="AUTH.LOGIN.TITLE" />
+          </h3>
           <div className="flex items-center justify-center font-medium">
-            <span className="text-2sm text-gray-600 me-1.5">Need an account?</span>
+            <span className="text-2sm text-gray-600 me-1.5">
+              <FormattedMessage id="AUTH.LOGIN.NEED_ACCOUNT" />
+            </span>
             <Link
               to={currentLayout?.name === 'auth-branded' ? '/auth/signup' : '/auth/classic/signup'}
               className="text-2sm link"
             >
-              Sign up
+              <FormattedMessage id="AUTH.LOGIN.SIGNUP" />
             </Link>
           </div>
         </div>
@@ -184,14 +180,16 @@ const Login = () => {
               src={toAbsoluteUrl('/media/brand-logos/google.svg')}
               className="size-3.5 shrink-0"
             />
-            Continue with Google
+            <FormattedMessage id="AUTH.LOGIN.CONTINUE_WITH_GOOGLE" />
           </button>
 
         </div>
 
         <div className="flex items-center gap-2">
           <span className="border-t border-gray-200 w-full"></span>
-          <span className="text-2xs text-gray-500 font-medium uppercase">Or</span>
+          <span className="text-2xs text-gray-500 font-medium uppercase">
+            <FormattedMessage id="AUTH.LOGIN.OR" />
+          </span>
           <span className="border-t border-gray-200 w-full"></span>
         </div>
 
@@ -200,10 +198,12 @@ const Login = () => {
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
 
         <div className="flex flex-col gap-1">
-          <label className="form-label text-gray-900">Email</label>
+          <label className="form-label text-gray-900">
+            <FormattedMessage id="AUTH.LOGIN.EMAIL" />
+          </label>
           <label className="input">
             <input
-              placeholder="Enter email"
+              placeholder={intl.formatMessage({ id: 'AUTH.LOGIN.PLACEHOLDER_EMAIL' })}
               autoComplete="off"
               {...formik.getFieldProps('email')}
               onChange={(e) => {
@@ -224,7 +224,9 @@ const Login = () => {
 
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-1">
-            <label className="form-label text-gray-900">Password</label>
+            <label className="form-label text-gray-900">
+              <FormattedMessage id="AUTH.LOGIN.PASSWORD" />
+            </label>
             <Link
               to={
                 currentLayout?.name === 'auth-branded'
@@ -233,13 +235,13 @@ const Login = () => {
               }
               className="text-2sm link shrink-0"
             >
-              Forgot Password?
+              <FormattedMessage id="AUTH.LOGIN.FORGOT_PASSWORD" />
             </Link>
           </div>
           <label className="input">
             <input
               type={showPassword ? 'text' : 'password'}
-              placeholder="Enter Password"
+              placeholder={intl.formatMessage({ id: 'AUTH.LOGIN.PLACEHOLDER_PASSWORD' })}
               autoComplete="off"
               {...formik.getFieldProps('password')}
               onChange={(e) => {
@@ -285,7 +287,9 @@ const Login = () => {
                 formik.setFieldValue("remember", e.target.checked);
               }}
             />
-            <span className="checkbox-label">Remember me</span>
+            <span className="checkbox-label">
+              <FormattedMessage id="AUTH.LOGIN.REMEMBER_ME" />
+            </span>
           </label>
         </div>
 
@@ -296,11 +300,10 @@ const Login = () => {
           className="btn btn-primary flex justify-center grow"
           disabled={loading || formik.isSubmitting || !formik.isValid}
         >
-          {/* {loading ? 'Please wait...' : 'Sign In'} */}
           {loading ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
           ) : (
-            "Sign In"
+            intl.formatMessage({ id: 'AUTH.LOGIN.BUTTON' })
           )}
         </button>
       </form>

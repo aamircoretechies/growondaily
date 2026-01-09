@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 
 import { toAbsoluteUrl } from '@/utils';
 import { useLayout } from '@/providers';
@@ -28,14 +29,16 @@ const ResetPasswordCheckEmail = () => {
           />
         </div>
 
-        <h3 className="text-lg font-medium text-gray-900 text-center mb-3">Check your email</h3>
+        <h3 className="text-lg font-medium text-gray-900 text-center mb-3">
+          <FormattedMessage id="AUTH.CHECK_EMAIL.TITLE" />
+        </h3>
         <div className="text-2sm text-center text-gray-700 mb-7.5">
-          Please click the link sent to your email{' '}
+          <FormattedMessage id="AUTH.CHECK_EMAIL.MSG" />{' '}
           <a href="#" className="text-2sm text-gray-800 font-medium hover:text-primary-active">
             {email}
           </a>
           <br />
-          to reset your password. Thank you
+          <FormattedMessage id="AUTH.RESET_PASSWORD.CHECK_EMAIL.MSG_VERIFY" />
         </div>
 
         <div className="flex justify-center mb-5">
@@ -52,7 +55,9 @@ const ResetPasswordCheckEmail = () => {
         </div>
 
         <div className="flex items-center justify-center gap-1">
-          <span className="text-xs text-gray-600">Didn’t receive an email?</span>
+          <span className="text-xs text-gray-600">
+            <FormattedMessage id="AUTH.CHECK_EMAIL.DIDNT_RECEIVE" />
+          </span>
           {/* <Link
             to={
               currentLayout?.name === 'auth-branded'
@@ -71,7 +76,7 @@ const ResetPasswordCheckEmail = () => {
             }
             className="text-xs font-medium link"
           >
-            Resend
+            <FormattedMessage id="AUTH.CHECK_EMAIL.RESEND" />
           </Link>
 
         </div>
