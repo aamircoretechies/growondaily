@@ -57,6 +57,11 @@ const VerseStudy = () => {
   const chapter = searchParams.get('chapter') || '1';
   const verse = searchParams.get('verse') || '1';
 
+  const displayName = useMemo(() => {
+    const foundBook = books.find((b) => slugify(b.name) === slugify(book));
+    return foundBook?.name || (book.charAt(0).toUpperCase() + book.slice(1));
+  }, [books, book]);
+
   const verseKey = `${book}-${chapter}-${verse}-${version || 'KJV'}`;
 
   // Always initialize to false - will be updated by useEffect when verse loads
@@ -417,7 +422,8 @@ const VerseStudy = () => {
 
         <div className="flex items-center justify-between mb-2">
           <h1 className="font-merriweather text-4xl text-primary">
-            {book.charAt(0).toUpperCase() + book.slice(1)} {chapter}:{verse}
+            {/* {book.charAt(0).toUpperCase() + book.slice(1)} {chapter}:{verse} */}
+            {displayName} {chapter}:{verse}
           </h1>
           <div className="flex items-center gap-3">
             <button
@@ -442,7 +448,8 @@ const VerseStudy = () => {
           </div>
         </div>
         <p className="font-merriweather text-xl text-gray-600 dark:text-gray-400">
-          ({book.charAt(0).toUpperCase() + book.slice(1)} {chapter}:{verse} {version})
+          {/* ({book.charAt(0).toUpperCase() + book.slice(1)} {chapter}:{verse} {version}) */}
+          ({displayName} {chapter}:{verse} {version})
         </p>
       </div>
 
